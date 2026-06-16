@@ -163,9 +163,9 @@ Each advance is a maintainer decision, **not** a calendar trigger. This is consi
 
 ### NFR-PERF-07 — Page weight budget
 
-**Decision:** **150 KB compressed for word pages, 200 KB compressed for `/learnIPA`**, excluding audio assets and web fonts (default).
+**Decision:** **150 KB compressed for word pages, 200 KB compressed for both `/learnIPA` and `/:variant/learnIPA`**, excluding audio assets and web fonts (default).
 
-**Rationale:** Disciplined target for a server-rendered EJS app with raw CSS. The exclusion of audio is deliberate — phoneme audio files are pre-loaded on word pages and lazy-loaded on `/learnIPA` (Foundational Decisions §4) and have their own weight characteristics tracked separately. Web fonts are excluded because they are cache-friendly across pages and shouldn't dominate the per-page measurement.
+**Rationale:** Disciplined target for a server-rendered EJS app with raw CSS. The exclusion of audio is deliberate — phoneme audio files are pre-loaded on word pages and lazy-loaded on both `/learnIPA` and `/:variant/learnIPA` (Foundational Decisions §4) and have their own weight characteristics tracked separately. Web fonts are excluded because they are cache-friendly across pages and shouldn't dominate the per-page measurement.
 
 ---
 

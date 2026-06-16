@@ -455,7 +455,7 @@ The system shall provide a single save-control component used identically for wo
 **Rationale:** The Handoff fixes the save UX as one Instagram-style button with an optional tag popover; the same component must cover both target kinds so users encounter identical behaviour everywhere.
 
 **Acceptance criteria:**
-- The component's DOM structure (parametrised by `data-target-kind` ∈ `{word, phoneme}` and `data-target-id`) appears on word pages, in phoneme popovers, on `/:variant/learnIPA`, and on `/learnIPA`.I'll
+- The component's DOM structure (parametrised by `data-target-kind` ∈ `{word, phoneme}` and `data-target-id`) appears on word pages, in phoneme popovers, on `/:variant/learnIPA`, and on `/learnIPA`.
 - All four states are visually distinguishable and announced accessibly (`aria-pressed` and `aria-label` reflect the state).
 - The same JavaScript module handles activation for both target kinds.
 
