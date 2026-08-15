@@ -461,7 +461,7 @@ The system shall provide a single save-control component used identically for wo
 
 #### FR-SAVE-02 — Three-state transitions. *Priority: Must.*
 
-The save control shall implement the following state machine: from `unsaved`, a single activation transitions to `saved`; from any saved state (`saved`, `learning`, `learned`), a single activation opens a tag-choice popover without changing the stored state; selecting `Remove` in that popover transitions to `unsaved`; selecting `Learning` or `Learned` transitions to that tagged state; selecting `None` resets the state to `saved` (untagged).
+The save control shall implement the following state machine: from `unsaved`, a single activation transitions to `saved`; from any saved state (`saved`, `learning`, `learned`), a single activation opens a tag-choice popover without changing the stored state; selecting `Remove` in that popover transitions to `unsaved`; selecting `Learning` or `Learned` transitions to that tagged state; selecting `None` resets the state to `saved` (untagged), recorded as a `tag_change` event carrying a null value.
 
 **Acceptance criteria:**
 - From `unsaved`, one activation stores a `save` event and renders `saved`.
@@ -472,7 +472,7 @@ The save control shall implement the following state machine: from `unsaved`, a 
 
 #### FR-SAVE-03 — Append-only event log. *Priority: Must.*
 
-Every state-changing action on a save target and every audio-listen and practice-attempt shall write a row to `user_activity_events` containing, at minimum: event ID (UUID), actor reference (exactly one of `anonymous_id` or `user_id` populated), target kind (`word` or `phoneme`), target ID, event type (`save`, `unsave`, `tag_change`, `audio_listen`, `practice_attempt`), event value (nullable — the tag for `tag_change`, the SM-2 rating for `practice_attempt`), and timestamp in UTC. Rows shall never be updated or deleted by application code except during account hard-deletion (see FR-SET-08).
+Every state-changing action on a save target and every audio-listen and practice-attempt shall write a row to `user_activity_events` containing, at minimum: event ID (UUID), actor reference (exactly one of `anonymous_id` or `user_id` populated), target kind (`word` or `phoneme`), target ID, event type (`save`, `unsave`, `tag_change`, `audio_listen_word`, `audio_listen_phoneme`, `practice_attempt`), event value (nullable — the tag for `tag_change`, null for an untagged reset, the SM-2 rating for `practice_attempt`), and timestamp in UTC. Rows shall never be updated or deleted by application code except during account hard-deletion (see FR-SET-08).
 
 **Rationale:** Append-only is the foundation of the merge-on-login rule and of the deterministic derivation of `user_word_states`, `user_phoneme_states`, and `sm2_states`.
 
@@ -531,7 +531,7 @@ Save-state-changing requests shall carry a CSRF token (Foundational Decisions §
 - Replaying the same `POST /save` request with the same idempotency key twice within 30 s results in exactly one new event row.
 - A request without a valid CSRF token is rejected with HTTP 403.
 
-#### FR-SAVE-09 — `audio_listen` events. *Priority: Should.*
+#### FR-SAVE-09 — `audio_listen` events. *Priority: Must.*
 
 Playing phoneme audio or whole-word audio shall write an `audio_listen` event to the event log, tagged with the target kind and target ID. These events do not affect derived save state.
 

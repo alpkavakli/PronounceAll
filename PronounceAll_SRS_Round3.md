@@ -633,7 +633,7 @@ Columns:
 | FR-IPA-07 | 1 | F: The IPA learning flow | Supertest + Playwright | — |
 | FR-IPA-08 | 1 | F: The word page (sound-not-spelling) | Unit (seed lint) + manual | — |
 | FR-IPA-09 | 1 | — (robustness) | Playwright screenshot | — |
-| FR-IPA-10 | 1 | F: The IPA learning flow | Supertest + Playwright | — |
+| FR-IPA-10 | 1 | — (Option B URL split, post-Handoff) | Supertest + Playwright | — |
 
 ### 6.3 Save & tag system
 
