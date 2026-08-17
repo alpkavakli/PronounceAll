@@ -304,23 +304,25 @@ The system shall normalise the `:word` path segment before lookup by: lower-casi
 
 #### FR-WORD-03 — Word page content. *Priority: Must.*
 
-The system shall render, for every word present in the dictionary for the requested variant, a page containing at minimum: the word itself as the page heading; its meaning(s) sourced from the dictionary; its IPA transcription with each phoneme rendered as a clickable element (see §4.2); a whole-word audio control; and a written syllable/stress breakdown.
+The system shall render, for every word present in the dictionary for the requested variant, a page containing at minimum: the word itself as the page heading; its meaning(s) sourced from the dictionary; one or more IPA transcriptions drawn from `word_pronunciations`, presented in `display_order` with the `is_primary` pronunciation leading and any further pronunciations shown as secondary entries, each transcription's phonemes rendered as clickable elements (see §4.2); a whole-word audio control for the primary pronunciation; and a written syllable/stress breakdown. Exactly one pronunciation per word carries `is_primary`, and both `is_primary` and `display_order` are populated and validated at ingestion.
 
 **Acceptance criteria:**
 - Every field listed above is present in the rendered HTML for `GET /en-us/cupcake` and any other seeded word.
 - The IPA transcription's phoneme elements each expose a stable data attribute (`data-phoneme-id`) keyed to a row in `phonemes`.
+- A word with more than one pronunciation (for example a heteronym such as `lead`) renders each pronunciation from `word_pronunciations` in `display_order`, with exactly one marked `is_primary`; seed validation rejects any word that lacks a single primary pronunciation.
+- A word with more than one pronunciation (for example a heteronym such as `lead`) renders each pronunciation from `word_pronunciations` in `display_order`, with exactly one marked `is_primary`; seed validation rejects any word that lacks a single primary pronunciation.
 - The syllable/stress breakdown identifies primary stress and, where applicable, secondary stress using the standard IPA markers `ˈ` and `ˌ`.
 - Meaning(s) are attributed to the upstream dictionary source in a visible footer on the word page.
 
 #### FR-WORD-04 — Unknown-word page with fuzzy suggestions. *Priority: Must.*
 
-When a request is made to `/:variant/:word` and `:word` does not exist in the dictionary for that variant, the system shall return HTTP 404 with a dedicated page that: (a) states the word is not yet in the dictionary; (b) shows up to five fuzzy-match suggestions computed via Levenshtein distance ≤ 2 against the dictionary, ranked by distance then by frequency; (c) offers a word-request control (see FR-WORD-05).
+When a request is made to `/:variant/:word` and `:word` does not exist in the dictionary for that variant, the system shall return HTTP 404 with a dedicated page that: (a) states the word is not yet in the dictionary; (b) shows up to five fuzzy-match suggestions for likely typos and phonetic misspellings, ranked by closeness then by frequency (the matching algorithm is specified in the SDD); (c) offers a word-request control (see FR-WORD-05).
 
 **Rationale:** Making 404s helpful converts typos into successful lookups and channels genuine gaps into the word-request backlog.
 
 **Acceptance criteria:**
 - `GET /en-us/cuppcake` returns HTTP 404 and displays `cupcake` among its suggestions.
-- `GET /en-us/xqzzy` returns HTTP 404, shows no suggestions (none within distance 2), and still offers the word-request control.
+- `GET /en-us/xqzzy` returns HTTP 404, shows no suggestions (no sufficiently close match), and still offers the word-request control.
 - Response status is genuinely 404 (not 200), to keep search engines from indexing the page as a real entry.
 
 #### FR-WORD-05 — Word-request capture. *Priority: Must.*
@@ -467,7 +469,7 @@ For every phoneme, the `phoneme_example_words` relation shall record the match m
 
 **Acceptance criteria:**
 - Manual QA per phoneme confirms the example word demonstrates the target sound, not a matching letter.
-- A linter or seed-validation test rejects phoneme rows where the displayed example's first phoneme differs from the target phoneme.
+- A linter or seed-validation test rejects phoneme rows where the target phoneme does not appear anywhere in the phonemic transcription of the displayed example word. Where the phoneme can occur word-initially the seed prefers a word-initial example; where it cannot (for example `/ŋ/` or `/ʒ/`), an example with the phoneme in any position is accepted.
 
 #### FR-IPA-09 — IPA rendering fonts. *Priority: Should.*
 
@@ -523,7 +525,7 @@ Every state-changing action on a save target and every audio-listen and practice
 **Acceptance criteria:**
 - Tagging a saved word `learned` produces exactly one new row; no existing rows are modified.
 - Application code has no code path that performs `UPDATE` or `DELETE` against `user_activity_events` outside the hard-deletion flow.
-- The database user owned by the application has `INSERT` and `SELECT` privileges on the table; `UPDATE` and `DELETE` privileges are granted only to the deletion worker.
+- The database user owned by the application has `INSERT` and `SELECT` privileges on the append-only history-of-record tables `user_activity_events` and `identity_bindings`; `UPDATE` and `DELETE` privileges on both are granted only to the deletion worker. The two tables keep separate event-type vocabularies: `identity_bindings` carries `LINK` bindings and does not share the `user_activity_events` event-type enumeration.
 
 #### FR-SAVE-04 — Derived state consistency. *Priority: Must.*
 
@@ -828,7 +830,7 @@ When an anonymous visitor has reached 5 saved items (words + phonemes, counted b
 
 #### FR-AUTH-18 — Merge-on-login rule. *Priority: Must.*
 
-When a user successfully authenticates and the browser carries a non-empty anonymous UUID whose `anonymous_profiles` row is not already linked to an account, the system shall merge the anonymous events into the registered account by re-pointing `user_activity_events.anonymous_id` to `user_activity_events.user_id = <that account>`. Derived-state tables are recomputed post-merge. The merge rule is: for each (target kind, target ID), the most recent event (by timestamp) wins.
+When a user successfully authenticates and the browser carries a non-empty anonymous UUID whose `anonymous_profiles` row is not already linked to an account, the system shall associate the anonymous activity with the registered account by appending a `LINK` binding (anonymous identity to user) to the append-only `identity_bindings` table; existing `user_activity_events` rows are never modified. An anonymous identity binds to at most one account: a bound identity is never linked again, and continued anonymous use after a link is served by a newly issued anonymous identity. Derived-state tables are recomputed post-merge across the linked identities. The derived-state merge rule is: for each (target kind, target ID), the most recent event (by timestamp) wins.
 
 **Rationale:** Handoff. Latest-event-wins produces a deterministic merge that handles cross-device use without ambiguous reconciliation prompts. Recording event timestamps at millisecond precision (Round 4 decision) makes a same-timestamp collision for a single target effectively impossible at this system's volume, so no special tie-breaker between anonymous and registered events is needed.
 
@@ -1030,14 +1032,15 @@ For every seeded word lacking a Wiktionary human recording, the system shall hol
 
 #### FR-CONTENT-04 — Audio asset integrity. *Priority: Must.*
 
-Every audio asset referenced by `audio_assets` shall have: a file present on disk at the expected path, a recorded SHA-256 digest, a recorded MIME type, and a non-zero byte length. A startup or nightly integrity check verifies each referenced asset.
+Every audio asset referenced by `audio_assets` shall have: a file present on disk at the expected path, a recorded SHA-256 digest, a recorded MIME type, a non-zero byte length, and recorded provenance and licensing (source reference, author, licence identifier, licence URL, attribution text, and retrieval date). A startup or nightly integrity check verifies each referenced asset. The seed validation stage rejects or flags any asset whose licence is incompatible with the project's intended use and processing, assessed against actual use rather than a licence family in the abstract.
 
 **Acceptance criteria:**
 - The integrity check running against the launch dataset reports zero missing, zero digest mismatches, zero zero-byte files.
+- Every referenced asset has a recorded licence identifier and attribution text, and the seed validation reports zero assets with missing or incompatible licensing.
 
 #### FR-CONTENT-05 — Upstream attribution on word pages. *Priority: Must.*
 
-Every word page shall display, in a visible footer or near the meaning, the upstream source attribution and licence (e.g. "Meaning from Wiktionary · CC BY-SA 4.0") with a link to the source entry.
+Every word page shall display, in a visible footer or near the meaning, the upstream source attribution and licence for the meaning (e.g. "Meaning from Wiktionary · CC BY-SA 4.0") with a link to the source entry. Where an audio asset carries its own licence and author, its attribution shall be provided in the manner that asset's licence requires, distinct from the meaning attribution; whether it appears beside the player or on a dedicated attribution surface is a design decision.
 
 **Rationale:** CC BY-SA 4.0 requires attribution; the Charter §7 pledges to preserve upstream licensing terms.
 
@@ -1226,10 +1229,10 @@ The application tier shall produce a first byte of response within 200 ms (p95) 
 
 #### NFR-PERF-05 — Database query budget on word-page composition. *Priority: Should.*
 
-Composing a word page (all queries: word + pronunciations + phoneme joins + user state + progress banner count) shall complete in ≤ 50 ms (p95) against a database loaded with the launch dataset. The query plan shall be reviewed in the SDD and relevant indexes declared in the ERD.
+Composing the cacheable word-page shell (word + pronunciations + phoneme joins) shall complete in ≤ 50 ms (p95) against a database loaded with the launch dataset. Per-viewer save state and the progress banner count are served by the separate client-side hydration endpoint (see SDD), whose own query budget is defined there. The query plan shall be reviewed in the SDD and relevant indexes declared in the ERD.
 
 **Acceptance criteria:**
-- An instrumented integration test measures total DB time for rendering `/en-us/cupcake` and asserts the budget.
+- An instrumented integration test measures total DB time for composing the shell of `/en-us/cupcake` and asserts the budget.
 
 #### NFR-PERF-06 — Phoneme audio latency. *Priority: Must.*
 
