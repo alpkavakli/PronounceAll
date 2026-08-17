@@ -1,6 +1,6 @@
 # PronounceAll — Software Requirements Specification
 
-**Version:** 1.0
+**Version:** 1.0.1
 **Status:** Approved (pending maintainer sign-off)
 **Owner:** Alp K. (solo developer)
 **Domain:** pronounceall.com
@@ -17,6 +17,7 @@
 | 0.2 | Round 2 draft — §1–§3 and all functional requirements (§4). |
 | 0.3 | Round 3 draft — §5 non-functional requirements, §6 traceability matrix, §7 appendices. |
 | 1.0 | Merge of Rounds 2 and 3, with Round 4 maintainer decisions applied. |
+| 1.0.1 | SDD Round 1 reconciliation amendments applied; no v1.0 product scope change. |
 
 ---
 
@@ -304,19 +305,18 @@ The system shall normalise the `:word` path segment before lookup by: lower-casi
 
 #### FR-WORD-03 — Word page content. *Priority: Must.*
 
-The system shall render, for every word present in the dictionary for the requested variant, a page containing at minimum: the word itself as the page heading; its meaning(s) sourced from the dictionary; one or more IPA transcriptions drawn from `word_pronunciations`, presented in `display_order` with the `is_primary` pronunciation leading and any further pronunciations shown as secondary entries, each transcription's phonemes rendered as clickable elements (see §4.2); a whole-word audio control for the primary pronunciation; and a written syllable/stress breakdown. Exactly one pronunciation per word carries `is_primary`, and both `is_primary` and `display_order` are populated and validated at ingestion.
+The system shall render, for every word present in the dictionary for the requested variant, a page containing at minimum: the word itself as the page heading; its meaning(s) sourced from the dictionary; one or more IPA transcriptions drawn from `word_pronunciations`, presented in `display_order` with the `is_primary` pronunciation leading and any further pronunciations shown as secondary entries, each transcription's phonemes rendered as clickable elements (see §4.2); a whole-word audio control; and a written syllable/stress breakdown. Exactly one pronunciation per word carries `is_primary`, and both `is_primary` and `display_order` are populated and validated at ingestion. The whole-word audio presentation for secondary pronunciations is a design decision deferred to the SDD and is not fixed here.
 
 **Acceptance criteria:**
 - Every field listed above is present in the rendered HTML for `GET /en-us/cupcake` and any other seeded word.
 - The IPA transcription's phoneme elements each expose a stable data attribute (`data-phoneme-id`) keyed to a row in `phonemes`.
-- A word with more than one pronunciation (for example a heteronym such as `lead`) renders each pronunciation from `word_pronunciations` in `display_order`, with exactly one marked `is_primary`; seed validation rejects any word that lacks a single primary pronunciation.
 - A word with more than one pronunciation (for example a heteronym such as `lead`) renders each pronunciation from `word_pronunciations` in `display_order`, with exactly one marked `is_primary`; seed validation rejects any word that lacks a single primary pronunciation.
 - The syllable/stress breakdown identifies primary stress and, where applicable, secondary stress using the standard IPA markers `ˈ` and `ˌ`.
 - Meaning(s) are attributed to the upstream dictionary source in a visible footer on the word page.
 
 #### FR-WORD-04 — Unknown-word page with fuzzy suggestions. *Priority: Must.*
 
-When a request is made to `/:variant/:word` and `:word` does not exist in the dictionary for that variant, the system shall return HTTP 404 with a dedicated page that: (a) states the word is not yet in the dictionary; (b) shows up to five fuzzy-match suggestions for likely typos and phonetic misspellings, ranked by closeness then by frequency (the matching algorithm is specified in the SDD); (c) offers a word-request control (see FR-WORD-05).
+When a request is made to `/:variant/:word` and `:word` does not exist in the dictionary for that variant, the system shall return HTTP 404 with a dedicated page that: (a) states the word is not yet in the dictionary; (b) shows up to five fuzzy-match suggestions that cover both typographical errors (including adjacent-character transpositions such as `freind` for `friend`) and phonetic misspellings (spelling a word roughly as it sounds), ranked by closeness then by frequency; the exact matching algorithm is specified in the SDD; (c) offers a word-request control (see FR-WORD-05).
 
 **Rationale:** Making 404s helpful converts typos into successful lookups and channels genuine gaps into the word-request backlog.
 
@@ -408,12 +408,12 @@ On every word page the IPA transcription shall be rendered as a sequence of clic
 
 #### FR-IPA-03 — Phoneme popover content. *Priority: Must.*
 
-The popover opened by a phoneme click shall contain: the IPA symbol, a replay button for the phoneme audio, one popular example word that starts with that sound (matched by sound, not by spelling), and a control to save/tag the phoneme.
+The popover opened by a phoneme click shall contain: the IPA symbol, a replay button for the phoneme audio, one popular example word that genuinely contains the target sound (matched by sound, not by spelling), and a control to save/tag the phoneme. Where the phoneme can occur word-initially and that is pedagogically useful, a word-initial example is preferred; for phonemes that do not occur word-initially (for example `/ŋ/` or `/ʒ/`), an example demonstrating the sound in any position is used.
 
 **Rationale:** Teaches by example, avoids the spelling-vs-sound trap (e.g. for `/k/` the example should be `cat`, not a K-initial word like `knife`).
 
 **Acceptance criteria:**
-- For `/k/`, the example word is matched by `phoneme_example_words.match_mode = 'sound'` and the displayed word begins phonetically with `/k/`.
+- For `/k/`, the example word is matched by `phoneme_example_words.match_mode = 'sound'` and its phonemic transcription contains `/k/` (a word-initial example such as `cat` is preferred where the phoneme permits it).
 - Pressing the replay button replays the phoneme audio without re-opening the popover.
 - The save control inside the popover reuses the component defined in §4.3 and operates on the phoneme target.
 - The popover is dismissable by Esc, outside click, and an explicit close button.
@@ -518,18 +518,18 @@ The save control shall implement the following state machine: from `unsaved`, a 
 
 #### FR-SAVE-03 — Append-only event log. *Priority: Must.*
 
-Every state-changing action on a save target and every audio-listen and practice-attempt shall write a row to `user_activity_events` containing, at minimum: event ID (UUID), actor reference (exactly one of `anonymous_id` or `user_id` populated), target kind (`word` or `phoneme`), target ID, event type (`save`, `unsave`, `tag_change`, `audio_listen_word`, `audio_listen_phoneme`, `practice_attempt`), event value (nullable — the tag for `tag_change`, null for an untagged reset, the SM-2 rating for `practice_attempt`), and timestamp in UTC. Rows shall never be updated or deleted by application code except during account hard-deletion (see FR-SET-08).
+Every state-changing action on a save target and every audio-listen and practice-attempt shall write a row to `user_activity_events` containing, at minimum: event ID (`event_id`, a `BIGINT AUTO_INCREMENT`), actor reference (exactly one of `anonymous_id` or `user_id` populated), target kind (`word` or `phoneme`), target ID, event type (`save`, `unsave`, `tag_change`, `audio_listen_word`, `audio_listen_phoneme`, `practice_attempt`), event value (nullable — the tag for `tag_change`, null for an untagged reset, the SM-2 rating for `practice_attempt`), and an occurrence timestamp (`occurred_at`, `DATETIME(3)` in UTC). Rows in `user_activity_events`, and `LINK` rows in the append-only `identity_bindings` history table, shall never be updated or deleted by application code except during account hard-deletion (see FR-SET-08).
 
 **Rationale:** Append-only is the foundation of the merge-on-login rule and of the deterministic derivation of `user_word_states`, `user_phoneme_states`, and `sm2_states`.
 
 **Acceptance criteria:**
 - Tagging a saved word `learned` produces exactly one new row; no existing rows are modified.
 - Application code has no code path that performs `UPDATE` or `DELETE` against `user_activity_events` outside the hard-deletion flow.
-- The database user owned by the application has `INSERT` and `SELECT` privileges on the append-only history-of-record tables `user_activity_events` and `identity_bindings`; `UPDATE` and `DELETE` privileges on both are granted only to the deletion worker. The two tables keep separate event-type vocabularies: `identity_bindings` carries `LINK` bindings and does not share the `user_activity_events` event-type enumeration.
+- The database user owned by the application has only `INSERT` and `SELECT` privileges on the append-only history-of-record tables `user_activity_events` and `identity_bindings`, and holds no `UPDATE` or `DELETE` on either. Destructive access is confined to the narrow erasure credential used by the deletion worker, limited to the tables and operations that erasure requires; the exact destructive-privilege surface is fixed in the deletion-flow and schema design. The two tables keep separate event-type vocabularies: `identity_bindings` carries `LINK` bindings and does not share the `user_activity_events` event-type enumeration.
 
 #### FR-SAVE-04 — Derived state consistency. *Priority: Must.*
 
-`user_word_states` and `user_phoneme_states` shall reflect, for each (actor, target) pair, the most recent non-`audio_listen_word`, non-`audio_listen_phoneme`, non-`practice_attempt` event. The derivation rule is deterministic: the latest qualifying event's type/value dictates the state; earlier events are superseded but preserved in the log.
+`user_word_states` and `user_phoneme_states` shall reflect, for each (actor, target) pair, the most recent qualifying event, excluding `audio_listen_word`, `audio_listen_phoneme`, and `practice_attempt`. The derivation rule is deterministic: qualifying events are ordered by `(occurred_at, event_id)`, and the latest such event's type/value dictates the state; earlier events are superseded but preserved in the log.
 
 **Acceptance criteria:**
 - For an actor whose event history for one word is `save → tag_change(learning) → tag_change(learned) → tag_change(learning)`, the derived state is `learning`.
@@ -830,13 +830,13 @@ When an anonymous visitor has reached 5 saved items (words + phonemes, counted b
 
 #### FR-AUTH-18 — Merge-on-login rule. *Priority: Must.*
 
-When a user successfully authenticates and the browser carries a non-empty anonymous UUID whose `anonymous_profiles` row is not already linked to an account, the system shall associate the anonymous activity with the registered account by appending a `LINK` binding (anonymous identity to user) to the append-only `identity_bindings` table; existing `user_activity_events` rows are never modified. An anonymous identity binds to at most one account: a bound identity is never linked again, and continued anonymous use after a link is served by a newly issued anonymous identity. Derived-state tables are recomputed post-merge across the linked identities. The derived-state merge rule is: for each (target kind, target ID), the most recent event (by timestamp) wins.
+When a user successfully authenticates and the browser carries a non-empty anonymous UUID whose `anonymous_profiles` row is not already linked to an account, the system shall associate the anonymous activity with the registered account by appending a `LINK` binding (anonymous identity to user) to the append-only `identity_bindings` table; existing `user_activity_events` rows are never modified. An anonymous identity binds to at most one account: a bound identity is never linked again, and continued anonymous use after a link is served by a newly issued anonymous identity. Derived-state tables are recomputed post-merge across the linked identities. The derived-state merge rule is: for each (target kind, target ID), The derived-state merge rule is: for each (target kind, target ID), the latest event by (occurred_at, event_id) wins.
 
-**Rationale:** Handoff. Latest-event-wins produces a deterministic merge that handles cross-device use without ambiguous reconciliation prompts. Recording event timestamps at millisecond precision (Round 4 decision) makes a same-timestamp collision for a single target effectively impossible at this system's volume, so no special tie-breaker between anonymous and registered events is needed.
+**Rationale:** Handoff. Latest-event-wins produces a deterministic merge that handles cross-device use without ambiguous reconciliation prompts. Event timestamps are recorded at millisecond precision (`DATETIME(3)`), and ordering by `(occurred_at, event_id)` provides a deterministic total order, so any same-millisecond collision for a single target is resolved by the monotonic `event_id` rather than left ambiguous.
 
 **Acceptance criteria:**
 - An anonymous user who tagged `cupcake` as `learning` at T1, then logs into an account where `cupcake` was tagged `learned` at T0 (earlier), has `cupcake` end up as `learning` in the merged account.
-- Event timestamps are stored at millisecond precision, so an identical-timestamp collision between two events for the same target is effectively impossible at this system's volume; there is no anonymous-versus-registered tie-breaker — the latest event always wins.
+- Event timestamps are stored at millisecond precision (`DATETIME(3)`); when two events for the same target fall in the same millisecond, resolution is deterministic via the monotonic `event_id`, so ordering by `(occurred_at, event_id)` always yields a single latest event.
 - The anonymous UUID becomes dormant after merge: subsequent use of that browser before a new anonymous UUID is issued routes events to the registered account.
 
 #### FR-AUTH-19 — Cross-device anonymous → registered merge. *Priority: Must.*
@@ -985,13 +985,13 @@ Activating "Delete account" from Settings shall initiate a two-step flow: (1) an
 
 #### FR-SET-08 — Hard-delete data purge. *Priority: Must.*
 
-The hard-delete job shall permanently remove or irreversibly anonymise: the `users` row, all `user_accounts` rows for that user, all `user_word_states` and `user_phoneme_states` rows, all `sm2_states` rows, all `practice_sessions` and `practice_attempts` rows, the user-owned subset of `user_activity_events`, all `consent_records` rows, all session rows. Word requests previously submitted by the user are retained with the `submitted_by_user_id` nulled (they become ownerless). A tombstone row referencing a deletion ID (no PII) is retained for audit.
+The hard-delete job shall permanently remove or irreversibly anonymise: the `users` row, all `user_accounts` rows for that user, all `user_word_states` and `user_phoneme_states` rows, all `sm2_states` rows, all `practice_sessions` and `practice_attempts` rows, the user-owned subset of `user_activity_events` (including events originating from anonymous identities bound to the account), all `identity_bindings` rows binding an anonymous identity to that account, all `consent_records` rows, all session rows. Word requests previously submitted by the user are retained with the `submitted_by_user_id` nulled (they become ownerless). A tombstone row referencing a deletion ID (no PII) is retained for audit.
 
 **Rationale:** Foundational Decisions §8.
 
 **Acceptance criteria:**
 - After a hard-delete the email and username are available for reuse by a future registration.
-- No PII remains in the named tables for the deleted user.
+- No PII remains in the named tables for the deleted user, and no `identity_bindings` row associating an anonymous identity with the deleted account remains.
 - The audit tombstone contains no PII; it records the deletion ID and timestamp only.
 
 #### FR-SET-09 — Soft-delete restoration. *Priority: Must.*
@@ -1229,7 +1229,7 @@ The application tier shall produce a first byte of response within 200 ms (p95) 
 
 #### NFR-PERF-05 — Database query budget on word-page composition. *Priority: Should.*
 
-Composing the cacheable word-page shell (word + pronunciations + phoneme joins) shall complete in ≤ 50 ms (p95) against a database loaded with the launch dataset. Per-viewer save state and the progress banner count are served by the separate client-side hydration endpoint (see SDD), whose own query budget is defined there. The query plan shall be reviewed in the SDD and relevant indexes declared in the ERD.
+Composing the cacheable word-page shell (word + pronunciations + phoneme joins) shall complete in ≤ 50 ms (p95) against a database loaded with the launch dataset. Per-viewer save state and the progress banner count are served by the separate client-side hydration endpoint (see SDD) and are measured separately; this NFR sets no numeric budget for that endpoint. The query plan shall be reviewed in the SDD and relevant indexes declared in the ERD.
 
 **Acceptance criteria:**
 - An instrumented integration test measures total DB time for composing the shell of `/en-us/cupcake` and asserts the budget.
@@ -1398,7 +1398,8 @@ Retention periods shall be:
 | Data class | Retention | Rationale |
 |-----------|-----------|-----------|
 | Event log rows owned by a registered user | Until the user deletes the account | It is the user's own progress data |
-| Event log rows owned by an anonymous UUID | **Pruned when the UUID has been dormant for 2 years** (matches the cookie's max sliding lifetime) | GDPR Art. 5(1)(e) storage limitation |
+| Event log rows owned by an *unbound* anonymous UUID | **Pruned when the UUID has been dormant for 2 years** (matches the cookie's max sliding lifetime) | GDPR Art. 5(1)(e) storage limitation |
+| Anonymous-to-account bindings (`identity_bindings`) and the events of a *bound* anonymous UUID | Follow the account lifecycle; deleted on account hard-delete, never dormancy-pruned | The identity belongs to an active account, so storage limitation is governed by the account, not by anonymous dormancy |
 | Session rows (`pa_sid`) | Idle 30 min / absolute 12 h (per FR-AUTH-12), pruned nightly | Per Foundational Decisions §2 |
 | Email-verification tokens | 24 h (per FR-AUTH-09), pruned nightly after expiry | Security |
 | Password-reset tokens | 1 h (per FR-AUTH-11), pruned nightly after expiry | Security |
@@ -1929,6 +1930,7 @@ Normative source: NFR-PRIV-01. Each field has a justifying FR and a retention ru
 | `profile_picture_url` (cached or direct from Google) | `user_accounts` | Display | FR-AUTH-16 | Until hard-delete |
 | `anonymous_id` | `anonymous_profiles` | Pseudonymous identifier | FR-AUTH-01, FR-AUTH-03 | 2-year dormancy |
 | Event log rows | `user_activity_events` | Progress data | FR-SAVE-03 | Until hard-delete or dormancy prune |
+| Anonymous-to-account bindings | `identity_bindings` | Pseudonymous linkage (anonymous identity to account) | FR-AUTH-18 | Until account hard-delete; follows the account lifecycle, not dormancy-pruned |
 | Consent records | `consent_records` | Legal demonstrability | FR-CONSENT-03, FR-CONSENT-04 | Until hard-delete |
 | Session rows | `sessions` (or Redis) | Authenticator | FR-AUTH-12 | Idle/absolute timeouts |
 | Verification / reset tokens (hashed) | `auth_tokens` | Auth workflow | FR-AUTH-09, FR-AUTH-11 | Token-specific (24 h / 1 h) |
@@ -1968,4 +1970,4 @@ The canonical source of endpoints is the API Specification (OpenAPI 3.1 YAML). T
 
 ---
 
-*End of PronounceAll SRS v1.0. This document merges SRS Rounds 2 and 3 and applies the sixteen Round 4 maintainer decisions. Two requirements marked Must — FR-SAVE-03 (append-only event log at the database-privilege level) and FR-AUTH-18 (merge-on-login by re-pointing the actor column) — are in tension over whether the merge performs an UPDATE; this is a schema decision reserved for the SDD and is intentionally left unresolved here. Downstream: SDD, ERD, API Specification, Threat Model.*
+*End of PronounceAll SRS v1.0. This document merges SRS Rounds 2 and 3 and applies the sixteen Round 4 maintainer decisions. The earlier tension between FR-SAVE-03 (append-only event log at the database-privilege level) and FR-AUTH-18 (merge-on-login) over whether the merge performs an UPDATE has been resolved by SDD Round 1 decision B1: merge-on-login appends a `LINK` to the append-only `identity_bindings` table rather than updating event rows, so both requirements hold without conflict. Downstream: SDD, ERD, API Specification, Threat Model.*
