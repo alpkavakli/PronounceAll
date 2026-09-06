@@ -388,10 +388,10 @@ At v1.0 launch the `words` table shall contain at least 5 000 common American-En
 
 #### FR-IPA-01 — Phoneme table coverage. *Priority: Must.*
 
-The `phonemes` table shall contain one row for each distinct phoneme of American English (approximately 44 symbols, including diphthongs and stressed/unstressed distinctions where phonemically relevant). Each row shall include: the IPA symbol (NFC-normalised), a stable internal ID, a frequency rank, at least one example word, and a reference to an audio asset.
+The `phonemes` table shall contain one row for each distinct phoneme of the PronounceAll en-us Phoneme Inventory (41 symbols: 24 consonants, 10 monophthong vowels, 5 diphthongs, 2 r colored vowels), documented in the SDD with its transcription convention. Each row shall include: the IPA symbol (NFC-normalised), a stable internal ID, a frequency rank, at least one example word, and a reference to an audio asset.
 
 **Acceptance criteria:**
-- `SELECT COUNT(*) FROM phonemes WHERE variant = 'en-us'` returns the locked count (documented in the SDD) — in the range 43–45.
+- `SELECT COUNT(*) FROM phonemes WHERE variant = 'en-us'` returns exactly 41, per the canonical inventory documented in the SDD.
 - Every row has a non-null `audio_asset_id` and a non-null `primary_example_word_id`.
 - The frequency rank is dense and unique (1…N) within each variant, enabling deterministic ordering on `/:variant/learnIPA`.
 
@@ -658,13 +658,14 @@ A practice session shall end when: the viewer has answered every due word at lea
 
 #### FR-AUTH-01 — Anonymous UUID cookie issuance. *Priority: Must.*
 
-On any request that does not already carry a valid UUID cookie, the system shall issue a new v4 UUID and set it as a cookie named `pa_uid` with attributes: `HttpOnly=false` (required for the `localStorage` mirror in Foundational Decisions §6), `Secure`, `SameSite=Lax`, `Path=/`, `Max-Age=63072000` (2 years). The `Max-Age` shall be refreshed on every subsequent request so the cookie's lifetime slides.
+The system shall issue and maintain an anonymous identity cookie named `pa_uid`, a v4 UUID, with attributes `HttpOnly=false` (required for the `localStorage` mirror in Foundational Decisions §6), `Secure`, `SameSite=Lax`, `Path=/`, and `Max-Age=63072000` (two years, sliding). Because the word page shell is a shared, edge cached response (SDD decision B2), it must not carry a per viewer `Set-Cookie`, and a cache hit on it does not reach the origin; the cookie is therefore issued and its `Max-Age` refreshed on uncached responses that reach the origin, not on the cacheable shell. The system shall issue the cookie on the first uncached origin reaching request that does not already carry a valid `pa_uid`, which for a client running JavaScript is the viewer bootstrap or hydration request made on page load and otherwise is the first write or other non cached request, and shall refresh the `Max-Age` on every subsequent uncached origin reaching response so the lifetime slides. For a client running JavaScript the bootstrap or hydration request already fires on every word page view under B2, so issuance and sliding refresh add no round trip beyond that request and do not depend on the cached shell.
 
 **Rationale:** Foundational Decisions §6 locks sliding 2-year expiry and mirrors the UUID into `localStorage` as an explicit tradeoff; the mirror needs JS access, hence no `HttpOnly`. This is an accepted tradeoff — any XSS that could read `localStorage` could also read this cookie; see Threat Model.
 
 **Acceptance criteria:**
-- The first response to a fresh client includes `Set-Cookie: pa_uid=…; Max-Age=63072000; Path=/; Secure; SameSite=Lax`.
-- Every subsequent request that carries the cookie yields a response that refreshes `Max-Age`.
+- The first uncached origin reaching response to a fresh client (the viewer bootstrap or hydration response, or a first write response) includes `Set-Cookie: pa_uid=…; Max-Age=63072000; Path=/; Secure; SameSite=Lax`.
+- A cache hit on the word page shell carries no `Set-Cookie` for `pa_uid`.
+- Every subsequent uncached origin reaching request that carries the cookie yields a response that refreshes `Max-Age`.
 - The cookie value is a valid v4 UUID.
 
 #### FR-AUTH-02 — `localStorage` mirror and rehydration. *Priority: Must.*
@@ -830,7 +831,7 @@ When an anonymous visitor has reached 5 saved items (words + phonemes, counted b
 
 #### FR-AUTH-18 — Merge-on-login rule. *Priority: Must.*
 
-When a user successfully authenticates and the browser carries a non-empty anonymous UUID whose `anonymous_profiles` row is not already linked to an account, the system shall associate the anonymous activity with the registered account by appending a `LINK` binding (anonymous identity to user) to the append-only `identity_bindings` table; existing `user_activity_events` rows are never modified. An anonymous identity binds to at most one account: a bound identity is never linked again, and continued anonymous use after a link is served by a newly issued anonymous identity. Derived-state tables are recomputed post-merge across the linked identities. The derived-state merge rule is: for each (target kind, target ID), The derived-state merge rule is: for each (target kind, target ID), the latest event by (occurred_at, event_id) wins.
+When a user successfully authenticates and the browser carries a non-empty anonymous UUID whose `anonymous_profiles` row is not already linked to an account, the system shall associate the anonymous activity with the registered account by appending a `LINK` binding (anonymous identity to user) to the append-only `identity_bindings` table; existing `user_activity_events` rows are never modified. An anonymous identity binds to at most one account: a bound identity is never linked again, and continued anonymous use after a link is served by a newly issued anonymous identity. Derived-state tables are recomputed post-merge across the linked identities. The derived-state merge rule is: for each (target kind, target ID), the latest event by (occurred_at, event_id) wins.
 
 **Rationale:** Handoff. Latest-event-wins produces a deterministic merge that handles cross-device use without ambiguous reconciliation prompts. Event timestamps are recorded at millisecond precision (`DATETIME(3)`), and ordering by `(occurred_at, event_id)` provides a deterministic total order, so any same-millisecond collision for a single target is resolved by the monotonic `event_id` rather than left ambiguous.
 
@@ -1096,13 +1097,14 @@ Each advance is a maintainer decision tied to an observed stability milestone, n
 
 #### NFR-SEC-03 — Content Security Policy. *Priority: Must.*
 
-Every HTML response shall carry a Content-Security-Policy header with, at minimum: `default-src 'self'`, `script-src 'self' 'nonce-<per-request>'` (no `unsafe-inline`, no `unsafe-eval`), `style-src 'self' 'nonce-<per-request>'`, `img-src 'self' data:` (as tight as asset strategy allows), `media-src 'self'`, `connect-src 'self' https://api.pwnedpasswords.com https://challenges.cloudflare.com`, `frame-ancestors 'none'`, `base-uri 'self'`, `form-action 'self'`, `object-src 'none'`, `upgrade-insecure-requests`.
+Every HTML response shall carry a Content-Security-Policy header. For every uncached, origin generated HTML response the header shall include, at minimum: `default-src 'self'`, `script-src 'self' 'nonce-<per-request>'` (no `unsafe-inline`, no `unsafe-eval`), `style-src 'self' 'nonce-<per-request>'`, `img-src 'self' data:` (as tight as asset strategy allows), `media-src 'self'`, `connect-src 'self' https://api.pwnedpasswords.com https://challenges.cloudflare.com`, `frame-ancestors 'none'`, `base-uri 'self'`, `form-action 'self'`, `object-src 'none'`, `upgrade-insecure-requests`. The cacheable word page shell (SDD decision B2) is a shared, edge cached response and cannot carry a genuine per request nonce, because a nonce baked into a shared cached response would be identical for every viewer for the cache lifetime, which does not satisfy the intended per-response nonce property and weakens nonce-based injection protection. The word page shell shall therefore contain no inline `<script>` or `<style>` and shall load all script and style from `'self'` origins, and its CSP header shall carry the same directive set with the nonce sources removed from `script-src` and `style-src` (`script-src 'self'`, `style-src 'self'`), which preserves the no `unsafe-inline` and no `unsafe-eval` guarantee without relying on a shared static nonce. A per request nonce shall never be reused across responses or served from cache.
 
 **Rationale:** Foundational Decisions §2 — CSP with nonces, no `unsafe-inline`. Per ASVS v5.0.0-3.4.6, the CSP `frame-ancestors` directive is the required mechanism for clickjacking protection; the `X-Frame-Options` header is treated by the standard as obsolete and not relied upon.
 
 **Acceptance criteria:**
-- Inline `<script>` or `<style>` without a nonce fails to execute in the browser.
-- A Playwright test asserts the presence of every listed directive on `/`, `/en-us/cupcake`, `/en-us/learnIPA`, `/learnIPA`, `/register`, `/login`, `/settings`, `/privacy`, `/kvkk`.
+- On every uncached HTML response, an inline `<script>` or `<style>` without a valid per request nonce fails to execute in the browser.
+- The cacheable word page shell contains no inline `<script>` or `<style>`, and its CSP header carries `script-src 'self'` and `style-src 'self'` with no nonce source; no nonce value is served from cache or reused across responses.
+- A Playwright test asserts the presence of every listed directive on `/`, `/en-us/cupcake`, `/en-us/learnIPA`, `/learnIPA`, `/register`, `/login`, `/settings`, `/privacy`, `/kvkk`, asserting a per request nonce source on the uncached responses and the nonce free equivalent (`script-src 'self'`, `style-src 'self'`) on the cacheable word page shell.
 - The CSP violation report endpoint (if used) is `report-to`- or `report-uri`-configured and receives violations in staging tests.
 
 #### NFR-SEC-04 — HTTP security headers. *Priority: Must.*
@@ -1447,10 +1449,10 @@ Without an explicit opt-in (FR-SET-04), the served pages shall load no third-par
 
 #### NFR-PRIV-06 — Third-party data-flow inventory. *Priority: Must.*
 
-The Threat Model shall include a data-flow diagram listing every third party the system exchanges personal data with and what is exchanged: Google OAuth (email, sub, profile picture URL on login), Cloudflare edge (IP, request metadata, Turnstile token payload), HIBP (SHA-1 prefix only — first 5 hex chars), transactional-email provider (recipient email address + token URL). No other data leaves the origin.
+The Threat Model shall include a data-flow diagram listing every third party the system exchanges personal data with and what is exchanged: Google OAuth (email, subject identifier, profile picture URL on login), Cloudflare edge (IP, request metadata, Turnstile token payload), HIBP (SHA-1 prefix only, the first five hex characters, under k anonymity), the transactional email provider (recipient email address and token URL), and the off-site backup provider (Backblaze B2 per SDD decision V6), which stores an encrypted logical database backup containing personal data. The error-tracking service (Sentry or equivalent per NFR-OPS-03) receives exception and 5xx diagnostics with named user PII scrubbed before transmission; whether any residual metadata it transmits qualifies as personal data is determined in the Threat Model. No other intentional personal-data flow shall leave the origin. If the Threat Model determines the error-tracking service transmits residual personal data, that service shall be added to this inventory, the Privacy Policy, and the Threat Model before production use.
 
 **Acceptance criteria:**
-- The Threat Model's DFD enumerates exactly this list.
+- The Threat Model's DFD enumerates every confirmed personal-data recipient named above and records the error-tracking service's residual-metadata determination.
 - Any change to the list requires an update here, in the Privacy Policy, and in the Threat Model in the same PR.
 
 ### 5.5 Operations — `NFR-OPS-*`
@@ -1882,7 +1884,7 @@ The list is maintained in a single source-controlled file. Adding a new route to
 
 Deferred to the SDD, per Handoff Open Questions. The list is drafted in the SDD using Cambridge and Wiktionary references and ideally reviewed by a phonetician before launch. The seed script (FR-CONTENT-02) populates `phonemes` and `phoneme_example_words` from this list.
 
-Approximate count: 43–45 phonemes for `en-us` (FR-IPA-01). The SDD shall pin the exact count and list.
+Count: 41 phonemes for `en-us` (FR-IPA-01), per the canonical inventory and transcription convention documented in the SDD's standalone phoneme artifact.
 
 ### Appendix C — Rate-limit quick reference
 

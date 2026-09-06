@@ -45,13 +45,14 @@ All public traffic shall be served over TLS. The Cloudflare edge shall enforce T
 
 #### NFR-SEC-03 — Content Security Policy. *Priority: Must.*
 
-Every HTML response shall carry a Content-Security-Policy header with, at minimum: `default-src 'self'`, `script-src 'self' 'nonce-<per-request>'` (no `unsafe-inline`, no `unsafe-eval`), `style-src 'self' 'nonce-<per-request>'`, `img-src 'self' data:` (as tight as asset strategy allows), `media-src 'self'`, `connect-src 'self' https://api.pwnedpasswords.com https://challenges.cloudflare.com`, `frame-ancestors 'none'`, `base-uri 'self'`, `form-action 'self'`, `object-src 'none'`, `upgrade-insecure-requests`.
+Every HTML response shall carry a Content-Security-Policy header. For every uncached, origin generated HTML response the header shall include, at minimum: `default-src 'self'`, `script-src 'self' 'nonce-<per-request>'` (no `unsafe-inline`, no `unsafe-eval`), `style-src 'self' 'nonce-<per-request>'`, `img-src 'self' data:` (as tight as asset strategy allows), `media-src 'self'`, `connect-src 'self' https://api.pwnedpasswords.com https://challenges.cloudflare.com`, `frame-ancestors 'none'`, `base-uri 'self'`, `form-action 'self'`, `object-src 'none'`, `upgrade-insecure-requests`. The cacheable word page shell (SDD decision B2) is a shared, edge cached response and cannot carry a genuine per request nonce, because a nonce baked into a shared cached response would be identical for every viewer for the cache lifetime, which does not satisfy the intended per-response nonce property and weakens nonce-based injection protection. The word page shell shall therefore contain no inline `<script>` or `<style>` and shall load all script and style from `'self'` origins, and its CSP header shall carry the same directive set with the nonce sources removed from `script-src` and `style-src` (`script-src 'self'`, `style-src 'self'`), which preserves the no `unsafe-inline` and no `unsafe-eval` guarantee without relying on a shared static nonce. A per request nonce shall never be reused across responses or served from cache.
 
 **Rationale:** Foundational Decisions §2 — CSP with nonces, no `unsafe-inline`. Per ASVS v5.0.0-3.4.6, the CSP `frame-ancestors` directive is the required mechanism for clickjacking protection; the `X-Frame-Options` header is treated by the standard as obsolete and not relied upon.
 
 **Acceptance criteria:**
-- Inline `<script>` or `<style>` without a nonce fails to execute in the browser.
-- A Playwright test asserts the presence of every listed directive on `/`, `/en-us/cupcake`, `/en-us/learnIPA`, `/learnIPA`, `/register`, `/login`, `/settings`, `/privacy`, `/kvkk`.
+- On every uncached HTML response, an inline `<script>` or `<style>` without a valid per request nonce fails to execute in the browser.
+- The cacheable word page shell contains no inline `<script>` or `<style>`, and its CSP header carries `script-src 'self'` and `style-src 'self'` with no nonce source; no nonce value is served from cache or reused across responses.
+- A Playwright test asserts the presence of every listed directive on `/`, `/en-us/cupcake`, `/en-us/learnIPA`, `/learnIPA`, `/register`, `/login`, `/settings`, `/privacy`, `/kvkk`, asserting a per request nonce source on the uncached responses and the nonce free equivalent (`script-src 'self'`, `style-src 'self'`) on the cacheable word page shell.
 - The CSP violation report endpoint (if used) is `report-to`- or `report-uri`-configured and receives violations in staging tests.
 
 #### NFR-SEC-04 — HTTP security headers. *Priority: Must.*
@@ -826,7 +827,7 @@ The list is maintained in a single source-controlled file. Adding a new route to
 
 Deferred to the SDD, per Handoff Open Questions. The list is drafted in the SDD using Cambridge and Wiktionary references and ideally reviewed by a phonetician before launch. The seed script (FR-CONTENT-02) populates `phonemes` and `phoneme_example_words` from this list.
 
-Approximate count: 43–45 phonemes for `en-us` (FR-IPA-01). The SDD shall pin the exact count and list.
+Count: 41 phonemes for `en-us` (FR-IPA-01), per the canonical inventory and transcription convention documented in the SDD's standalone phoneme artifact.
 
 ### Appendix C — Rate-limit quick reference
 

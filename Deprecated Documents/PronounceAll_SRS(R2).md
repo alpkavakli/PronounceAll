@@ -342,10 +342,10 @@ At v1.0 launch the `words` table shall contain at least 5 000 common American-En
 
 #### FR-IPA-01 — Phoneme table coverage. *Priority: Must.*
 
-The `phonemes` table shall contain one row for each distinct phoneme of American English (approximately 44 symbols, including diphthongs and stressed/unstressed distinctions where phonemically relevant). Each row shall include: the IPA symbol (NFC-normalised), a stable internal ID, a frequency rank, at least one example word, and a reference to an audio asset.
+The `phonemes` table shall contain one row for each distinct phoneme of the PronounceAll en-us Phoneme Inventory (41 symbols: 24 consonants, 10 monophthong vowels, 5 diphthongs, 2 r colored vowels), documented in the SDD with its transcription convention. Each row shall include: the IPA symbol (NFC-normalised), a stable internal ID, a frequency rank, at least one example word, and a reference to an audio asset.
 
 **Acceptance criteria:**
-- `SELECT COUNT(*) FROM phonemes WHERE variant = 'en-us'` returns the locked count (documented in the SDD) — in the range 43–45.
+- `SELECT COUNT(*) FROM phonemes WHERE variant = 'en-us'` returns exactly 41, per the canonical inventory documented in the SDD.
 - Every row has a non-null `audio_asset_id` and a non-null `primary_example_word_id`.
 - The frequency rank is dense and unique (1…N) within each variant, enabling deterministic ordering on `/:variant/learnIPA`.
 
