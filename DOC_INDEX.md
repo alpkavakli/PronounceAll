@@ -1,6 +1,6 @@
 # DOC_INDEX.md: PronounceAll documentation router
 
-This file answers one question: **for a given task, which exact documents and sections should I read, and which can I ignore?** It does not restate requirements or decisions. Current documents live at the repository root; superseded documents live under `Deprecated Documents/`.
+This file answers one question: **for a given task, which exact documents and sections should I read, and which can I ignore?** It does not restate requirements or decisions. Current documents live under `docs/current/`; live process documents under `docs/process/`; superseded documents under `docs/archive/`; external references under `docs/references/`.
 
 Retrieval discipline is defined in the root `CLAUDE.md`. This file supplies the map that discipline needs. Read this first, resolve the task to a domain, load only the listed IDs, and follow secondary references only when they materially affect the change.
 
@@ -12,14 +12,14 @@ The SRS and current SDD are the two primary implementation baselines. Foundation
 
 | Tier | Document | Owns |
 |---|---|---|
-| **Requirements baseline** | `SRS` (`PronounceAll_SRS_v1.0.md`) | What the system must do: `FR-*`, `NFR-*`, appendices |
-| **Design baseline** | `SDD Round 1 Decisions` (`PronounceAll_SDD_Round1_Decisionsv1.0.3.md`) | How it is built: decisions `B1-B3`, `C1-C6`, `E1-E4`, `V1-V8`, and the amendment ledger |
-| Input (fixed) | `Charter` (`PronounceAll_Project_Charter.md`) | Vision, scope in/out, success criteria `SC1-6`, licensing |
-| Input (fixed) | `Handoff` (`PronounceAll_Handoff_Document.md`) | Locked feature brief, iteration order, document plan |
-| Input (fixed) | `Foundational Decisions` (`PronounceAll_SRS_Foundational_Decisions.md`) | Security posture, auth model, anonymous identity, rate limits, deletion model (detail the SRS abstracts) |
-| Input (fixed) | `Round 4 Decisions` (`PronounceAll_SRS_Round4_Decisions.md`) | The 16 settled values and their SDD implementation notes |
-| Register | `Backlog & Findings` (`PronounceAll_Backlog_and_Findings.md`) | Deferred ideas `IDEA-*`, known defects `FIND-*` |
-| Process (live) | `SDD Handoff` (`PronounceAll_SDD_Handoff.md`) | The SDD round plan; governs SDD Rounds 2 to 4. Not a source of requirements or design decisions |
+| **Requirements baseline** | `SRS` (`docs/current/PronounceAll_SRS_v1.0.md`) | What the system must do: `FR-*`, `NFR-*`, appendices |
+| **Design baseline** | `SDD Round 1 Decisions` (`docs/current/PronounceAll_SDD_Round1_Decisionsv1.0.3.md`) | How it is built: decisions `B1-B3`, `C1-C6`, `E1-E4`, `V1-V8`, and the amendment ledger |
+| Input (fixed) | `Charter` (`docs/current/PronounceAll_Project_Charter.md`) | Vision, scope in/out, success criteria `SC1-6`, licensing |
+| Input (fixed) | `Handoff` (`docs/process/PronounceAll_Handoff_Document.md`) | Locked feature brief, iteration order, document plan |
+| Input (fixed) | `Foundational Decisions` (`docs/current/PronounceAll_SRS_Foundational_Decisions.md`) | Security posture, auth model, anonymous identity, rate limits, deletion model (detail the SRS abstracts) |
+| Input (fixed) | `Round 4 Decisions` (`docs/current/PronounceAll_SRS_Round4_Decisions.md`) | The 16 settled values and their SDD implementation notes |
+| Register | `Backlog & Findings` (`docs/process/PronounceAll_Backlog_and_Findings.md`) | Deferred ideas `IDEA-*`, known defects `FIND-*` |
+| Process (live) | `SDD Handoff` (`docs/process/PronounceAll_SDD_Handoff.md`) | The SDD round plan; governs SDD Rounds 2 to 4. Not a source of requirements or design decisions |
 
 **Precedence.** For *what to build*, the SRS wins. For *how to build it*, the SDD Round 1 Decisions win. Where a design decision changed a requirement, the change is recorded in (15 items); that ledger is the reconciliation record between the two baselines, so the SRS text should already reflect it. The fixed inputs are not reopened; read them for detail and rationale, not to override a baseline.
 
@@ -95,14 +95,14 @@ Follow these when a change is not self-contained. Each arrow is a real relations
 
 ## 6. Superseded and process documents: do not implement from these
 
-These are consumed by SRS v1.0 or were one-time process handoffs. Reading them for implementation risks quoting values the merge already overrode. All of them live under `Deprecated Documents/`.
+These are consumed by SRS v1.0 or were one-time process handoffs. Reading them for implementation risks quoting values the merge already overrode. All of them live under `docs/archive/`.
 
-- `Deprecated Documents/PronounceAll_SRS(R2).md` (Round 2 SRS draft)
-- `Deprecated Documents/PronounceAll_SRS_Round3.md` (Round 3 SRS draft)
-- `Deprecated Documents/SRS_Round4_Handoff.md`, `Deprecated Documents/PronounceAll_SRS_Reading_QA_Handoff.md`, `Deprecated Documents/PronounceAll_Merge_and_Build_Handoff.md` (SRS process handoffs)
-- `Deprecated Documents/PronounceAll_Handoff_Document.docx` (superseded by the amended `PronounceAll_Handoff_Document.md` at the root)
+- `docs/archive/PronounceAll_SRS(R2).md` (Round 2 SRS draft)
+- `docs/archive/PronounceAll_SRS_Round3.md` (Round 3 SRS draft)
+- `docs/archive/SRS_Round4_Handoff.md`, `docs/archive/PronounceAll_SRS_Reading_QA_Handoff.md`, `docs/archive/PronounceAll_Merge_and_Build_Handoff.md` (SRS process handoffs)
+- `docs/archive/PronounceAll_Handoff_Document.docx` (superseded by the amended `docs/process/PronounceAll_Handoff_Document.md`)
 
-Read one of these only when explicitly investigating project history. Anything under `Deprecated Documents/` is non-authoritative. Note that two current root documents carry `Handoff` in their names and are not superseded: `PronounceAll_Handoff_Document.md` (binding input) and `PronounceAll_SDD_Handoff.md` (live process document).
+Read one of these only when explicitly investigating project history. Anything under `docs/archive/` is non-authoritative. Note that two documents under `docs/process/` carry `Handoff` in their names and are not superseded: `PronounceAll_Handoff_Document.md` (binding input) and `PronounceAll_SDD_Handoff.md` (live process document).
 
 ---
 

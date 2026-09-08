@@ -49,7 +49,7 @@ Second, the cross-language form presumes several seeded variants. Version 1.0 sh
 **Recorded:** 15 August 2026
 **Source:** Reading pass on Round 2 SRS, §4.2
 **Status:** Scheduled (SDD Round 1 Decisions §6 item 6; scheduled for the Iteration 2 seed validation test per §7)
-**Affects:** `Deprecated Documents/PronounceAll_SRS(R2).md`, FR-IPA-08 acceptance criteria
+**Affects:** `docs/archive/PronounceAll_SRS(R2).md`, FR-IPA-08 acceptance criteria
 
 **The problem.** The second acceptance criterion states that a linter or seed validation test rejects phoneme rows where the first phoneme of the displayed example word differs from the target phoneme. That rule requires every example word to begin with the sound it illustrates.
 
