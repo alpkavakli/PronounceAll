@@ -60,9 +60,9 @@ When a user logs in, their current anonymous profile is merged into their accoun
 
 #### **The IPA learning flow**
 
-Every word page has a prominent link or banner that says something like: "Learn every sound in English! Just learn these **44** IPA symbols to pronounce every word." The number is pulled from the phoneme table, not hardcoded.
+Every word page has a prominent link or banner that says something like: "Learn every sound in English! Just learn these **N** IPA symbols to pronounce every word," where N is read from the phoneme table. The number is pulled from the phoneme table, not hardcoded.
 
-Once a user has started learning IPA, this banner becomes progress-aware: "**12/44** — doing great! 32 to go." The numbers come from their user\_phoneme\_states — how many phonemes they've tagged as "learning" or "learned".
+Once a user has started learning IPA, this banner becomes progress-aware: "**12/N** — doing great! N−12 to go." The numbers come from their user\_phoneme\_states — how many phonemes they've tagged as "learned"; "learning" does not advance the count..
 
 The banner links to pronounceall.com/en-us/learnIPA (the per-language page for the user's active variant). This page teaches each IPA symbol with its sound and an example word. Symbols are ordered by frequency in English, from most common to least. Each row on this page has the symbol, a play button, the example word, and the same save/tag system (save / learning / learned) that word pages have.
 
@@ -125,7 +125,7 @@ The v1.0 release is built feature-by-feature in the following order. **Each feat
 
 1. **Iteration 0 — Foundation.** Repo initialization with AGPL-3.0, open-source files, Express + EJS skeleton, MySQL with bare minimum schema, cookie-issuing middleware, Docker setup, CI pipeline, staging deploy. No user-facing features yet.
 2. **Iteration 1 — Word pages.** GET /:variant/:word rendering word, meaning, and static IPA transcription. URL normalization. 404 with fuzzy-match suggestions and word-request capture. Responsive mobile layout. Seed dataset of ~100 common American English words.
-3. **Iteration 2 — IPA system.** Clickable IPA symbols with phoneme popover (symbol + replay + example word). phonemes table seeded with all ~44 English phonemes + audio. /:variant/learnIPA (per-language) and /learnIPA (global) pages, both with frequency-ordered phoneme lists; in v1.0 they render identical content because en-us is the only seeded variant. Whole-word audio button with Wiktionary → AI TTS → Web Speech API fallback chain.
+3. **Iteration 2 — IPA system.** Clickable IPA symbols with phoneme popover (symbol + replay + example word). phonemes table seeded with the full canonical en-us pedagogical inventory + audio. /:variant/learnIPA (per-language) and /learnIPA (global) pages, both with frequency-ordered phoneme lists; in v1.0 they render identical content because en-us is the only seeded variant. Whole-word audio button with Wiktionary → AI TTS → Web Speech API fallback chain.
 4. **Iteration 3 — Save/tag system.** Three-state save for words (saved / learning / learned) and the identical system for phonemes on both /:variant/learnIPA and /learnIPA. Works for anonymous users immediately via UUID cookie. Append-only event log + derived state tables in place.
 5. **Iteration 4 — Authentication (both modes).** Email + password with bcrypt, Google OAuth, unique username collection, email verification, password reset, session management. Anonymous-to-registered merge logic on login.
 6. **Iteration 5 — Practice sessions.** Saved-words practice page with SM-2 algorithm. Self-assessment UI. Frequency weighting by tag (full / half). Wrong-answer reinsertion at random 3-7 rounds.
@@ -184,7 +184,7 @@ README.md, CONTRIBUTING.md, CODE\_OF\_CONDUCT.md (Contributor Covenant 2.1), SEC
 * **Database:** MySQL
 * **Deployment:** Docker + Hetzner VPS + Cloudflare + Nginx + Certbot
 * **CI:** GitHub Actions (lint + test + security audit on every push)
-* **Merge rule for anonymous → registered:** Event log is append-only; latest event per target wins; merging re-points anonymous\_id to user\_id
+* **Merge rule for anonymous → registered:** Event log is append-only; latest event per target wins; merging appends an identity\_bindings LINK row and rebuilds derived state; immutable activity events are never re-pointed (B1).
 * **Open-source banner:** Dismissable via localStorage, reappears after 30 minutes
 
 **SRS Process Decisions (locked before SRS drafting):**

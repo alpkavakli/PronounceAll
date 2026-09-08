@@ -1,6 +1,6 @@
 # PronounceAll — Software Requirements Specification
 
-**Version:** 1.0.1
+**Version:** 1.0.3
 **Status:** Approved (pending maintainer sign-off)
 **Owner:** Alp K. (solo developer)
 **Domain:** pronounceall.com
@@ -18,7 +18,8 @@
 | 0.3 | Round 3 draft — §5 non-functional requirements, §6 traceability matrix, §7 appendices. |
 | 1.0 | Merge of Rounds 2 and 3, with Round 4 maintainer decisions applied. |
 | 1.0.1 | SDD Round 1 reconciliation amendments applied; no v1.0 product scope change. |
-
+| 1.0.2 | FR-PRACTICE-01 clarified for zero-due sessions and upcoming-review preview. |
+| 1.0.3 | FIND-07 resolved: FR-IPA-01 replaced by the canonical pedagogical inventory model; count constraints removed from FR-IPA-01, FR-IPA-09, Appendix B, and §1–2 scope text. |
 ---
 
 ## Table of contents
@@ -86,7 +87,7 @@ This SRS is a living document under the change-control rules in Charter §10: an
 
 PronounceAll is an open-source web application that teaches English pronunciation through the International Phonetic Alphabet (IPA). v1.0 is intentionally narrow: American English only (`en-us`), self-assessment practice only (no microphone or ML), no native mobile apps, no ads wired to a network. The product is free of charge, free of non-essential tracking, and free (as in freedom) under AGPL-3.0 for code and CC BY-SA 4.0 for content.
 
-What v1.0 does: serves per-word pages with meaning, clickable IPA, whole-word audio, and syllable/stress breakdowns; teaches the ~44 English phonemes on a dedicated page; lets anonymous visitors save and tag words and phonemes; runs SM-2 spaced-repetition practice sessions; supports three registration paths (Google OAuth, email+password, username±email); merges anonymous progress into registered accounts deterministically; honours GDPR/KVKK with explicit right-to-erasure.
+What v1.0 does: serves per-word pages with meaning, clickable IPA, whole-word audio, and syllable/stress breakdowns; teaches the canonical American-English pronunciation inventory on a dedicated page; lets anonymous visitors save and tag words and phonemes; runs SM-2 spaced-repetition practice sessions; supports three registration paths (Google OAuth, email+password, username±email); merges anonymous progress into registered accounts deterministically; honours GDPR/KVKK with explicit right-to-erasure.
 
 What v1.0 does not do: any language other than American English; microphone-based pronunciation grading; IPA-subset practice (pronounce-me-a-word-using-these-phonemes); community-contributed audio; dark mode; user-facing analytics. These are catalogued in Charter §6 and the Handoff's post-v1.0 section.
 
@@ -95,7 +96,7 @@ What v1.0 does not do: any language other than American English; microphone-base
 | Term | Meaning |
 |------|---------|
 | **IPA** | International Phonetic Alphabet — the per-sound notation used on every word page. |
-| **Phoneme** | A single distinctive sound, represented by one IPA symbol or symbol cluster (e.g. `/θ/`, `/eɪ/`). |
+| **Phoneme** | Shorthand throughout this document for a canonical pedagogical pronunciation unit: one teaching target represented by an IPA symbol or symbol cluster (e.g. /θ/, /eɪ/), per the inventory in FR-IPA-01. Not a claim that each unit is an autonomous phoneme under every phonological analysis. |
 | **Variant** | A language/region pair treated as a standalone language for pronunciation purposes, e.g. `en-us`, `en-gb`. v1.0 ships `en-us` only. |
 | **Anonymous profile** | The server-side row keyed to the visitor's UUID cookie; stores progress for users who have not registered. |
 | **Registered account** | A permanent account created via one of the three registration paths. |
@@ -156,7 +157,7 @@ A more precise catalogue appears in §4. At a glance, v1.0 provides:
 
 - Per-word pages at `/:variant/:word` with meaning, clickable IPA, whole-word audio, syllable/stress breakdown.
 - A friendly 404 page with fuzzy-match suggestions and a word-request form.
-- A per-language `/:variant/learnIPA` page covering the variant's phonemes (~44 for `en-us`) in frequency order, and a global `/learnIPA` page listing every phoneme across every variant; in v1.0 they render identical content because `en-us` is the only seeded variant.
+- A per-language `/:variant/learnIPA` page covering the variant's canonical pronunciation inventory in frequency order, and a global `/learnIPA` page listing every phoneme across every variant; in v1.0 they render identical content because `en-us` is the only seeded variant.
 - A three-state save system for both words and phonemes.
 - SM-2 practice sessions driven by the user's saved items.
 - Three registration paths plus anonymous use, with deterministic merge on login.
@@ -339,7 +340,7 @@ The system shall allow any visitor to request that a missing word be added to th
 
 Every word page shall display a prominent banner linking to `/:variant/learnIPA` for the page's active variant. The banner's text shall reflect the viewer's progress: for users with zero phonemes in `learned` state it shall read a fixed invitation ("Learn every sound in English! Just learn these N IPA symbols to pronounce every word"); for users with at least one phoneme in `learned` it shall read a progress form ("M/N — doing great! K to go"), where M is the count of phonemes the user has tagged `learned` for the active variant, N is the total count of phonemes in the `phonemes` table for the active variant, and K is N − M.
 
-**Rationale:** Charter Success Criterion 1 and the Handoff explicitly require the banner to be progress-aware and to pull N dynamically rather than hard-coding 44.
+**Rationale:** Charter Success Criterion 1 and the Handoff explicitly require the banner to be progress-aware and to pull N dynamically. N is the size of the canonical inventory defined in FR-IPA-01 and is derived from the phonemes table at render time; no literal count is authored into copy, templates, or configuration.
 
 **Acceptance criteria:**
 - For an anonymous visitor who has never saved a phoneme, the banner's N equals `SELECT COUNT(*) FROM phonemes WHERE variant = '<active variant>'` (e.g. `'en-us'` on a `/en-us/:word` page).
@@ -388,10 +389,19 @@ At v1.0 launch the `words` table shall contain at least 5 000 common American-En
 
 #### FR-IPA-01 — Phoneme table coverage. *Priority: Must.*
 
-The `phonemes` table shall contain one row for each distinct phoneme of the PronounceAll en-us Phoneme Inventory (41 symbols: 24 consonants, 10 monophthong vowels, 5 diphthongs, 2 r colored vowels), documented in the SDD with its transcription convention. Each row shall include: the IPA symbol (NFC-normalised), a stable internal ID, a frequency rank, at least one example word, and a reference to an audio asset.
+For the `en-us` variant, the `phonemes` table shall contain exactly the canonical pedagogical pronunciation-unit inventory specified normatively in the SDD: one row for every unit in that inventory and no row outside it. The SDD defines the authoritative ordered symbol list together with the transcription conventions that produce it, including the treatment of diphthongs, rhotic vowels, dialect-variable contrasts, allophones, and transcription marks.
+
+The inventory is a PronounceAll pedagogical and transcription convention for broad American English, not a claim about the number of phonemes English objectively has. Its size is a consequence of the approved list and shall not be specified independently as a fixed number anywhere in this document.
+
+Each row shall include: the IPA symbol or symbol cluster (NFC-normalised), a stable internal ID, a frequency rank, at least one example word, and a reference to an audio asset. A canonical teaching unit may consist of more than one IPA character; such a unit resolves to one stable `phoneme_id` and renders as one clickable element (FR-IPA-02).
+
+**Rationale:** No IPA-sanctioned canonical inventory of American English exists, and reputable sources diverge on the low-back contrast, on rhotic-vowel notation, and on vowel-length marks, while speech-technology inventories differ from both. A requirement that fixes a count therefore constrains the design to a number no source justifies. Requiring the table to equal an explicitly documented convention is testable, is reviewable by a phonetician on terms an expert can actually certify, and lets the count be derived rather than asserted, which FR-WORD-06 already assumes.
 
 **Acceptance criteria:**
-- `SELECT COUNT(*) FROM phonemes WHERE variant = 'en-us'` returns exactly 41, per the canonical inventory documented in the SDD.
+- The set of `en-us` rows in `phonemes` equals the canonical list in the SDD exactly: no missing unit, no extra unit.
+- Every seeded `en-us` pronunciation tokenises completely into canonical `phoneme_id` values plus the explicitly permitted non-clickable transcription marks, with no unmatched residue.
+- Multi-character canonical units resolve atomically and are never split into independent clickable characters.
+- No template, client bundle, or API contract contains a separately maintained literal inventory count.
 - Every row has a non-null `audio_asset_id` and a non-null `primary_example_word_id`.
 - The frequency rank is dense and unique (1…N) within each variant, enabling deterministic ordering on `/:variant/learnIPA`.
 
@@ -473,7 +483,7 @@ For every phoneme, the `phoneme_example_words` relation shall record the match m
 
 #### FR-IPA-09 — IPA rendering fonts. *Priority: Should.*
 
-The system shall render IPA symbols in a font stack that guarantees full IPA coverage across supported browsers, starting with a web-delivered IPA-aware font (e.g. Noto Sans) and falling back through the system IPA-capable families. Symbols such as `θ`, `ð`, `ŋ`, `ʃ`, `ʒ`, `ɹ`, `ɚ`, `ɫ` shall render correctly on every supported browser/OS pair.
+The system shall render IPA symbols in a font stack that guarantees full IPA coverage across supported browsers, starting with a web-delivered IPA-aware font (e.g. Noto Sans) and falling back through the system IPA-capable families. The font-rendering test set shall be generated from the canonical inventory (FR-IPA-01) together with every additional phonetic or transcription symbol the product intentionally displays, including stress marks and any allophonic notation used in explanatory content. Membership in the font test set does not imply membership in the canonical inventory: `ɫ`, for example, must render if displayed, but is a realisation of `/l/` and is not a canonical row.
 
 **Rationale:** A "tofu" square in place of an IPA glyph destroys the product's core value.
 
@@ -591,11 +601,18 @@ Playing whole-word audio shall write an `audio_listen_word` event, and playing p
 
 #### FR-PRACTICE-01 — Entry point and session construction. *Priority: Must.*
 
-The system shall provide a "Practice my saved words" page at `GET /practice`. Requesting this page shall construct a session consisting of the viewer's saved words, scheduled by the SM-2 algorithm's due dates, with one word served at a time.
+The system shall provide a "Practice my saved words" page at `GET /practice`. When one or more of the viewer's saved words are currently due, requesting this page shall construct a practice session consisting of those due words, scheduled by the SM-2 algorithm's due dates, with one word served at a time. A saved word is due when `sm2_states.next_due_at <= now`, or when no `sm2_states` row exists for it because it has never been practised; a never-practised word is therefore due immediately, and its SM-2 row is created by its first answer.
+
+The page shall distinguish three states. With zero saved words, it renders an empty state and a link back to browsing. With saved words but none currently due, it renders a "You have no words due right now" state and offers to show what is coming up; if the viewer accepts, it renders the viewer's saved words with future `next_due_at` values ordered ascending. That upcoming list is informational only: it creates no practice session, serves no word for assessment, and modifies no SM-2 state or due date. With one or more due words, a session starts.
+
+**Rationale:** Serving a future-dated word early would defeat the spacing SM-2 exists to produce, so a viewer with nothing due is shown the schedule rather than given work. Treating a never-practised word as due keeps a first-time viewer out of the zero-due state entirely.
 
 **Acceptance criteria:**
 - For a viewer with zero saved words, the page renders an empty-state message and a link back to browsing.
-- For a viewer with saved words, a session starts and the first due word is presented.
+- For a viewer with saved words of which at least one is due, a session starts and the first due word is presented.
+- For a viewer whose saved words all carry future `next_due_at` values, no session is created, no `practice_sessions` row is written, and the "no words due right now" state is rendered.
+- Accepting the upcoming-review offer lists only saved words with future `next_due_at` values, ordered ascending by that timestamp, and leaves every `sm2_states` row unchanged.
+- A viewer who has saved words but has never practised any of them starts a session; none of those words appear in the upcoming list.
 - The session is associated with a row in `practice_sessions` containing the actor, start timestamp, and initial queue snapshot.
 
 #### FR-PRACTICE-02 — Frequency weighting by tag. *Priority: Must.*
@@ -1884,8 +1901,7 @@ The list is maintained in a single source-controlled file. Adding a new route to
 
 Deferred to the SDD, per Handoff Open Questions. The list is drafted in the SDD using Cambridge and Wiktionary references and ideally reviewed by a phonetician before launch. The seed script (FR-CONTENT-02) populates `phonemes` and `phoneme_example_words` from this list.
 
-Count: 41 phonemes for `en-us` (FR-IPA-01), per the canonical inventory and transcription convention documented in the SDD's standalone phoneme artifact.
-
+This appendix documents examples and teaching metadata for the canonical en-us inventory, which is defined normatively in the SDD (FR-IPA-01). It does not independently specify or constrain the inventory's size.
 ### Appendix C — Rate-limit quick reference
 
 Normative source: Foundational Decisions §10.3, enforced by FR-AUTH-15 (authentication endpoints), FR-WORD-05 (word-request), FR-SAVE-08 (idempotency bucket infrastructure), and NFR-SEC-11 (Redis-backed store). Reproduced here for ease of audit.

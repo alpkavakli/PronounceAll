@@ -178,7 +178,7 @@ tests/
 
 ### E2: Phoneme example word artifact and the FIND-01 fix
 
-**Decision.** The phoneme example word list is a standalone artifact of roughly 44 en-us phonemes with example words, referenced by the SDD (per D4). Every example is verified against a named primary reference with per row source attribution for CC BY-SA. The `FR-IPA-08` validation is corrected: the check asserts that the target phoneme appears somewhere in the phonemic transcription of the example word, preferring word initial position where the phoneme permits it and allowing any position otherwise. v1.0 ships on maintainer review, with phonetician review flagged as a pre launch Should rather than a blocker.
+**Decision.** The phoneme example word list is a standalone artifact covering the canonical `en-us` pedagogical pronunciation inventory, one row per teaching unit with its example word, referenced by the SDD (per D4). The inventory and its size are fixed by the transcription-policy section, not by this decision. Every example is verified against a named primary reference with per row source attribution for CC BY-SA. The `FR-IPA-08` validation is corrected: the check asserts that the target phoneme appears somewhere in the phonemic transcription of the example word, preferring word initial position where the phoneme permits it and allowing any position otherwise. v1.0 ships on maintainer review, with phonetician review flagged as a pre launch Should rather than a blocker.
 
 **Rationale.** FIND-01 records that the original `FR-IPA-08` acceptance criterion, requiring the example word to begin with the target phoneme, is impossible for phonemes that never begin an English word, such as the sound in `sing` or `measure`, so it would reject correct seed data. The corrected rule keeps the intent, that the example genuinely demonstrates the sound, without rejecting those phonemes.
 
@@ -318,7 +318,7 @@ tests/
 
 ## 6. Amendment Ledger
 
-Changes to settled requirement text implied by the decisions above. Per D7, each amendment is produced against the authoritative document rather than left as a contradiction. These are logged here, to be applied in a dedicated amendment pass, not drafted in this document. Items 1 through 9 are the original ledger; items 10 through 14 are the follow-up addendum (v1.0.3) from the full-SRS reconciliation against this baseline, which surfaced consequences the original nine missed. The architecture sections are unchanged.
+Changes to settled requirement text implied by the decisions above. Per D7, each amendment is produced against the authoritative document rather than left as a contradiction. These are logged here, to be applied in a dedicated amendment pass, not drafted in this document. Items 1 through 9 are the original ledger; items 10 through 14 are the follow-up addendum (v1.0.3), and item 15 records the FIND-07 inventory reconciliation from the full-SRS reconciliation against this baseline, which surfaced consequences the original nine missed. The architecture sections are unchanged.
 
 1. **`FR-AUTH-18`**: reword the merge mechanism from re pointing `user_activity_events.anonymous_id` to appending an identity binding, with event rows unchanged. Follow-up: this also corrects the SRS closing footer, which still describes the merge as re-pointing and calls the FR-SAVE-03 / FR-AUTH-18 tension "intentionally left unresolved"; the footer is updated to record the B1 resolution.
 2. **`FR-AUTH-19`**: verify only. Its cross device merge semantics remain unchanged; each anonymous identity is linked independently to the authenticated account under the B1 at most one user per anonymous identity invariant. Any latest wins rule applies only to state resolution after identities belonging to the same account are merged, not to reassignment of an anonymous identity between users.
@@ -353,7 +353,7 @@ Follow-up addendum (v1.0.3), discovered during the full-SRS reconciliation again
 
 ## 8. Round 1 status and next step
 
-The entire Round 1 inventory from SDD Handoff §6 is settled: three blocking resolutions (§1), six cross cutting conventions (§2), four content and algorithm decisions (§3), eight vendor and infrastructure picks (§4), and the amendment ledger (§6), now fourteen items after the v1.0.3 follow-up addendum, with V5 provisional and the open items in §7 tracked.
+The entire Round 1 inventory from SDD Handoff §6 is settled: three blocking resolutions (§1), six cross cutting conventions (§2), four content and algorithm decisions (§3), eight vendor and infrastructure picks (§4), and the amendment ledger (§6), now fifteen items after the v1.0.3 follow-up addendum and the FIND-07 reconciliation., with V5 provisional and the open items in §7 tracked.
 
 Next deliverable is **SDD Round 2: architecture and cross cutting** (SDD sections 1, 2, 3, 6, and 7). Upload this document alongside the §9 document set from the SDD Handoff to begin Round 2.
 

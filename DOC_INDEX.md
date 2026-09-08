@@ -21,7 +21,7 @@ The SRS and current SDD are the two primary implementation baselines. Foundation
 | Register | `Backlog & Findings` (`PronounceAll_Backlog_and_Findings.md`) | Deferred ideas `IDEA-*`, known defects `FIND-*` |
 | Process (live) | `SDD Handoff` (`PronounceAll_SDD_Handoff.md`) | The SDD round plan; governs SDD Rounds 2 to 4. Not a source of requirements or design decisions |
 
-**Precedence.** For *what to build*, the SRS wins. For *how to build it*, the SDD Round 1 Decisions win. Where a design decision changed a requirement, the change is recorded in the **SDD Decisions §6 amendment ledger** (14 items); that ledger is the reconciliation record between the two baselines, so the SRS text should already reflect it. The fixed inputs are not reopened; read them for detail and rationale, not to override a baseline.
+**Precedence.** For *what to build*, the SRS wins. For *how to build it*, the SDD Round 1 Decisions win. Where a design decision changed a requirement, the change is recorded in (15 items); that ledger is the reconciliation record between the two baselines, so the SRS text should already reflect it. The fixed inputs are not reopened; read them for detail and rationale, not to override a baseline.
 
 **Conflict rule.** If the SRS and the SDD Decisions disagree and §6 does not explain the difference, **stop and report the conflict.** Do not pick a side silently. Never resolve a conflict using a superseded document (§6 below).
 
