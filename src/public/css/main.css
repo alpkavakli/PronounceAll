@@ -1,0 +1,88 @@
+/* PronounceAll — Copyright (C) 2026 Alp Kavaklı
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ * See LICENSE-NOTICE.md at the repository root.
+ *
+ * Hand-written CSS, Flexbox as the default layout primitive (SDD v1.1 §7.7).
+ * Foundation styling only; the design system arrives with Iteration 1. */
+
+:root {
+  --colour-ink: #16191d;
+  --colour-muted: #5b6470;
+  --colour-page: #fdfdfc;
+  --colour-rule: #dfe3e8;
+  --measure: 38rem;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--colour-page);
+  color: var(--colour-ink);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  line-height: 1.55;
+}
+
+.page {
+  max-width: var(--measure);
+  margin: 0 auto;
+  padding: 3rem 1.25rem;
+}
+
+h1 {
+  margin: 0 0 0.5rem;
+  font-size: 2rem;
+  line-height: 1.2;
+}
+
+.lede {
+  margin: 0 0 2.5rem;
+  color: var(--colour-muted);
+  font-size: 1.125rem;
+}
+
+.variant-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.variant-list li {
+  display: flex;
+  gap: 0.5rem;
+  align-items: baseline;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--colour-rule);
+}
+
+.error-reference {
+  color: var(--colour-muted);
+  font-size: 0.9rem;
+}
+
+.site-footer {
+  max-width: var(--measure);
+  margin: 0 auto;
+  padding: 1.5rem 1.25rem 3rem;
+  border-top: 1px solid var(--colour-rule);
+  color: var(--colour-muted);
+  font-size: 0.875rem;
+}
+
+a {
+  color: inherit;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

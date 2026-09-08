@@ -1,0 +1,83 @@
+# PronounceAll — Copyright (C) 2026 Alp Kavaklı
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# See LICENSE-NOTICE.md at the repository root.
+#
+# Local development topology. Production adds Nginx, Certbot, and the worker
+# processes in front of and alongside this set (SDD v1.1 §3.2); those arrive
+# with the deployment work rather than here.
+
+services:
+  mysql:
+    image: mysql:8.4
+    command:
+      - --default-time-zone=+00:00
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-devroot}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-pronounceall}
+      MYSQL_USER: ${MYSQL_USER:-pronounceall_app}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-devpass}
+    ports:
+      - '3306:3306'
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ['CMD', 'mysqladmin', 'ping', '-h', '127.0.0.1', '-uroot', '-p${MYSQL_ROOT_PASSWORD:-devroot}']
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  redis:
+    image: redis:7-alpine
+    # AOF persistence and noeviction, per V2: Redis memory is a monitored
+    # signal, never something left to evict silently.
+    command: ['redis-server', '--appendonly', 'yes', '--maxmemory-policy', 'noeviction']
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  flyway:
+    image: flyway/flyway:11-alpine
+    # Flyway owns schema migrations (C3). Run explicitly: `npm run migrate`.
+    command:
+      - -url=jdbc:mysql://mysql:3306/${MYSQL_DATABASE:-pronounceall}?allowPublicKeyRetrieval=true&useSSL=false
+      - -user=root
+      - -password=${MYSQL_ROOT_PASSWORD:-devroot}
+      - -locations=filesystem:/flyway/sql
+      - -connectRetries=30
+      - migrate
+    volumes:
+      - ./migrations:/flyway/sql:ro
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  app:
+    build: .
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      PORT: 3000
+      APP_BASE_URL: ${APP_BASE_URL:-http://localhost:3000}
+      LOG_LEVEL: ${LOG_LEVEL:-debug}
+      MYSQL_HOST: mysql
+      MYSQL_PORT: 3306
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-pronounceall}
+      MYSQL_USER: ${MYSQL_USER:-pronounceall_app}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-devpass}
+      REDIS_URL: redis://redis:6379
+    ports:
+      - '3000:3000'
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+volumes:
+  mysql-data:
+  redis-data:

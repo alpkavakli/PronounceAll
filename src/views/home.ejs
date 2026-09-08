@@ -1,0 +1,31 @@
+<%# PronounceAll — Copyright (C) 2026 Alp Kavaklı
+    SPDX-License-Identifier: AGPL-3.0-or-later
+    See LICENSE-NOTICE.md at the repository root. %>
+<!doctype html>
+<html lang="en">
+<head>
+  <%- include('partials/head', { title: 'Pronunciation for English learners' }) %>
+</head>
+<body>
+  <main class="page">
+    <h1>PronounceAll</h1>
+    <p class="lede">
+      A free, open pronunciation reference and practice tool for English learners.
+    </p>
+
+    <h2>Language variants</h2>
+    <% if (variants.length === 0) { %>
+      <p>No language variant is active yet.</p>
+    <% } else { %>
+      <ul class="variant-list">
+        <% variants.forEach(function (variant) { %>
+          <li><%= variant.displayName %> <code><%= variant.code %></code></li>
+        <% }); %>
+      </ul>
+    <% } %>
+  </main>
+
+  <%- include('partials/footer') %>
+  <script type="module" src="/js/bootstrap.js"></script>
+</body>
+</html>

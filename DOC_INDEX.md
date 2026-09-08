@@ -13,7 +13,8 @@ The SRS and current SDD are the two primary implementation baselines. Foundation
 | Tier | Document | Owns |
 |---|---|---|
 | **Requirements baseline** | `SRS` (`docs/current/PronounceAll_SRS_v1.0.md`) | What the system must do: `FR-*`, `NFR-*`, appendices |
-| **Design baseline** | `SDD Round 1 Decisions` (`docs/current/PronounceAll_SDD_Round1_Decisionsv1.0.3.md`) | How it is built: decisions `B1-B3`, `C1-C6`, `E1-E4`, `V1-V8`, and the amendment ledger |
+| **Design baseline (decisions)** | `SDD Round 1 Decisions` (`docs/current/PronounceAll_SDD_Round1_Decisionsv1.0.3.md`) | The settled *how*: decisions `B1-B3`, `C1-C6`, `E1-E4`, `V1-V8`, and the amendment ledger |
+| **Design baseline (document)** | `SDD v1.1` (`docs/current/PronounceAll_SDD_v1_1.md`) | The design built on those decisions: §1-§9, including the data model (§4), the six key flows (§5), the cross-cutting mechanics (§6), the conventions (§7), and the Round 3 register `D-R3-01` to `D-R3-08` (§8) |
 | Input (fixed) | `Charter` (`docs/current/PronounceAll_Project_Charter.md`) | Vision, scope in/out, success criteria `SC1-6`, licensing |
 | Input (fixed) | `Handoff` (`docs/process/PronounceAll_Handoff_Document.md`) | Locked feature brief, iteration order, document plan |
 | Input (fixed) | `Foundational Decisions` (`docs/current/PronounceAll_SRS_Foundational_Decisions.md`) | Security posture, auth model, anonymous identity, rate limits, deletion model (detail the SRS abstracts) |
@@ -21,7 +22,7 @@ The SRS and current SDD are the two primary implementation baselines. Foundation
 | Register | `Backlog & Findings` (`docs/process/PronounceAll_Backlog_and_Findings.md`) | Deferred ideas `IDEA-*`, known defects `FIND-*` |
 | Process (live) | `SDD Handoff` (`docs/process/PronounceAll_SDD_Handoff.md`) | The SDD round plan; governs SDD Rounds 2 to 4. Not a source of requirements or design decisions |
 
-**Precedence.** For *what to build*, the SRS wins. For *how to build it*, the SDD Round 1 Decisions win. Where a design decision changed a requirement, the change is recorded in (15 items); that ledger is the reconciliation record between the two baselines, so the SRS text should already reflect it. The fixed inputs are not reopened; read them for detail and rationale, not to override a baseline.
+**Precedence.** For *what to build*, the SRS wins. For *how to build it*, the SDD Round 1 Decisions win; `SDD v1.1` elaborates those decisions into the design the implementation follows and does not override them (SDD v1.1 §1.3). Where the SDD document and a Round 1 decision appear to disagree, the decision governs and the disagreement is a defect to report. Where a design decision changed a requirement, the change is recorded in (15 items); that ledger is the reconciliation record between the two baselines, so the SRS text should already reflect it. The fixed inputs are not reopened; read them for detail and rationale, not to override a baseline.
 
 **Conflict rule.** If the SRS and the SDD Decisions disagree and §6 does not explain the difference, **stop and report the conflict.** Do not pick a side silently. Never resolve a conflict using a superseded document (§6 below).
 
@@ -33,6 +34,7 @@ The SRS and current SDD are the two primary implementation baselines. Foundation
 - **SRS non-functional**, `NFR-<AREA>-NN`: `NFR-SEC-*` (§5.1), `NFR-PERF-*` (§5.2), `NFR-A11Y-*` (§5.3), `NFR-PRIV-*` (§5.4), `NFR-OPS-*` (§5.5), `NFR-COMPAT-*` (§5.6), `NFR-I18N-*` (§5.7), `NFR-LEGAL-*` (§5.8).
 - **SRS traceability** §6 (per area), **appendices** §7: A reserved usernames, B phoneme example words, C rate-limit reference, D cookie inventory, E PII inventory, F endpoint catalogue.
 - **SDD decisions**: `B1-B3` blocking, `C1-C6` conventions, `E1-E4` content/algorithm, `V1-V8` vendor/infra, §6 ledger, §7 open items.
+- **SDD v1.1 sections**: §2 actors and boundary, §3 architecture and module map, §4 data model (§4.2 catalogue, §4.3 identity, §4.4 event log, §4.5 derived state, §4.6 practice, §4.7 legal/consent, §4.8 indexing, §4.9 deletion privileges, §4.11 ERD, §4.12 resolved flags), §5 key flows (§5.1 merge, §5.2 save/tag write, §5.3 word page render, §5.4 practice, §5.5 deletion, §5.6 registration), §6 cross-cutting (§6.1 errors, §6.2 logging, §6.3 caching, §6.4 config/secrets, §6.5 jobs), §7 conventions, §8 register `D-R3-01` to `D-R3-08`, §9 deferrals.
 
 To find a requirement, grep the ID or the area family heading. Do not read a section family end to end; jump to the specific ID.
 
@@ -62,7 +64,7 @@ Start set = the minimum IDs to load. Follow-if = load only when the change touch
 | Caching / performance | `NFR-PERF-04/05`, `B2`, `V4` | `NFR-PERF-07/08` |
 | Logging / errors | `C1` (pino), `C2` (AppError), `NFR-SEC-10`, `NFR-OPS-04` | none |
 | Background jobs | `C6` (BullMQ), `C4` (services/idempotency) | the job's own domain (deletion `FR-SET-08`, purge `NFR-PRIV-02`, reconciliation `B3`, TTS `V1`) |
-| DB / schema / migrations | `C3` (Flyway), `C5` (types), table's decision (`B1`/`B3`) | `NFR-PERF-05`, SDD Rounds 2-3 (schema, when written) |
+| DB / schema / migrations | `C3` (Flyway), `C5` (types), SDD v1.1 §4 (the table's own subsection), §7.2 (naming), table's decision (`B1`/`B3`) | `NFR-PERF-05`, SDD v1.1 §4.8 (indexing), §4.9 (deletion privileges) |
 | Deployment / backups | `V6` (backups), `V7` (region), `V2`, `V5`, `NFR-OPS-01` | Charter §5/§8, Foundational |
 | Accessibility | `NFR-A11Y-*`, Charter `SC4` | the affected feature's `FR-*` requirements |
 | Security | the specific `NFR-SEC-NN` for the affected surface (search the family, do not load it whole), Foundational §2/§9/§10 | Appendix C (rate limits), `C1` (redaction), `V3` |
@@ -117,4 +119,4 @@ The full policy is in the root `CLAUDE.md`. Index-specific rules:
 5. On a conflict not explained by the SDD Decisions §6 ledger, report it; do not resolve silently.
 6. Skip §6 documents unless auditing history.
 
-Keep this file current: when SDD Rounds 2-4 add the schema and flow sections, add their anchors to the DB/schema and merge/deletion rows.
+Keep this file current. SDD Rounds 2 to 4 are complete and merged as `SDD v1.1`; its section anchors are recorded in §2 above. When a later document changes location or authority, update §1 and §2 here, and leave the precedence rules alone unless the authority itself has actually changed.
