@@ -21,6 +21,7 @@ The SRS and current SDD are the two primary implementation baselines. Foundation
 | Input (fixed) | `Round 4 Decisions` (`docs/current/PronounceAll_SRS_Round4_Decisions.md`) | The 16 settled values and their SDD implementation notes |
 | Register | `Backlog & Findings` (`docs/process/PronounceAll_Backlog_and_Findings.md`) | Deferred ideas `IDEA-*`, known defects `FIND-*` |
 | Process (live) | `SDD Handoff` (`docs/process/PronounceAll_SDD_Handoff.md`) | The SDD round plan; governs SDD Rounds 2 to 4. Not a source of requirements or design decisions |
+| Process (live) | `Iteration 1 Handoff` (`docs/process/PronounceAll_Iteration1_Handoff.md`) | Implementation-phase state record and reading router for Iteration 1. Routes to IDs and records what Iteration 0 built. Not a source of requirements or design decisions |
 
 **Precedence.** For *what to build*, the SRS wins. For *how to build it*, the SDD Round 1 Decisions win; `SDD v1.1` elaborates those decisions into the design the implementation follows and does not override them (SDD v1.1 §1.3). Where the SDD document and a Round 1 decision appear to disagree, the decision governs and the disagreement is a defect to report. Where a design decision changed a requirement, the change is recorded in (15 items); that ledger is the reconciliation record between the two baselines, so the SRS text should already reflect it. The fixed inputs are not reopened; read them for detail and rationale, not to override a baseline.
 
