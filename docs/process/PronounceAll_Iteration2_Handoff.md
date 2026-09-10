@@ -12,7 +12,31 @@ governing documents, per the retrieval policy in the root `CLAUDE.md`.
 
 ---
 
-## 0. Read this before anything else — Iteration 2 has a hard prerequisite
+## 0. Prerequisite — RESOLVED on 2026-09-11
+
+**D4 now exists, is approved, and is frozen:**
+`docs/current/PronounceAll_en-US_Phoneme_Inventory_v1.md`.
+
+It carries the canonical 41-unit inventory, the frozen transcription conventions,
+one maintainer-approved teaching example per unit, the English Wiktionary
+normalisation profile, the frequency-rank policy, and the Iteration 2 acceptance
+fixtures. `DOC_INDEX.md` §1 routes to it as a design baseline for that content.
+
+**Iteration 2 is unblocked.** Two things in D4 bind the seed directly:
+
+- **§5.7 runtime loading invariant.** After the Iteration 2 seed converges, every
+  row loaded into `word_pronunciations` must tokenise completely. The 7
+  Iteration 1 rows that do not (D4 §8) must be filtered out, not coerced.
+- **§6 frequency-rank policy.** `phonemes.frequency_rank` is derived from corpus
+  occurrence counts after tokenisation, ties broken by D4 `canonical_order`. The
+  document order is NOT the ranking.
+
+Do not reopen `FIND-07`, the 41-unit inventory, or D4 §2/§3.
+
+The original blocker text is kept below for the record.
+
+<details>
+<summary>Original §0 (superseded)</summary>
 
 **The D4 phoneme artifact does not exist in the repository.**
 
@@ -64,6 +88,8 @@ decision, not a new design decision. It still needs sign-off, and `DOC_INDEX.md`
 Everything else in Iteration 2 that does not touch the phoneme inventory —
 notably the audio pipeline and the `audio_assets` table — can proceed in
 parallel.
+
+</details>
 
 ---
 
@@ -309,7 +335,7 @@ keyboard operation, and the shell's headers after audio lands.
 
 ## 8. Definition of done for Iteration 2
 
-- [ ] D4 exists, is approved, and is routed in `DOC_INDEX.md` (**§0**)
+- [x] D4 exists, is approved, and is routed in `DOC_INDEX.md` (**§0**, done 2026-09-11)
 - [ ] `phonemes` holds exactly the canonical inventory for `en-us`, with a dense
       unique `frequency_rank`, and every row has audio and a non-null
       `primary_example_word_id`

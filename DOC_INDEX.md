@@ -15,6 +15,7 @@ The SRS and current SDD are the two primary implementation baselines. Foundation
 | **Requirements baseline** | `SRS` (`docs/current/PronounceAll_SRS_v1.0.md`) | What the system must do: `FR-*`, `NFR-*`, appendices |
 | **Design baseline (decisions)** | `SDD Round 1 Decisions` (`docs/current/PronounceAll_SDD_Round1_Decisionsv1.0.3.md`) | The settled *how*: decisions `B1-B3`, `C1-C6`, `E1-E4`, `V1-V8`, and the amendment ledger |
 | **Design baseline (document)** | `SDD v1.1` (`docs/current/PronounceAll_SDD_v1_1.md`) | The design built on those decisions: §1-§9, including the data model (§4), the six key flows (§5), the cross-cutting mechanics (§6), the conventions (§7), and the Round 3 register `D-R3-01` to `D-R3-08` (§8) |
+| **Design baseline (content)** | `en-US Phoneme Inventory v1` — the D4 artifact (`docs/current/PronounceAll_en-US_Phoneme_Inventory_v1.md`) | The canonical `en-us` symbol set, its transcription conventions, and the per-unit teaching examples. SDD v1.1 §4.2 and `D-R3-07` reference this artifact and make it authoritative for that content; it instantiates their frozen policy rather than adding to it |
 | Input (fixed) | `Charter` (`docs/current/PronounceAll_Project_Charter.md`) | Vision, scope in/out, success criteria `SC1-6`, licensing |
 | Input (fixed) | `Handoff` (`docs/process/PronounceAll_Handoff_Document.md`) | Locked feature brief, iteration order, document plan |
 | Input (fixed) | `Foundational Decisions` (`docs/current/PronounceAll_SRS_Foundational_Decisions.md`) | Security posture, auth model, anonymous identity, rate limits, deletion model (detail the SRS abstracts) |
@@ -51,7 +52,7 @@ Start set = the minimum IDs to load. Follow-if = load only when the change touch
 | Word page render | `FR-WORD-03`, `E4` (pronunciation model), `B2` (shell+hydration cache) | `FR-IPA-*`, `NFR-PERF-04/05`, `FR-CONTENT-05` |
 | Fuzzy 404 | `FR-WORD-04`, `E3` | none, self-contained |
 | Word requests | `FR-WORD-05` | `NFR-SEC-*` rate limits, Appendix C |
-| IPA / phonemes | `FR-IPA-*` (esp `FR-IPA-03`, `FR-IPA-08`), `E2`, Appendix B | `FR-SAVE-*` (phonemes reuse save), `FR-IPA-05/06` audio |
+| IPA / phonemes | `FR-IPA-*` (esp `FR-IPA-03`, `FR-IPA-08`), `E2`, Appendix B, **D4** (`PronounceAll_en-US_Phoneme_Inventory_v1.md`) — the symbol set, transcription conventions, normalisation profile, and frequency-rank policy | `FR-SAVE-*` (phonemes reuse save), `FR-IPA-05/06` audio, `D-R3-07` |
 | Save / tag | `FR-SAVE-03/04/05/08`, `B1`, `B3`, `C5` | `FR-AUTH-18` (merge), `NFR-PERF-05` |
 | Event history / ordering | `FR-SAVE-03/04`, `C5` (event_id + occurred_at ordering) | `B1`, `FR-AUTH-18` |
 | Anonymous identity | `FR-AUTH-01/03`, Foundational §6, `B1` | `FR-SAVE-05`, `NFR-PRIV-02` |
