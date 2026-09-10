@@ -28,6 +28,13 @@
 </head>
 <body>
   <main class="page word-page">
+    <%# FIND-10: look up the next word without going back to the home page.
+
+        Safe on the cacheable shell: a plain GET form is static markup, identical
+        for every viewer of this word, and carries no script, style, or state. It
+        changes nothing about the response class. %>
+    <%- include('partials/search-form', { variantCode: variant.code }) %>
+
     <article class="word">
       <header class="word__header">
         <h1 class="word__headword"><%= word.displayHeadword %></h1>

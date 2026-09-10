@@ -148,12 +148,39 @@ describe('the response is a plain, uncached page', () => {
   });
 });
 
-describe('the home page offers the way in', () => {
-  test('renders the search form', async () => {
-    const response = await request(app).get('/');
+describe('every reading page offers the way in', () => {
+  test.each([
+    ['the home page', '/'],
+    ['a word page', '/en-us/cupcake'],
+    ['the search results page', '/search?q=cuppcake'],
+  ])('%s renders the search form', async (_label, url) => {
+    const response = await request(app).get(url);
 
     expect(response.status).toBe(200);
     expect(response.text).toContain('action="/search"');
     expect(response.text).toContain('name="q"');
+  });
+
+  test('the unknown-word page renders it too, prefilled with the failed attempt', async () => {
+    // This is the page a reader reaches by getting a word wrong, so it is where
+    // trying another one matters most — and starting from what they typed is
+    // less work than retyping it.
+    const response = await request(app).get('/en-us/gorgeus');
+
+    expect(response.status).toBe(404);
+    expect(response.text).toContain('action="/search"');
+    expect(response.text).toContain('value="gorgeus"');
+  });
+
+  test('adding it to the word page did not break the cacheable shell', async () => {
+    // A plain GET form is static markup: no script, no style, no per-viewer
+    // state. The B2 contract has to survive it.
+    const response = await request(app).get('/en-us/cupcake');
+
+    expect(response.headers['cache-control']).toContain('s-maxage');
+    expect(response.headers['set-cookie']).toBeUndefined();
+    expect(response.headers['content-security-policy']).not.toContain('nonce-');
+    expect(response.text).not.toMatch(/<script(?![^>]*\ssrc=)[^>]*>[\s\S]*?\S[\s\S]*?<\/script>/);
+    expect(response.text).not.toMatch(/<style[^>]*>/);
   });
 });

@@ -29,6 +29,11 @@
     <h1 class="word-missing__headword"><%= slug %></h1>
     <p class="lede">This word is not in the dictionary yet.</p>
 
+    <%# FIND-10: this is the page a reader reaches by getting a word wrong, so
+        it is the page where being able to try another one matters most. The
+        suggestions below cover a near miss; the box covers everything else. %>
+    <%- include('../partials/search-form', { variantCode: variant.code, value: slug }) %>
+
     <% if (locals.requested === 'new') { %>
       <p class="notice" role="status">Thanks — we have added this word to the request list.</p>
     <% } else if (locals.requested === 'upvoted') { %>
