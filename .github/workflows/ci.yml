@@ -46,6 +46,11 @@ jobs:
       - name: Licence headers
         run: npm run lint:licence
 
+      # D4 is authoritative for the canonical inventory. This fails if the
+      # committed artifact has drifted from the document.
+      - name: Phoneme inventory matches D4
+        run: npm run inventory:check
+
   test:
     name: Unit and integration tests
     runs-on: ubuntu-latest
@@ -155,6 +160,11 @@ jobs:
       - name: Seed the dictionary
         run: npm run seed
 
+      # Iteration 2: the canonical inventory, its teaching examples, and the
+      # ordered `pronunciation_phonemes` occurrences the word page renders from.
+      - name: Seed the phoneme inventory
+        run: npm run seed:phonemes
+
       # Multi-browser including WebKit for Safari, plus the no-JavaScript
       # profile that proves progressive enhancement (NFR-COMPAT-03, §7.8).
       - name: Install browsers
@@ -245,6 +255,11 @@ jobs:
 
       - name: Seed the dictionary
         run: npm run seed
+
+      # Iteration 2: the canonical inventory, its teaching examples, and the
+      # ordered `pronunciation_phonemes` occurrences the word page renders from.
+      - name: Seed the phoneme inventory
+        run: npm run seed:phonemes
 
       # NFR-PERF-07: a word page's document plus its critical CSS and core
       # JavaScript must stay within 150 KB gzipped. The document is rendered and

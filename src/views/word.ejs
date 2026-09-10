@@ -14,11 +14,13 @@
          belong to the hydration layer (B2) and arrive in later iterations.
       3. Everything below reads with JavaScript disabled (FR-WORD-08).
 
-    ITERATION 1 SCOPE (Iteration 1 Handoff §8.1, §8.2). The IPA is STATIC TEXT.
-    There are deliberately no clickable phoneme elements, no `data-phoneme-id`
-    attributes, and NO AUDIO CONTROL: whole-word audio is entirely Iteration 2,
-    and a dead or disabled control is worse than temporarily leaving it out.
-    FR-WORD-03 is therefore intentionally only partially satisfied here. %>
+    ITERATION 2 completes FR-WORD-03. The IPA is built from the stored
+    `pronunciation_phonemes` occurrences, so each phoneme is a clickable element
+    with a stable `data-phoneme-id` (FR-IPA-02) and no IPA is parsed at render.
+
+    Audio appears only where a REAL asset is ready. A pending asset renders no
+    control at all, on the same rule Iteration 1 applied: a control that cannot
+    play is worse than temporarily leaving it out. %>
 <!doctype html>
 <html lang="<%= variant.code %>">
 <head>
@@ -45,13 +47,58 @@
                 <p class="pronunciation__gloss"><%= pronunciation.gloss %></p>
               <% } %>
 
+              <%# FR-IPA-02: every phoneme is a clickable element carrying a
+                  stable `data-phoneme-id`, composed from the stored
+                  `pronunciation_phonemes` occurrences. No IPA is parsed here —
+                  tokenisation happened once, server-side, at seed time.
+
+                  Each unit is a <button> rather than a <span> with a handler:
+                  that gives keyboard focus and Enter/Space activation for free
+                  (NFR-A11Y-08 wants every control operable by at least two of
+                  pointer, touch, keyboard), and without JavaScript it is simply
+                  an inert button whose text still reads as the transcription
+                  (FR-WORD-08).
+
+                  Where the seed has not produced occurrences the static string
+                  is rendered instead, so the page never loses its IPA. %>
               <p class="pronunciation__ipa">
                 <span class="visually-hidden">IPA transcription: </span>
-                <span class="ipa" lang="und-fonipa"><%= pronunciation.ipaTranscription %></span>
+                <% if (pronunciation.occurrences.length > 0) { %>
+                  <span class="ipa" lang="und-fonipa">
+                    <% pronunciation.occurrences.forEach(function (occurrence) { %><button
+                      type="button"
+                      class="phoneme"
+                      data-phoneme-id="<%= occurrence.phonemeId %>"
+                      data-symbol="<%= occurrence.ipaSymbol %>"
+                      <% if (occurrence.detail && occurrence.detail.exampleWord) { %>data-example-word="<%= occurrence.detail.exampleWord %>"<% } %>
+                      <% if (occurrence.detail && occurrence.detail.examplePhonemicTranscription) { %>data-example-ipa="<%= occurrence.detail.examplePhonemicTranscription %>"<% } %>
+                      <% if (occurrence.detail && occurrence.detail.audioStorageKey) { %>data-audio="<%= audioPublicPrefix %>/<%= occurrence.detail.audioStorageKey %>"<% } %>
+                    ><%= occurrence.ipaSymbol %></button><% }); %>
+                  </span>
+                <% } else { %>
+                  <span class="ipa" lang="und-fonipa"><%= pronunciation.ipaTranscription %></span>
+                <% } %>
                 <% if (!pronunciation.isPrimary) { %>
                   <span class="pronunciation__badge">also</span>
                 <% } %>
               </p>
+
+              <%# SDD §4.12, D-R3-08: a pronunciation gets an audio control ONLY
+                  when an asset is known to correspond to THAT pronunciation.
+                  Primary audio is never reused for a secondary pronunciation,
+                  and a runtime Web Speech fallback is never presented as though
+                  it were a specific secondary pronunciation. With no asset the
+                  control is simply absent.
+
+                  The native <audio controls> element is the FR-IPA-05 no-
+                  JavaScript fallback: it plays without any script at all. %>
+              <% if (pronunciation.audioStorageKey) { %>
+                <p class="pronunciation__audio">
+                  <audio controls preload="none" src="<%= audioPublicPrefix %>/<%= pronunciation.audioStorageKey %>">
+                    Your browser cannot play this recording.
+                  </audio>
+                </p>
+              <% } %>
 
               <%# FR-WORD-03: the written syllable and stress breakdown, marking
                   primary stress with ˈ and secondary stress with ˌ. %>
@@ -84,5 +131,9 @@
 
   <%- include('partials/footer') %>
   <script type="module" src="/js/bootstrap.js"></script>
+  <%# FR-IPA-02/03: the popover is a progressive enhancement over markup that
+      already reads without it. External module, so the nonce-free shell CSP
+      (`script-src 'self'`) admits it. %>
+  <script type="module" src="/js/phoneme-popover.js"></script>
 </body>
 </html>

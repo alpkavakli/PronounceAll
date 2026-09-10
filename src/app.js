@@ -109,6 +109,22 @@ export function createApp() {
     }),
   );
 
+  // 4b. Audio assets (V4). Content-addressed and immutable, so they take the
+  //     year-long immutable cache headers of §6.3 and are never invalidated —
+  //     changed content is a new filename. Mounted with the other shared,
+  //     cacheable assets, ahead of the identity middleware, so an audio
+  //     response never carries a per-viewer `Set-Cookie`. In production Nginx
+  //     serves this directory directly and Express never sees the request.
+  app.use(
+    config.audio.publicPrefix,
+    express.static(config.audio.storageRoot, {
+      index: false,
+      fallthrough: false,
+      immutable: true,
+      maxAge: '1y',
+    }),
+  );
+
   // 5. Request parsing, then anonymous identity (FR-AUTH-01).
   app.use(cookieParser());
   app.use(express.urlencoded({ extended: false, limit: '32kb' }));

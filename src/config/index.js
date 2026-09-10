@@ -13,6 +13,8 @@
  * arguments or through the composition root.
  */
 
+import path from 'node:path';
+
 import { z } from 'zod';
 import 'dotenv/config';
 
@@ -47,6 +49,14 @@ const schema = z.object({
    * strict environment, so the restriction is enforced rather than documented.
    */
   RATE_LIMIT_STORE: z.enum(['redis', 'memory']).default('redis'),
+
+  /**
+   * Audio asset storage (V4, FR-CONTENT-04). Pre-generated audio lives on local
+   * disk with content-addressed immutable filenames; in production Nginx serves
+   * the directory directly and Express never sees the request.
+   */
+  AUDIO_STORAGE_ROOT: z.string().min(1).default('data/audio'),
+  AUDIO_PUBLIC_PREFIX: z.string().min(1).default('/audio'),
 
   // Cloudflare Turnstile, gating the word-request form (FR-WORD-05).
   TURNSTILE_SITE_KEY: z.string().default(''),
@@ -152,6 +162,16 @@ export function loadConfig(env) {
 
     /** Rate-limit counter store selection (NFR-SEC-11). */
     rateLimitStore: value.RATE_LIMIT_STORE,
+
+    /**
+     * Audio asset storage (V4). `storageRoot` is resolved against the process
+     * working directory when relative, so a deployment can point it at a volume
+     * without the code caring where that is.
+     */
+    audio: Object.freeze({
+      storageRoot: path.resolve(value.AUDIO_STORAGE_ROOT),
+      publicPrefix: value.AUDIO_PUBLIC_PREFIX.replace(/\/+$/, ''),
+    }),
 
     /**
      * Cloudflare Turnstile (FR-WORD-05). `isConfigured` is what the composition

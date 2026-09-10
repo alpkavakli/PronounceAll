@@ -100,14 +100,21 @@ export async function findWordByHeadword(
  */
 export async function findPronunciationsByWordId(wordId, executor = defaultExecutor()) {
   const [rows] = await executor.execute(
-    `SELECT pronunciation_id, ipa_transcription, syllable_breakdown,
-            gloss, is_primary, display_order
-       FROM word_pronunciations
-      WHERE word_id = ?
-      ORDER BY display_order`,
+    `SELECT p.pronunciation_id, p.ipa_transcription, p.syllable_breakdown,
+            p.gloss, p.is_primary, p.display_order,
+            a.storage_key, a.generation_status
+       FROM word_pronunciations p
+       LEFT JOIN audio_assets a ON a.audio_asset_id = p.whole_word_audio_asset_id
+      WHERE p.word_id = ?
+      ORDER BY p.display_order`,
     [wordId],
   );
-  return rows.map(toPronunciation);
+  return rows.map((row) => ({
+    ...toPronunciation(row),
+    // SDD §4.12: only an asset that corresponds to THIS pronunciation, and only
+    // once it is actually playable. A pending asset yields no control.
+    audioStorageKey: row.generation_status === 'ready' ? row.storage_key : null,
+  }));
 }
 
 /**
@@ -242,4 +249,118 @@ export async function deletePronunciationByIpa(
     [wordId, ipaTranscription],
   );
   return result.affectedRows;
+}
+
+/**
+ * Every word in a variant, for the Iteration 2 reconciliation pass.
+ *
+ * @param {number} variantId
+ * @param {import('./transaction.js').Executor} [executor]
+ * @returns {Promise<Array<{ wordId: number, normalizedHeadword: string }>>}
+ */
+export async function listWordsForVariant(variantId, executor = defaultExecutor()) {
+  const [rows] = await executor.execute(
+    `SELECT word_id, normalized_headword
+       FROM words
+      WHERE variant_id = ?
+      ORDER BY word_id`,
+    [variantId],
+  );
+  return rows.map((row) => ({
+    wordId: row.word_id,
+    normalizedHeadword: row.normalized_headword,
+  }));
+}
+
+/**
+ * Every pronunciation in a variant, for the D4 occurrence count and the
+ * `pronunciation_phonemes` population pass.
+ *
+ * @param {number} variantId
+ * @param {import('./transaction.js').Executor} [executor]
+ * @returns {Promise<Array<{ pronunciationId: number, wordId: number, ipaTranscription: string }>>}
+ */
+export async function listAllPronunciations(variantId, executor = defaultExecutor()) {
+  const [rows] = await executor.execute(
+    `SELECT p.pronunciation_id, p.word_id, p.ipa_transcription
+       FROM word_pronunciations p
+       JOIN words w ON w.word_id = p.word_id
+      WHERE w.variant_id = ?
+      ORDER BY p.pronunciation_id`,
+    [variantId],
+  );
+  return rows.map((row) => ({
+    pronunciationId: row.pronunciation_id,
+    wordId: row.word_id,
+    ipaTranscription: row.ipa_transcription,
+  }));
+}
+
+/**
+ * Rewrite one pronunciation's transcription to its canonical form (D4 §5).
+ *
+ * The transcription is the row's natural key, so this is the one update that
+ * changes identity. It is safe because reconciliation maps each source row to
+ * exactly one canonical form and the unique key rejects a collision rather than
+ * silently merging two rows.
+ *
+ * @param {number} pronunciationId
+ * @param {string} ipaTranscription
+ * @param {import('./transaction.js').Executor} [executor]
+ * @returns {Promise<void>}
+ */
+export async function updatePronunciationTranscription(
+  pronunciationId,
+  ipaTranscription,
+  executor = defaultExecutor(),
+) {
+  await executor.execute(
+    'UPDATE word_pronunciations SET ipa_transcription = ? WHERE pronunciation_id = ?',
+    [ipaTranscription, pronunciationId],
+  );
+}
+
+/**
+ * Remove one pronunciation by id.
+ *
+ * Used by the D4 §5.7 reconciliation to drop a runtime row the canonical
+ * inventory cannot represent. `pronunciation_phonemes` references this row, so
+ * its occurrences are cleared first — the RESTRICT foreign key of SDD §4.9 would
+ * otherwise refuse, which is the intended safety net rather than an obstacle.
+ *
+ * @param {number} pronunciationId
+ * @param {import('./transaction.js').Executor} [executor]
+ * @returns {Promise<number>} rows removed, 0 or 1
+ */
+export async function deletePronunciationById(pronunciationId, executor = defaultExecutor()) {
+  await executor.execute('DELETE FROM pronunciation_phonemes WHERE pronunciation_id = ?', [
+    pronunciationId,
+  ]);
+  const [result] = await executor.execute(
+    'DELETE FROM word_pronunciations WHERE pronunciation_id = ?',
+    [pronunciationId],
+  );
+  return result.affectedRows;
+}
+
+/**
+ * Promote or demote one pronunciation's primary flag.
+ *
+ * `UNIQUE (word_id, is_primary_flag)` permits at most one primary per word, so
+ * a caller promoting a row must have already demoted or removed the incumbent.
+ *
+ * @param {number} pronunciationId
+ * @param {boolean} isPrimary
+ * @param {import('./transaction.js').Executor} [executor]
+ * @returns {Promise<void>}
+ */
+export async function setPronunciationPrimary(
+  pronunciationId,
+  isPrimary,
+  executor = defaultExecutor(),
+) {
+  await executor.execute(
+    'UPDATE word_pronunciations SET is_primary = ? WHERE pronunciation_id = ?',
+    [isPrimary ? 1 : 0, pronunciationId],
+  );
 }

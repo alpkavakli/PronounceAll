@@ -1,0 +1,418 @@
+{
+  "variant": "en-us",
+  "source": "PronounceAll en-US Pedagogical IPA Inventory v1 (D4)",
+  "sourceDocument": "docs/current/PronounceAll_en-US_Phoneme_Inventory_v1.md",
+  "exampleSourceLicence": "CC BY-SA 4.0",
+  "units": [
+    {
+      "canonicalOrder": 1,
+      "ipaSymbol": "p",
+      "category": "consonant",
+      "exampleWord": "pen",
+      "phonemicTranscription": "pɛn",
+      "targetPosition": "initial",
+      "sourceReference": "https://en.wiktionary.org/wiki/pen#English",
+      "notes": ""
+    },
+    {
+      "canonicalOrder": 2,
+      "ipaSymbol": "b",
+      "category": "consonant",
+      "exampleWord": "bed",
+      "phonemicTranscription": "bɛd",
+      "targetPosition": "initial",
+      "sourceReference": "https://en.wiktionary.org/wiki/bed#English",
+      "notes": ""
+    },
+    {
+      "canonicalOrder": 3,
+      "ipaSymbol": "t",
+      "category": "consonant",
+      "exampleWord": "ten",
+      "phonemicTranscription": "tɛn",
+      "targetPosition": "initial",
+      "sourceReference": "https://en.wiktionary.org/wiki/ten#English",
+      "notes": ""
+    },
+    {
+      "canonicalOrder": 4,
+      "ipaSymbol": "d",
+      "category": "consonant",
+      "exampleWord": "dog",
+      "phonemicTranscription": "dɔɡ",
+      "targetPosition": "initial",
+      "sourceReference": "https://en.wiktionary.org/wiki/dog#English",
+      "notes": "non-cot-caught form"
+    },
+    {
+      "canonicalOrder": 5,
+      "ipaSymbol": "k",
+      "category": "consonant",
+      "exampleWord": "cat",
+      "phonemicTranscription": "ˈkæt",
+      "targetPosition": "initial",
+      "sourceReference": "https://en.wiktionary.org/wiki/cat#English",
+      "notes": ""
+    },
+    {
+      "canonicalOrder": 6,
+      "ipaSymbol": "ɡ",
+      "category": "consonant",
+      "exampleWord": "go",
+      "phonemicTranscription": "ɡoʊ",
+      "targetPosition": "initial",
+      "sourceReference": "https://en.wiktionary.org/wiki/go#English",
+      "notes": ""
+    },
+    {
+      "canonicalOrder": 7,
+      "ipaSymbol": "tʃ",
+      "category": "consonant",
+      "exampleWord": "chair",
+      "phonemicTranscription": "tʃɛɚ",
+      "targetPosition": "initial",
+      "sourceReference": "https://en.wiktionary.org/wiki/chair#English",
+      "notes": "tie bar removed"
+    },
+    {
+      "canonicalOrder": 8,
+      "ipaSymbol": "dʒ",
+      "category": "consonant",
+      "exampleWord": "jump",
+      "phonemicTranscription": "dʒʌmp",
+      "targetPosition": "initial",
+      "sourceReference": "https://en.wiktionary.org/wiki/jump#English",
+      "notes": "tie bar removed"
+    },
+    {
+      "canonicalOrder": 9,
+      "ipaSymbol": "f",
+      "category": "consonant",
+      "exampleWord": "fish",
+      "phonemicTranscription": "fɪʃ",
+      "targetPosition": "initial",
+      "sourceReference": "https://en.wiktionary.org/wiki/fish#English",
+      "notes": ""
+    },
+    {
+      "canonicalOrder": 10,
+      "ipaSymbol": "v",
+      "category": "consonant",
+      "exampleWord": "van",
+      "phonemicTranscription": "væn",
+      "targetPosition": "initial",
+      "sourceReference": "https://en.wiktionary.org/wiki/van#English",
+      "notes": ""
+    },
+    {
+      "canonicalOrder": 11,
+      "ipaSymbol": "θ",
+      "category": "consonant",
+      "exampleWord": "think",
+      "phonemicTranscription": "ˈθɪŋk",
+      "targetPosition": "initial",
+      "sourceReference": "https://en.wiktionary.org/wiki/think#English",
+      "notes": ""
+    },
+    {
+      "canonicalOrder": 12,
+      "ipaSymbol": "ð",
+      "category": "consonant",
+      "exampleWord": "this",
+      "phonemicTranscription": "ðɪs",
+      "targetPosition": "initial",
+      "sourceReference": "https://en.wiktionary.org/wiki/this#English",
+      "notes": ""
+    },
+    {
+      "canonicalOrder": 13,
+      "ipaSymbol": "s",
+      "category": "consonant",
+      "exampleWord": "sun",
+      "phonemicTranscription": "sʌn",
+      "targetPosition": "initial",
+      "sourceReference": "https://en.wiktionary.org/wiki/sun#English",
+      "notes": ""
+    },
+    {
+      "canonicalOrder": 14,
+      "ipaSymbol": "z",
+      "category": "consonant",
+      "exampleWord": "zoo",
+      "phonemicTranscription": "zu",
+      "targetPosition": "initial",
+      "sourceReference": "https://en.wiktionary.org/wiki/zoo#English",
+      "notes": "length mark dropped"
+    },
+    {
+      "canonicalOrder": 15,
+      "ipaSymbol": "ʃ",
+      "category": "consonant",
+      "exampleWord": "ship",
+      "phonemicTranscription": "ˈʃɪp",
+      "targetPosition": "initial",
+      "sourceReference": "https://en.wiktionary.org/wiki/ship#English",
+      "notes": ""
+    },
+    {
+      "canonicalOrder": 16,
+      "ipaSymbol": "ʒ",
+      "category": "consonant",
+      "exampleWord": "measure",
+      "phonemicTranscription": "ˈmɛʒ.ɚ",
+      "targetPosition": "medial",
+      "sourceReference": "https://en.wiktionary.org/wiki/measure#English",
+      "notes": "never word-initial in native English"
+    },
+    {
+      "canonicalOrder": 17,
+      "ipaSymbol": "h",
+      "category": "consonant",
+      "exampleWord": "hat",
+      "phonemicTranscription": "hæt",
+      "targetPosition": "initial",
+      "sourceReference": "https://en.wiktionary.org/wiki/hat#English",
+      "notes": ""
+    },
+    {
+      "canonicalOrder": 18,
+      "ipaSymbol": "m",
+      "category": "consonant",
+      "exampleWord": "moon",
+      "phonemicTranscription": "mun",
+      "targetPosition": "initial",
+      "sourceReference": "https://en.wiktionary.org/wiki/moon#English",
+      "notes": ""
+    },
+    {
+      "canonicalOrder": 19,
+      "ipaSymbol": "n",
+      "category": "consonant",
+      "exampleWord": "name",
+      "phonemicTranscription": "neɪm",
+      "targetPosition": "initial",
+      "sourceReference": "https://en.wiktionary.org/wiki/name#English",
+      "notes": ""
+    },
+    {
+      "canonicalOrder": 20,
+      "ipaSymbol": "ŋ",
+      "category": "consonant",
+      "exampleWord": "sing",
+      "phonemicTranscription": "ˈsɪŋ",
+      "targetPosition": "final",
+      "sourceReference": "https://en.wiktionary.org/wiki/sing#English",
+      "notes": "cannot be word-initial in English"
+    },
+    {
+      "canonicalOrder": 21,
+      "ipaSymbol": "l",
+      "category": "consonant",
+      "exampleWord": "leg",
+      "phonemicTranscription": "lɛɡ",
+      "targetPosition": "initial",
+      "sourceReference": "https://en.wiktionary.org/wiki/leg#English",
+      "notes": ""
+    },
+    {
+      "canonicalOrder": 22,
+      "ipaSymbol": "ɹ",
+      "category": "consonant",
+      "exampleWord": "red",
+      "phonemicTranscription": "ɹɛd",
+      "targetPosition": "initial",
+      "sourceReference": "https://en.wiktionary.org/wiki/red#English",
+      "notes": ""
+    },
+    {
+      "canonicalOrder": 23,
+      "ipaSymbol": "w",
+      "category": "consonant",
+      "exampleWord": "water",
+      "phonemicTranscription": "ˈwɔ.tɚ",
+      "targetPosition": "initial",
+      "sourceReference": "https://en.wiktionary.org/wiki/water#English",
+      "notes": "non-cot-caught form"
+    },
+    {
+      "canonicalOrder": 24,
+      "ipaSymbol": "j",
+      "category": "consonant",
+      "exampleWord": "yes",
+      "phonemicTranscription": "jɛs",
+      "targetPosition": "initial",
+      "sourceReference": "https://en.wiktionary.org/wiki/yes#English",
+      "notes": ""
+    },
+    {
+      "canonicalOrder": 25,
+      "ipaSymbol": "i",
+      "category": "vowel",
+      "exampleWord": "eat",
+      "phonemicTranscription": "it",
+      "targetPosition": "initial",
+      "sourceReference": "https://en.wiktionary.org/wiki/eat#English",
+      "notes": "length mark dropped"
+    },
+    {
+      "canonicalOrder": 26,
+      "ipaSymbol": "ɪ",
+      "category": "vowel",
+      "exampleWord": "ink",
+      "phonemicTranscription": "ˈɪŋk",
+      "targetPosition": "initial",
+      "sourceReference": "https://en.wiktionary.org/wiki/ink#English",
+      "notes": ""
+    },
+    {
+      "canonicalOrder": 27,
+      "ipaSymbol": "ɛ",
+      "category": "vowel",
+      "exampleWord": "egg",
+      "phonemicTranscription": "ɛɡ",
+      "targetPosition": "initial",
+      "sourceReference": "https://en.wiktionary.org/wiki/egg#English",
+      "notes": ""
+    },
+    {
+      "canonicalOrder": 28,
+      "ipaSymbol": "æ",
+      "category": "vowel",
+      "exampleWord": "apple",
+      "phonemicTranscription": "ˈæpəl",
+      "targetPosition": "initial",
+      "sourceReference": "https://en.wiktionary.org/wiki/apple#English",
+      "notes": ""
+    },
+    {
+      "canonicalOrder": 29,
+      "ipaSymbol": "ʌ",
+      "category": "vowel",
+      "exampleWord": "up",
+      "phonemicTranscription": "ʌp",
+      "targetPosition": "initial",
+      "sourceReference": "https://en.wiktionary.org/wiki/up#English",
+      "notes": ""
+    },
+    {
+      "canonicalOrder": 30,
+      "ipaSymbol": "ə",
+      "category": "vowel",
+      "exampleWord": "about",
+      "phonemicTranscription": "əˈbaʊt",
+      "targetPosition": "initial",
+      "sourceReference": "https://en.wiktionary.org/wiki/about#English",
+      "notes": "offglide mark dropped; `/ə/` is inherently unstressed"
+    },
+    {
+      "canonicalOrder": 31,
+      "ipaSymbol": "ɑ",
+      "category": "vowel",
+      "exampleWord": "otter",
+      "phonemicTranscription": "ˈɑtɚ",
+      "targetPosition": "initial",
+      "sourceReference": "https://en.wiktionary.org/wiki/otter#English",
+      "notes": ""
+    },
+    {
+      "canonicalOrder": 32,
+      "ipaSymbol": "ɔ",
+      "category": "vowel",
+      "exampleWord": "author",
+      "phonemicTranscription": "ˈɔ.θɚ",
+      "targetPosition": "initial",
+      "sourceReference": "https://en.wiktionary.org/wiki/author#English",
+      "notes": "non-cot-caught form; see §3.6"
+    },
+    {
+      "canonicalOrder": 33,
+      "ipaSymbol": "ʊ",
+      "category": "vowel",
+      "exampleWord": "book",
+      "phonemicTranscription": "bʊk",
+      "targetPosition": "medial",
+      "sourceReference": "https://en.wiktionary.org/wiki/book#English",
+      "notes": "does not occur word-initially"
+    },
+    {
+      "canonicalOrder": 34,
+      "ipaSymbol": "u",
+      "category": "vowel",
+      "exampleWord": "food",
+      "phonemicTranscription": "fud",
+      "targetPosition": "medial",
+      "sourceReference": "https://en.wiktionary.org/wiki/food#English",
+      "notes": "length mark dropped"
+    },
+    {
+      "canonicalOrder": 35,
+      "ipaSymbol": "ɝ",
+      "category": "central rhotic",
+      "exampleWord": "earth",
+      "phonemicTranscription": "ɝθ",
+      "targetPosition": "initial",
+      "sourceReference": "https://en.wiktionary.org/wiki/earth#English",
+      "notes": "stressed central rhotic"
+    },
+    {
+      "canonicalOrder": 36,
+      "ipaSymbol": "ɚ",
+      "category": "central rhotic",
+      "exampleWord": "butter",
+      "phonemicTranscription": "ˈbʌtɚ",
+      "targetPosition": "final",
+      "sourceReference": "https://en.wiktionary.org/wiki/butter#English",
+      "notes": "unstressed; cannot be word-initial"
+    },
+    {
+      "canonicalOrder": 37,
+      "ipaSymbol": "eɪ",
+      "category": "diphthong",
+      "exampleWord": "eight",
+      "phonemicTranscription": "eɪt",
+      "targetPosition": "initial",
+      "sourceReference": "https://en.wiktionary.org/wiki/eight#English",
+      "notes": ""
+    },
+    {
+      "canonicalOrder": 38,
+      "ipaSymbol": "aɪ",
+      "category": "diphthong",
+      "exampleWord": "ice",
+      "phonemicTranscription": "aɪs",
+      "targetPosition": "initial",
+      "sourceReference": "https://en.wiktionary.org/wiki/ice#English",
+      "notes": ""
+    },
+    {
+      "canonicalOrder": 39,
+      "ipaSymbol": "ɔɪ",
+      "category": "diphthong",
+      "exampleWord": "oil",
+      "phonemicTranscription": "ɔɪl",
+      "targetPosition": "initial",
+      "sourceReference": "https://en.wiktionary.org/wiki/oil#English",
+      "notes": ""
+    },
+    {
+      "canonicalOrder": 40,
+      "ipaSymbol": "aʊ",
+      "category": "diphthong",
+      "exampleWord": "out",
+      "phonemicTranscription": "ˈaʊt",
+      "targetPosition": "initial",
+      "sourceReference": "https://en.wiktionary.org/wiki/out#English",
+      "notes": "offglide mark dropped"
+    },
+    {
+      "canonicalOrder": 41,
+      "ipaSymbol": "oʊ",
+      "category": "diphthong",
+      "exampleWord": "open",
+      "phonemicTranscription": "ˈoʊ.pən",
+      "targetPosition": "initial",
+      "sourceReference": "https://en.wiktionary.org/wiki/open#English",
+      "notes": ""
+    }
+  ]
+}

@@ -17,12 +17,22 @@
  * this path, or the shared cache entry would carry one viewer's data to every
  * other viewer.
  *
- * Iteration 1 renders static IPA TEXT only. Clickable phonemes, `data-phoneme-id`
- * attributes, and whole-word audio are Iteration 2 (Iteration 1 Handoff §8.1,
- * §8.2), so `FR-WORD-03` is intentionally only partially satisfied here.
+ * Iteration 2 completes `FR-WORD-03`: each transcription is composed from its
+ * `pronunciation_phonemes` occurrences, so every phoneme is a clickable element
+ * carrying a stable `data-phoneme-id` (FR-IPA-02) and NO IPA is reparsed at
+ * render time. Tokenisation happened once, at seed time, server-side.
+ *
+ * Audio is rendered only where a real asset is READY. A pending asset produces
+ * no control at all, because a control that cannot play is worse than none —
+ * the rule Iteration 1 applied to whole-word audio and §4.12 applies to
+ * secondary pronunciations.
  */
 
 import { AppError } from '../errors/index.js';
+import {
+  findOccurrencesForWord,
+  listPhonemeDetails,
+} from '../repositories/phonemes.repository.js';
 import {
   findPronunciationsByWordId,
   findWordByHeadword,
@@ -144,7 +154,11 @@ export async function getWordPage(variant, slug) {
     throw AppError.wordNotFound(slug, { meta: { variant, suggestions } });
   }
 
-  const pronunciations = await findPronunciationsByWordId(word.wordId);
+  const [pronunciations, occurrences, phonemeDetails] = await Promise.all([
+    findPronunciationsByWordId(word.wordId),
+    findOccurrencesForWord(word.wordId),
+    listPhonemeDetails(variant.variantId),
+  ]);
 
   // A word with no pronunciation cannot satisfy FR-WORD-03. Seed validation
   // rejects such a word before load, so reaching here means the catalogue was
@@ -155,12 +169,34 @@ export async function getWordPage(variant, slug) {
     );
   }
 
+  // Compose each transcription from its stored occurrences (SDD §5.3). The
+  // markup is built from `pronunciation_phonemes`, never from the IPA string,
+  // which is what keeps linguistic parsing out of the render path entirely.
+  const detailsById = new Map(phonemeDetails.map((detail) => [detail.phonemeId, detail]));
+  const occurrencesByPronunciation = new Map();
+  for (const occurrence of occurrences) {
+    if (!occurrencesByPronunciation.has(occurrence.pronunciationId)) {
+      occurrencesByPronunciation.set(occurrence.pronunciationId, []);
+    }
+    occurrencesByPronunciation.get(occurrence.pronunciationId).push({
+      ...occurrence,
+      detail: detailsById.get(occurrence.phonemeId) ?? null,
+    });
+  }
+
+  const composed = pronunciations.map((pronunciation) => ({
+    ...pronunciation,
+    // Empty until the Iteration 2 seed has run for this word; the view then
+    // falls back to the static transcription text, which still reads correctly.
+    occurrences: occurrencesByPronunciation.get(pronunciation.pronunciationId) ?? [],
+  }));
+
   return {
     variant,
     word,
-    pronunciations,
+    pronunciations: composed,
     // Ingestion guarantees exactly one primary at the lowest `display_order`,
     // so the ordered read already leads with it (E4, FR-WORD-03).
-    primaryPronunciation: pronunciations.find((entry) => entry.isPrimary) ?? pronunciations[0],
+    primaryPronunciation: composed.find((entry) => entry.isPrimary) ?? composed[0],
   };
 }

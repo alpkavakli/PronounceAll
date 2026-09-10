@@ -272,3 +272,86 @@ a:focus-visible,
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ---------------------------------------------------------------------------
+   Clickable phonemes and the popover (FR-IPA-02, FR-IPA-03, NFR-A11Y-08)
+   ---------------------------------------------------------------------------
+   Each phoneme is a real <button>, so it is focusable and answers Enter and
+   Space natively. The styling strips the button chrome without stripping the
+   affordance: the transcription must still read as a transcription, while every
+   unit stays an unmistakable target of at least 44x44 CSS px (NFR-A11Y-08).
+   -------------------------------------------------------------------------- */
+
+.phoneme {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  border-radius: 0.25rem;
+  padding: 0.35rem 0.15rem;
+  /* The 44 px touch target is met by the padded box while the glyphs stay
+     visually adjacent, so the IPA still reads as one continuous string. */
+  min-width: 1.4rem;
+  min-height: 44px;
+  cursor: pointer;
+  transition: background-color 120ms ease-out;
+}
+
+.phoneme:hover,
+.phoneme:focus-visible {
+  background-color: #e8eef7;
+}
+
+.phoneme:focus-visible {
+  outline: 2px solid #2f5d9e;
+  outline-offset: 1px;
+}
+
+/* Without JavaScript the buttons never gain `aria-haspopup`, so they present as
+   plain text rather than advertising an interaction that cannot happen. */
+.phoneme:not([aria-haspopup]) {
+  cursor: text;
+}
+
+.phoneme-popover {
+  position: absolute;
+  z-index: 20;
+  min-width: 10rem;
+  max-width: min(20rem, calc(100vw - 1rem));
+  padding: 0.75rem 1rem;
+  background: #fff;
+  border: 1px solid #c8d2e0;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 16px rgb(15 30 55 / 18%);
+}
+
+.phoneme-popover__symbol {
+  margin: 0;
+  font-size: 1.75rem;
+  line-height: 1.2;
+}
+
+.phoneme-popover__example {
+  margin: 0.25rem 0 0;
+  color: #445;
+}
+
+.phoneme-popover__replay {
+  margin-top: 0.6rem;
+  min-height: 44px;
+  padding: 0.4rem 0.9rem;
+  font: inherit;
+  color: #16324f;
+  background: #e8eef7;
+  border: 1px solid #c8d2e0;
+  border-radius: 0.35rem;
+  cursor: pointer;
+}
+
+.pronunciation__audio {
+  margin: 0.5rem 0 0;
+}
+
+.pronunciation__audio audio {
+  max-width: 100%;
+}

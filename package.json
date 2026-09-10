@@ -29,6 +29,9 @@
     "fetch:wiktionary": "node scripts/fetch-wiktionary.js",
     "seed": "node scripts/seed-words.js",
     "seed:dry-run": "node scripts/seed-words.js --dry-run",
+    "seed:phonemes": "node scripts/seed-phonemes.js",
+    "seed:phonemes:dry-run": "node scripts/seed-phonemes.js --dry-run",
+    "inventory:check": "node scripts/extract-phoneme-inventory.js --check",
     "capture:word-page": "node scripts/capture-word-page.js",
     "size": "npm run capture:word-page && size-limit"
   },
