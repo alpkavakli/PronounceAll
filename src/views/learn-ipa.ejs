@@ -1,0 +1,101 @@
+<%# PronounceAll — Copyright (C) 2026 Alp Kavaklı
+    SPDX-License-Identifier: AGPL-3.0-or-later
+    See LICENSE-NOTICE.md at the repository root.
+
+    The phoneme learning pages (FR-IPA-07, FR-IPA-10).
+
+    One template, two scopes. The per-variant page lists one variant's
+    inventory; the global page lists every active variant's and shows a variant
+    marker on each row, which is the only rendering difference between them
+    (FR-IPA-10).
+
+    Uncached and DYNAMIC. SDD §6.3 names the learning pages among the responses
+    B2 does NOT make cacheable, because FR-IPA-07 gives each row a per-viewer
+    save state. There is still no inline script or style here.
+
+    PARTIALLY SATISFIED, deliberately, and on the rule this project has applied
+    throughout — a control that cannot work is worse than none:
+
+      * the play-audio button of FR-IPA-07/FR-IPA-10 renders only where a READY
+        asset backs it. Every phoneme asset is currently `pending`, so no button
+        appears yet;
+      * the save/tag control of §4.3 is Iteration 3 and is absent.
+
+    The ranked inventory, the symbols, and the FR-IPA-08 sound-matched examples
+    are all here and correct. %>
+<!doctype html>
+<html lang="<%= scope === 'variant' ? variant.code : 'en' %>">
+<head>
+  <%- include('partials/head', { title: title }) %>
+</head>
+<body>
+  <main class="page learn-ipa">
+    <h1><%= scope === 'variant' ? `The sounds of ${variant.displayName}` : 'The sounds of every language' %></h1>
+
+    <p class="lede">
+      <%= phonemes.length %> teaching units, most common first. Every English
+      word is built from these.
+    </p>
+
+    <% if (scope === 'variant') { %>
+      <%- include('partials/search-form', { variantCode: variant.code }) %>
+    <% } %>
+
+    <% if (phonemes.length === 0) { %>
+      <p class="search__hint">No phonemes have been seeded yet.</p>
+    <% } else { %>
+      <%# FR-IPA-07: ordered by ascending frequency rank, which is the order the
+          query returned. Nothing re-sorts it here. %>
+      <ol class="phoneme-list">
+        <% phonemes.forEach(function (phoneme) { %>
+          <li class="phoneme-row">
+            <span class="phoneme-row__rank" aria-hidden="true"><%= phoneme.frequencyRank %></span>
+
+            <span class="phoneme-row__symbol" lang="und-fonipa">
+              <span class="visually-hidden">Phoneme: </span><%= phoneme.ipaSymbol %>
+            </span>
+
+            <span class="phoneme-row__example">
+              <% if (phoneme.exampleWord) { %>
+                as in <strong><%= phoneme.exampleWord %></strong>
+                <% if (phoneme.examplePhonemicTranscription) { %>
+                  <span class="phoneme-row__example-ipa" lang="und-fonipa">/<%= phoneme.examplePhonemicTranscription %>/</span>
+                <% } %>
+              <% } %>
+            </span>
+
+            <% if (scope === 'global') { %>
+              <%# FR-IPA-10: the marker identifying which variant the phoneme
+                  belongs to. Only the global page shows it — on the per-variant
+                  page every row would carry the same value. %>
+              <span class="phoneme-row__variant"><%= phoneme.variantCode %></span>
+            <% } %>
+
+            <%# FR-IPA-07/10 list a play-audio button. It appears once a real
+                asset exists; until then there is nothing to play and no button. %>
+            <% if (phoneme.hasAudio) { %>
+              <audio class="phoneme-row__audio" controls preload="none"
+                     src="<%= audioPublicPrefix %>/<%= phoneme.audioStorageKey %>">
+                Your browser cannot play this recording.
+              </audio>
+            <% } %>
+          </li>
+        <% }); %>
+      </ol>
+    <% } %>
+
+    <%# FR-CONTENT-05 and NFR-LEGAL-05: the example words are quoted from
+        Wiktionary and carry its licence. %>
+    <footer class="attribution">
+      <p>
+        Example words from
+        <a href="https://en.wiktionary.org/" rel="noopener noreferrer">Wiktionary</a>
+        · CC BY-SA 4.0
+      </p>
+    </footer>
+  </main>
+
+  <%- include('partials/footer') %>
+  <script type="module" src="/js/bootstrap.js"></script>
+</body>
+</html>

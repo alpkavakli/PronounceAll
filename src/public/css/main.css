@@ -422,3 +422,99 @@ a:focus-visible,
 .search__back {
   margin-top: 2rem;
 }
+
+/* ---------------------------------------------------------------------------
+   The phoneme learning pages (FR-IPA-07, FR-IPA-10, FR-WORD-07)
+   ---------------------------------------------------------------------------
+   A ranked list rather than a table: the content is one item per row, and a
+   table would impose column semantics on data that has none. Flex with wrap
+   keeps every row readable down to 320 px without horizontal scrolling.
+   -------------------------------------------------------------------------- */
+
+.phoneme-list {
+  margin: 1.5rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.phoneme-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem 0.9rem;
+  padding: 0.6rem 0.25rem;
+  border-bottom: 1px solid #e6ebf2;
+}
+
+.phoneme-row__rank {
+  flex: 0 0 2.25rem;
+  /* 5.33:1 against the page background. The earlier #8894a6 measured 3.02:1 and
+     failed WCAG AA, which axe caught (NFR-A11Y-02). */
+  color: #5f6b7a;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.85rem;
+}
+
+.phoneme-row__symbol {
+  flex: 0 0 3rem;
+  font-size: 1.5rem;
+  line-height: 1.2;
+}
+
+.phoneme-row__example {
+  flex: 1 1 12rem;
+  min-width: 0;
+  color: #445;
+}
+
+.phoneme-row__example-ipa {
+  /* 5.33:1. The earlier #6a7788 measured 4.48:1 — just under the 4.5:1 floor,
+     which is exactly the kind of near-miss only a checker catches. */
+  color: #5f6b7a;
+}
+
+.phoneme-row__variant {
+  flex: 0 0 auto;
+  padding: 0.1rem 0.45rem;
+  font-size: 0.75rem;
+  color: #445;
+  background: #eef2f7;
+  border-radius: 0.25rem;
+}
+
+.phoneme-row__audio {
+  flex: 1 1 100%;
+  max-width: 100%;
+}
+
+/* ---------------------------------------------------------------------------
+   IPA glyph coverage (FR-IPA-09)
+   ---------------------------------------------------------------------------
+   A tofu box where a phoneme should be destroys the product's core value, so
+   every element that renders IPA gets a stack of families known to carry the
+   full IPA block rather than inheriting the UI font.
+
+   The SIL families lead because they are designed for phonetic transcription
+   and are what a linguistics-literate reader is likely to have installed. The
+   rest are the broad-coverage families that ship with Windows, macOS, and most
+   Linux distributions, so the stack degrades through progressively more common
+   fonts rather than falling straight to the default.
+
+   PARTIAL against FR-IPA-09, which asks the stack to START with a
+   web-delivered IPA-aware font. Self-hosting one is a real decision — which
+   family, its licence, subsetting, and the cost against the NFR-PERF-07 page
+   budget — and it is not made here. This is the system half of that stack, and
+   it is a *Should* rather than a *Must*.
+   -------------------------------------------------------------------------- */
+
+.ipa,
+.syllables,
+.phoneme,
+.phoneme-row__symbol,
+.phoneme-row__example-ipa,
+.phoneme-popover__symbol {
+  font-family:
+    "Charis SIL", "Doulos SIL", "Gentium Plus", "Noto Sans",
+    "Segoe UI", "Lucida Sans Unicode", "DejaVu Sans", "Arial Unicode MS",
+    sans-serif;
+}

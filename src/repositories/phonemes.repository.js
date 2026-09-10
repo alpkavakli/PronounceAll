@@ -252,3 +252,46 @@ export async function countPhonemes(variantId, executor = defaultExecutor()) {
   );
   return Number(rows[0].total);
 }
+
+/**
+ * Every phoneme across EVERY variant, for the global `/learnIPA` page
+ * (FR-IPA-10).
+ *
+ * Carries the variant code as the marker that requirement asks each row to
+ * show. Ordering is by frequency rank first so the page reads as one ranked
+ * inventory rather than as variants concatenated; the variant code breaks ties
+ * deterministically once a second variant exists.
+ *
+ * In v1.0 this returns exactly the `en-us` rows, because `en-us` is the only
+ * seeded variant — which is the point of locking the URL now (FR-IPA-10).
+ *
+ * @param {object} [executor]
+ * @returns {Promise<object[]>}
+ */
+export async function listAllPhonemeDetails(executor = defaultExecutor()) {
+  const [rows] = await executor.query(
+    `SELECT p.phoneme_id, p.ipa_symbol, p.frequency_rank,
+            v.code AS variant_code, v.display_name AS variant_name,
+            e.example_word, e.phonemic_transcription, e.source_reference,
+            a.storage_key, a.generation_status, a.attribution_text, a.licence_identifier
+       FROM phonemes p
+       JOIN language_variants v ON v.variant_id = p.variant_id
+       LEFT JOIN phoneme_example_words e ON e.example_word_id = p.primary_example_word_id
+       LEFT JOIN audio_assets a ON a.audio_asset_id = p.audio_asset_id
+      WHERE v.is_active = TRUE
+      ORDER BY p.frequency_rank, v.code`,
+  );
+  return rows.map((row) => ({
+    phonemeId: row.phoneme_id,
+    ipaSymbol: row.ipa_symbol,
+    frequencyRank: row.frequency_rank,
+    variantCode: row.variant_code,
+    variantName: row.variant_name,
+    exampleWord: row.example_word,
+    examplePhonemicTranscription: row.phonemic_transcription,
+    exampleSourceReference: row.source_reference,
+    audioStorageKey: row.generation_status === 'ready' ? row.storage_key : null,
+    audioAttribution: row.attribution_text,
+    audioLicence: row.licence_identifier,
+  }));
+}

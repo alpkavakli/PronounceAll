@@ -42,6 +42,7 @@ import {
 } from './middleware/index.js';
 import { healthRouter } from './routes/health.route.js';
 import { homeRouter } from './routes/home.route.js';
+import { learnIpaRouter } from './routes/learn-ipa.route.js';
 import { searchRouter } from './routes/search.route.js';
 import { wordRouter } from './routes/word.route.js';
 import { checkHealth } from './services/health.service.js';
@@ -140,6 +141,12 @@ export function createApp() {
   // FIND-10, implemented ahead of the SRS. Top-level rather than
   // `/:variant/search`, which would be indistinguishable from a word lookup.
   app.use(searchRouter());
+  // MUST precede the word router. `/:variant/learnIPA` matches
+  // `GET /:variant/:word` exactly, so registered the other way round the
+  // learning page would be looked up as a word and 404. FR-IPA-07 fixes that
+  // URL, so unlike /search the collision cannot be designed away — it is pinned
+  // by a test instead.
+  app.use(learnIpaRouter());
   app.use(
     wordRouter({
       // Appendix C / Foundational Decisions §10.3: 10 per hour, keyed on the
