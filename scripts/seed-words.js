@@ -80,6 +80,7 @@ async function main() {
 
   const report = await ingestArtifact(artifact, {
     variantId: variant.variantId,
+    variantCode: variant.code,
     curation,
     dryRun,
   });

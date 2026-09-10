@@ -138,4 +138,120 @@ Implement it as a Cloudflare rate-limiting rule during the deployment/production
 
 ---
 
+### FIND-10 — Word search exists in the product but not in the specification
+
+**Recorded:** 2026-09-11
+**Source:** Maintainer review of the running Iteration 2 build
+**Status:** Implemented ahead of specification — **SRS addendum owed**
+**Affects:** SRS Appendix F (endpoint catalogue), SRS §4.1 (`FR-WORD-*`), Appendix C (rate limits), the API Specification
+
+**The problem.** There is no way to look a word up from inside the site. The SRS
+specifies navigation as `GET /:variant/:word` only: Appendix F lists no search
+endpoint, and no `FR-WORD-*` requires one. The implied model is that a reader
+types the URL or arrives from a search engine, which is why `FR-WORD-09` and the
+sitemap requirements exist.
+
+That model has a hole. The E3 fuzzy matcher built for `FR-WORD-04` is already a
+capable word-finder — `cuppcake` resolves to `cupcake` — but the only way to
+reach it is to type a URL that fails. A reader who does not already know the
+exact spelling has no route into the dictionary at all. For a reference product
+that is a genuine usability gap rather than a deferred nicety.
+
+Note that `search` is already a reserved name in Appendix A, so the route name
+was protected without a feature ever being attached to it.
+
+**What was done.** On the maintainer's instruction (2026-09-11) a word search was
+implemented ahead of the specification, reusing the existing E3 ranking and the
+cached headword list rather than introducing a second matcher:
+
+- `GET /search?q=…&variant=…` — an exact match redirects to the word page; a
+  near match renders the E3-ranked suggestions; no match offers the word-request
+  form.
+- A search form on the home page and on the search results page. It is a plain
+  `GET` form, so it works with JavaScript disabled.
+
+**Documentation owed.** This entry exists so the debt is not lost. The SRS should
+gain:
+
+1. a functional requirement in §4.1 — provisionally `FR-WORD-11` — covering the
+   search input, the exact-match redirect, the ranked results, and the
+   no-results path, with acceptance criteria;
+2. an Appendix F row for `GET /search`;
+3. a decision on whether Appendix C should rate-limit it. It is currently
+   **unlimited**: the handler is an in-memory scan over the cached headword list
+   for the variant, which is bounded by the `FR-WORD-10` launch target of ~5 000
+   headwords and performs no database query per keystroke. That is defensible,
+   but it is a policy choice the SRS should state rather than leave implicit;
+4. a note in the API Specification, which is authoritative for endpoints.
+
+**Design points worth recording before the requirement is written.**
+
+- The route is top-level `GET /search` with the variant as a query parameter,
+  NOT `/:variant/search`. The latter collides with `GET /:variant/:word` and
+  would work only while the search route stays registered first — a silent
+  break waiting for someone to reorder the routers. If the eventual requirement
+  prefers the variant-first shape, the collision must be handled explicitly
+  rather than by registration order.
+- Search results are served uncached (`private, no-store`). They are not
+  per-viewer, so they could in principle be edge-cached, but a query string
+  makes a cache key per query for little benefit; B2's cacheable-shell class
+  remains reserved for word pages.
+- Input is normalised leniently rather than validated strictly. The slug
+  validator of `FR-WORD-02` answers 400 on a character outside the allow-list,
+  which is right for a URL and wrong for a free-text box: a reader who types
+  `Cup Cake!` should get results, not an error.
+
+---
+
+### FIND-11 — Dictionary expanded to ~6 150 words; two consequences to record
+
+**Recorded:** 2026-09-11
+**Source:** Maintainer instruction after finding ordinary words missing from the running build
+**Status:** Expansion applied; two follow-ups noted below
+**Affects:** SRS `FR-WORD-04` acceptance criteria, SRS `FR-WORD-10`
+
+**What happened.** The Iteration 1 seed held 123 words. It was composed to
+EXERCISE the pipeline — heteronyms, apostrophes, hyphens, awkward stress — and
+never to cover ordinary vocabulary, so it was missing `happy`, `good`, `house`,
+`car`, `think`, `go` and about thirty other words a person types first. The
+maintainer hit exactly that and reasonably read it as a broken dictionary.
+
+The seed was expanded to **6 150 headwords** through the existing pipeline, with
+headword SELECTION driven by Wiktionary's own frequency ranking (ranks 1–10 000)
+and meaning, IPA, and attribution still coming from the approved entry path. No
+second ingestion system was introduced. `FR-WORD-10`'s ≥5 000 floor is now met
+with about 23 % margin.
+
+**Consequence 1 — `FR-WORD-04`'s `xqzzy` example has gone stale.**
+
+The acceptance criterion reads: *`GET /en-us/xqzzy` returns HTTP 404, shows no
+suggestions (no sufficiently close match)*. Against 6 150 words `xqzzy` IS close
+enough to `sexy` to be offered, so the literal example now fails while the
+matcher is working correctly — the criterion silently assumed a small
+dictionary.
+
+The tests now use `qxzjvwkmpf`, which stays unmatchable as the corpus grows. The
+criterion's INTENT is unchanged and still enforced. The SRS should be amended to
+either use a slug that cannot drift, or to state the property rather than a
+particular string. Nothing was changed in E3: the ranking threshold is doing its
+job and tuning it to preserve an example would be the tail wagging the dog.
+
+**Consequence 2 — a coverage tripwire now exists.**
+
+`SMOKE_VOCABULARY` in `scripts/seed-headwords.js` lists ~48 ordinary words, and
+`tests/integration/seed-coverage.test.js` asserts every one resolves after a
+seed. This is deliberately not a size check: the 123-word seed would have passed
+any reasonable size assertion at its own scale while being useless in practice.
+It is a list of words a learner types first, and it fails loudly if the seed
+stops containing them.
+
+**Also worth knowing.** Roughly 1 850 of the 8 000 requested headwords do not
+load, dominated by two causes that are both correct behaviour rather than
+defects: about 1 066 have no identifiable American transcription, and about 919
+are inflected "form-of" entries (`went`, `said`) whose Wiktionary page carries no
+independent definition. Only ~35 are lost to D4 canonical validation. These are
+reported by the seed, not hidden.
+
+---
+
 *End of register.*

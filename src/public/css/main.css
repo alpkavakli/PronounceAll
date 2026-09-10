@@ -355,3 +355,70 @@ a:focus-visible,
 .pronunciation__audio audio {
   max-width: 100%;
 }
+
+/* ---------------------------------------------------------------------------
+   Word search (FIND-10)
+   ---------------------------------------------------------------------------
+   A plain GET form, so it needs no JavaScript and no styling to function. The
+   rules below only make it comfortable: a 44 px control height (NFR-A11Y-08),
+   and a row that wraps to stacked at narrow widths rather than overflowing
+   (FR-WORD-07 forbids horizontal scrolling down to 320 px).
+   -------------------------------------------------------------------------- */
+
+.search {
+  margin: 1.5rem 0 2rem;
+}
+
+.search__label {
+  display: block;
+  margin-bottom: 0.4rem;
+  font-weight: 600;
+}
+
+.search__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.search__input {
+  flex: 1 1 12rem;
+  min-width: 0;
+  min-height: 44px;
+  padding: 0.5rem 0.75rem;
+  font: inherit;
+  color: inherit;
+  background: #fff;
+  border: 1px solid #c8d2e0;
+  border-radius: 0.35rem;
+}
+
+.search__input:focus-visible,
+.search__submit:focus-visible {
+  outline: 2px solid #2f5d9e;
+  outline-offset: 1px;
+}
+
+.search__submit {
+  min-height: 44px;
+  padding: 0.5rem 1.25rem;
+  font: inherit;
+  font-weight: 600;
+  color: #fff;
+  background: #2f5d9e;
+  border: 1px solid #2f5d9e;
+  border-radius: 0.35rem;
+  cursor: pointer;
+}
+
+.search__submit:hover {
+  background: #26497d;
+}
+
+.search__hint {
+  color: #445;
+}
+
+.search__back {
+  margin-top: 2rem;
+}

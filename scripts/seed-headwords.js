@@ -28,8 +28,18 @@
  *     multi-syllable stress patterns a learner actually struggles with.
  */
 
-/** @type {Record<string, string[]>} */
-export const HEADWORD_LIST = {
+/**
+ * Words that must be in the seed whatever the frequency ranking says.
+ *
+ * These are no longer the whole selection — the bulk now comes from the ranked
+ * source (see `selectHeadwords`). They are kept as GUARANTEED inclusions because
+ * each earns its place for a reason the ranking cannot know:
+ * acceptance-criteria words, allow-list exercises, and heteronyms that exercise
+ * the E4 many-pronunciations model.
+ *
+ * @type {Record<string, string[]>}
+ */
+export const CURATED_HEADWORDS = {
   'en-us': [
     // Acceptance-criteria words and allow-list exercises.
     'cupcake',
@@ -169,4 +179,72 @@ export const HEADWORD_LIST = {
   ],
 };
 
-export default HEADWORD_LIST;
+/**
+ * Ordinary vocabulary a learner would expect to find, asserted by the seed
+ * smoke test (FIND-11).
+ *
+ * This list is NOT a selection source — it is a tripwire. The 123-word
+ * development sample looked reasonable and was missing `happy`, `good`, `house`,
+ * `think` and thirty others, which is exactly the failure this catches: a seed
+ * that is large but quietly missing the words people actually type.
+ *
+ * @type {Record<string, string[]>}
+ */
+export const SMOKE_VOCABULARY = {
+  'en-us': [
+    'beautiful', 'gorgeous', 'happy', 'sad', 'good', 'bad', 'big', 'small',
+    'house', 'home', 'car', 'street', 'food', 'love', 'friend', 'family',
+    'work', 'school', 'university', 'computer', 'phone', 'music', 'movie',
+    'book', 'water', 'coffee', 'restaurant', 'travel', 'country', 'city',
+    'man', 'woman', 'child', 'person', 'think', 'know', 'want', 'need',
+    'make', 'take', 'give', 'come', 'go', 'see', 'look', 'feel', 'say', 'tell',
+  ],
+};
+
+/**
+ * Choose the headwords to fetch, most common first.
+ *
+ * Selection is automatic: the ranked source decides, and the two hand-written
+ * lists above only guarantee inclusion. Nothing here curates thousands of words
+ * by hand.
+ *
+ * Ordering matters beyond tidiness. The fetch is bounded by `limit`, so putting
+ * the guaranteed words first means a truncated or interrupted run still holds
+ * the vocabulary the smoke test asserts, and the rest arrives in frequency
+ * order — the most useful words first.
+ *
+ * @param {object} options
+ * @param {string} options.variant
+ * @param {Array<{rank: number, word: string}>} options.ranked frequency-ordered
+ * @param {number} options.limit how many headwords to return
+ * @returns {string[]} deduplicated headwords, guaranteed first, then by rank
+ */
+export function selectHeadwords({ variant, ranked, limit }) {
+  const guaranteed = [
+    ...(CURATED_HEADWORDS[variant] ?? []),
+    ...(SMOKE_VOCABULARY[variant] ?? []),
+  ];
+
+  const chosen = [];
+  const seen = new Set();
+  for (const word of guaranteed) {
+    if (!seen.has(word)) {
+      seen.add(word);
+      chosen.push(word);
+    }
+  }
+
+  for (const entry of [...ranked].sort((a, b) => a.rank - b.rank)) {
+    if (chosen.length >= limit) {
+      break;
+    }
+    if (!seen.has(entry.word)) {
+      seen.add(entry.word);
+      chosen.push(entry.word);
+    }
+  }
+
+  return chosen;
+}
+
+export default CURATED_HEADWORDS;

@@ -30,6 +30,7 @@ import {
 } from '../repositories/words.repository.js';
 import { withTransaction } from '../repositories/transaction.js';
 import { canonicaliseSlug } from '../validators/word-slug.validator.js';
+import { loadInventory, tokenizeTranscription } from './ipa-tokenization.service.js';
 
 /** The IPA stress markers FR-WORD-03 names. */
 const PRIMARY_STRESS = 'ˈ';
@@ -254,7 +255,7 @@ function syllableCount(breakdown) {
  * @param {object} [curation] per-word maintainer overrides
  * @returns {object} a normalised entry, possibly carrying `rejections`
  */
-export function normaliseEntry(entry, curation = {}) {
+export function normaliseEntry(entry, curation = {}, inventory) {
   const rejections = [];
   const warnings = [];
 
@@ -299,21 +300,62 @@ export function normaliseEntry(entry, curation = {}) {
   const seen = new Set();
   const deduped = [];
   for (const candidate of selected) {
-    const ipa = normaliseIpa(candidate.ipa);
-    if (seen.has(ipa) || !isCompleteTranscription(ipa)) {
+    const source = normaliseIpa(candidate.ipa);
+    if (!isCompleteTranscription(source)) {
       continue;
     }
+
+    // THE D4 GATE. Only a transcription the frozen canonical inventory can
+    // represent may become a runtime row (D4 §5.7, FR-IPA-01). Applying it HERE
+    // rather than reconciling afterwards means an unsupported transcription is
+    // never written at all, so `word_pronunciations` is correct at every moment
+    // rather than only after a later pass has cleaned up behind the loader.
+    //
+    // The canonical form is what gets stored: source notation — tie bars,
+    // length marks, optional-segment parentheses, source `r` — is resolved once,
+    // here, and the artifact keeps the raw original (SDD §4.12).
+    const result = tokenizeTranscription(source, inventory);
+    if (!result.ok) {
+      // A WARNING, not a rejection: one unsupported variant must not cost the
+      // word its other pronunciations. `water` lists an RP `/ˈwɒ.tɚ/` beside two
+      // sound American forms, and dropping the word over it would lose a word
+      // every learner needs. The word is only rejected when NOTHING survives,
+      // which is checked once the loop has finished.
+      warnings.push(
+        `${source}: not representable in the canonical inventory ` +
+          `(blocked by ${JSON.stringify(result.offending)})`,
+      );
+      continue;
+    }
+
+    const [canonicalForm, ...alternatives] = result.forms.map((form) => form.ipa);
+    for (const alternative of alternatives) {
+      // D4 §5.4 permits a second row only where BOTH realisations are genuinely
+      // supported pronunciations, which cannot be decided mechanically. The
+      // segment-present form is kept and the alternative is reported.
+      warnings.push(`${source}: optional-segment variant ${alternative} reported, not loaded`);
+    }
+
+    if (seen.has(canonicalForm)) {
+      continue;
+    }
+
     // Drop an individual transcription that cannot satisfy FR-WORD-03's stress
     // criterion rather than failing the whole word on account of one bad
     // variant: `comfortable` lists two Indian-English forms with no stress mark
     // alongside four sound American ones.
-    const provisional = deriveSyllableBreakdown(ipa);
+    const provisional = deriveSyllableBreakdown(canonicalForm);
     if (syllableCount(provisional) > 1 && !provisional.includes(PRIMARY_STRESS)) {
-      warnings.push(`${ipa}: dropped, multi-syllable transcription carries no stress marker`);
+      warnings.push(`${canonicalForm}: dropped, multi-syllable transcription carries no stress marker`);
       continue;
     }
-    seen.add(ipa);
-    deduped.push(ipa);
+
+    seen.add(canonicalForm);
+    deduped.push({ canonical: canonicalForm, source });
+  }
+
+  if (deduped.length === 0 && selected.length > 0) {
+    rejections.push('every available transcription failed canonical validation');
   }
 
   // Prefer a transcription that carries upstream syllable dots as the primary:
@@ -325,14 +367,18 @@ export function normaliseEntry(entry, curation = {}) {
   const ordered = Array.isArray(pinned)
     ? deduped
     : [...deduped].sort((a, b) => {
-        const dotted = Number(b.includes('.')) - Number(a.includes('.'));
+        const dotted = Number(b.canonical.includes('.')) - Number(a.canonical.includes('.'));
         return dotted !== 0 ? dotted : deduped.indexOf(a) - deduped.indexOf(b);
       });
 
   const overrides = curation.pronunciations ?? {};
 
-  const pronunciations = ordered.map((ipa, index) => {
-    const override = overrides[ipa] ?? {};
+  const pronunciations = ordered.map(({ canonical: ipa, source }, index) => {
+    // A curation override may be keyed on either form. The Iteration 1 curation
+    // file was written against the raw upstream strings, before the D4 gate
+    // canonicalised them, so a key such as `ˈt͡ʃɪldɹən` must still find its word
+    // now that the stored form is `ˈtʃɪldɹən`.
+    const override = overrides[ipa] ?? overrides[source] ?? {};
     const breakdown = override.syllableBreakdown ?? deriveSyllableBreakdown(ipa);
 
     // The upstream hyphenation is the only independent syllable count
@@ -541,10 +587,14 @@ export async function loadEntry(normalised, variantId) {
  *   nothing — the reviewable diff E1 asks the validate stage to produce
  * @returns {Promise<object>} a report
  */
-export async function ingestArtifact(artifact, { variantId, curation = {}, dryRun = false }) {
+export async function ingestArtifact(artifact, { variantId, variantCode = 'en-us', curation = {}, dryRun = false }) {
   if (!Number.isInteger(variantId)) {
     throw AppError.internal(new Error('ingestArtifact requires a resolved variantId'));
   }
+
+  // The frozen canonical inventory, loaded once. Every transcription is gated
+  // against it before it can become a runtime row (D4 §5.7, FR-IPA-01).
+  const inventory = await loadInventory(variantCode);
 
   const loaded = [];
   const rejected = [];
@@ -557,7 +607,7 @@ export async function ingestArtifact(artifact, { variantId, curation = {}, dryRu
       continue;
     }
 
-    const normalised = normaliseEntry(entry, perWord);
+    const normalised = normaliseEntry(entry, perWord, inventory);
     const problems = validateEntry(normalised);
 
     if (problems.length > 0) {

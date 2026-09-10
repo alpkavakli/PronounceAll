@@ -31,7 +31,7 @@ import path from 'node:path';
 import process from 'node:process';
 import { fileURLToPath } from 'node:url';
 
-import { HEADWORD_LIST } from './seed-headwords.js';
+import { selectHeadwords } from './seed-headwords.js';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.join(here, '..');
@@ -48,31 +48,16 @@ const USER_AGENT =
 /** Delay between requests, in milliseconds. Deliberately unhurried. */
 const REQUEST_INTERVAL_MS = 250;
 
+/**
+ * Titles per request. 50 is the MediaWiki limit for ordinary clients, and using
+ * it turns a 6 500-word fetch into ~130 requests rather than 6 500. Combined
+ * with the interval above this stays well inside what Wikimedia asks of
+ * automated clients, while finishing in about a minute instead of half an hour.
+ */
+const BATCH_SIZE = 50;
+
 /** Wiktionary's licence for original entry text (Handoff §8.4). */
 const SOURCE_LICENCE = 'CC BY-SA 4.0';
-
-/**
- * The frequency-rank source (FR-WORD-04, decision E3).
- *
- * FR-WORD-04 ranks suggestions "by closeness then by frequency". SDD §4.2 gives
- * `words` no frequency column and that schema is frozen, so the rank is CONTENT
- * rather than relational state: it is fetched here, committed as a seed
- * artifact, and merged into the in-memory headword list E3 already scans.
- *
- * These are Wiktionary's own TV/movie-subtitle frequency lists, so the rank
- * comes from the same upstream under the same CC BY-SA 4.0 reuse path already
- * taken for meanings and pronunciations (Handoff §8.4, FR-CONTENT-05,
- * NFR-LEGAL-05) — no second licence analysis is needed. A subtitle corpus also
- * suits a learner-facing pronunciation tool better than a written corpus would.
- */
-const FREQUENCY_PAGES = [
-  'Wiktionary:Frequency lists/TV/2006/1-1000',
-  'Wiktionary:Frequency lists/TV/2006/1001-2000',
-  'Wiktionary:Frequency lists/TV/2006/2001-3000',
-];
-
-/** Table rows read `| <rank>  || [[word#English|word]]  || <count>`. */
-const FREQUENCY_ROW = /^\|\s*(\d+)\s*\|\|\s*\[\[([^\]|#]+)/;
 
 /**
  * @param {number} ms
@@ -85,29 +70,60 @@ function sleep(ms) {
 }
 
 /**
- * @param {string} headword
- * @returns {Promise<{ wikitext: string, revisionId: number } | null>}
+ * Fetch up to 50 pages in one request.
+ *
+ * The MediaWiki API accepts 50 titles per query for ordinary clients, so 6 500
+ * headwords cost ~130 requests rather than 6 500. That is the difference
+ * between a polite fetch and one that hammers Wikimedia, and it is why the
+ * expansion is practical at all.
+ *
+ * Titles are returned under their NORMALISED form, and the API may resolve a
+ * title differently from what was asked, so results are matched back through
+ * the `normalized` map rather than by position.
+ *
+ * @param {string[]} titles at most 50
+ * @returns {Promise<Map<string, {wikitext: string, revisionId: number} | null>>}
+ *   keyed by the REQUESTED title
  */
-async function fetchEntry(headword) {
+async function fetchBatch(titles) {
   const url =
     `${API}?action=query&prop=revisions&rvprop=content|ids&rvslots=main` +
-    `&titles=${encodeURIComponent(headword)}&format=json&formatversion=2`;
+    `&titles=${titles.map((t) => encodeURIComponent(t)).join('|')}` +
+    '&format=json&formatversion=2';
 
   const response = await fetch(url, { headers: { 'user-agent': USER_AGENT } });
   if (!response.ok) {
-    throw new Error(`Wiktionary returned HTTP ${response.status} for "${headword}"`);
+    throw new Error(`Wiktionary returned HTTP ${response.status} for a batch of ${titles.length}`);
   }
-
   const payload = await response.json();
-  const page = payload?.query?.pages?.[0];
-  if (!page || page.missing || !page.revisions?.[0]) {
-    return null;
+
+  // `from` is what we asked for, `to` what the API resolved it to.
+  const requestedFor = new Map();
+  for (const entry of payload?.query?.normalized ?? []) {
+    requestedFor.set(entry.to, entry.from);
   }
 
-  return {
-    wikitext: page.revisions[0].slots.main.content,
-    revisionId: page.revisions[0].revid,
-  };
+  const byTitle = new Map();
+  for (const page of payload?.query?.pages ?? []) {
+    const requested = requestedFor.get(page.title) ?? page.title;
+    byTitle.set(
+      requested,
+      page.missing || !page.revisions?.[0]
+        ? null
+        : {
+            wikitext: page.revisions[0].slots.main.content,
+            revisionId: page.revisions[0].revid,
+          },
+    );
+  }
+
+  // A title the response never mentioned is absent rather than silently lost.
+  for (const title of titles) {
+    if (!byTitle.has(title)) {
+      byTitle.set(title, null);
+    }
+  }
+  return byTitle;
 }
 
 /**
@@ -306,12 +322,20 @@ function extractDefinition(english) {
 }
 
 /**
+ * Turn one page's wikitext into an artifact entry.
+ *
+ * Separated from the transport so the SAME extraction serves both the
+ * single-page fetch and the batched one. At 6 500 headwords a request per word
+ * is neither fast enough nor polite enough, but the parsing must not fork —
+ * two extractors would drift and the artifact would depend on which path
+ * produced it.
+ *
  * @param {string} headword
  * @param {string} variant
- * @returns {Promise<object | null>} one raw artifact entry
+ * @param {{wikitext: string, revisionId: number} | null} entry
+ * @returns {object} one raw artifact entry, possibly carrying `error`
  */
-async function fetchHeadword(headword, variant) {
-  const entry = await fetchEntry(headword);
+function buildEntry(headword, variant, entry) {
   if (!entry) {
     return { headword, variant, error: 'no Wiktionary page' };
   }
@@ -383,42 +407,17 @@ async function writeEntries(outPath, variant, entries) {
  * @param {string[]} headwords the seeded headwords
  * @returns {Promise<Map<string, number>>} headword to rank, most common lowest
  */
-async function fetchFrequencyRanks(headwords) {
+function frequencyRanksFor(headwords, ranked) {
   const wanted = new Set(headwords.map((headword) => headword.toLowerCase()));
   const ranks = new Map();
 
-  for (const page of FREQUENCY_PAGES) {
-    const url = `${API}?${new URLSearchParams({
-      action: 'parse',
-      page,
-      prop: 'wikitext',
-      formatversion: '2',
-      format: 'json',
-    })}`;
-    const response = await fetch(url, { headers: { 'User-Agent': USER_AGENT } });
-    if (!response.ok) {
-      throw new Error(`Frequency list "${page}" returned HTTP ${response.status}`);
+  for (const entry of ranked) {
+    const word = entry.word.toLowerCase();
+    // A word can appear more than once across the source tables; the most
+    // common occurrence wins.
+    if (wanted.has(word) && (!ranks.has(word) || entry.rank < ranks.get(word))) {
+      ranks.set(word, entry.rank);
     }
-    const body = await response.json();
-    if (body.error) {
-      throw new Error(`Frequency list "${page}": ${body.error.code}`);
-    }
-
-    for (const line of body.parse.wikitext.split('\n')) {
-      const match = FREQUENCY_ROW.exec(line.trim());
-      if (!match) {
-        continue;
-      }
-      const rank = Number(match[1]);
-      const word = match[2].trim().toLowerCase();
-      // A word can appear more than once across the tables — a capitalised
-      // form, say. The most common occurrence wins.
-      if (wanted.has(word) && (!ranks.has(word) || rank < ranks.get(word))) {
-        ranks.set(word, rank);
-      }
-    }
-    process.stdout.write(`  . ${page}\n`);
-    await sleep(REQUEST_INTERVAL_MS);
   }
 
   return ranks;
@@ -431,9 +430,17 @@ async function main() {
     ? path.resolve(args[args.indexOf('--out') + 1])
     : path.join(repoRoot, 'data', 'seed', `${variant}.raw.json`);
 
-  const headwords = HEADWORD_LIST[variant];
-  if (!headwords) {
-    throw new Error(`No headword list is defined for variant "${variant}".`);
+  // How many headwords to request. FR-WORD-10 wants at least 5 000 LOADED, and
+  // a survey of the ranked source put the yield of usable American
+  // transcriptions at about 82 %, so the default asks for enough to clear that
+  // bar with room for the D4 tokenisation losses on top.
+  const limit = args.includes('--limit') ? Number(args[args.indexOf('--limit') + 1]) : 8000;
+
+  const headwordsPath = path.join(repoRoot, 'data', 'seed', `${variant}.headwords.json`);
+  const rankedSource = JSON.parse(await fs.readFile(headwordsPath, 'utf8')).ranked;
+  const headwords = selectHeadwords({ variant, ranked: rankedSource, limit });
+  if (headwords.length === 0) {
+    throw new Error(`No headwords selected for variant "${variant}".`);
   }
 
   await fs.mkdir(path.dirname(outPath), { recursive: true });
@@ -443,13 +450,26 @@ async function main() {
   // in whatever changed upstream since, turning a narrow content change into an
   // unreviewable diff.
   if (!args.includes('--frequency-only')) {
-    process.stdout.write(`Fetching ${headwords.length} headwords for ${variant}\n`);
+    process.stdout.write(
+      `Fetching ${headwords.length} headwords for ${variant} in batches of ${BATCH_SIZE}\n`,
+    );
 
     const entries = [];
-    for (const headword of headwords) {
-      const entry = await fetchHeadword(headword, variant);
-      entries.push(entry);
-      process.stdout.write(entry.error ? `  ! ${headword}: ${entry.error}\n` : `  . ${headword}\n`);
+    let unusable = 0;
+    for (let index = 0; index < headwords.length; index += BATCH_SIZE) {
+      const batch = headwords.slice(index, index + BATCH_SIZE);
+      const pages = await fetchBatch(batch);
+
+      for (const headword of batch) {
+        const entry = buildEntry(headword, variant, pages.get(headword) ?? null);
+        entries.push(entry);
+        if (entry.error) {
+          unusable += 1;
+        }
+      }
+
+      const done = Math.min(index + BATCH_SIZE, headwords.length);
+      process.stdout.write(`  . ${done}/${headwords.length}  (${unusable} unusable so far)\n`);
       await sleep(REQUEST_INTERVAL_MS);
     }
 
@@ -458,8 +478,7 @@ async function main() {
 
   // The frequency artifact (FR-WORD-04), written alongside the raw entries so
   // one documented command produces everything the seed needs.
-  process.stdout.write(`\nFetching frequency ranks\n`);
-  const ranks = await fetchFrequencyRanks(headwords);
+  const ranks = frequencyRanksFor(headwords, rankedSource);
   const frequencyPath = path.join(path.dirname(outPath), `${variant}.frequency.json`);
 
   await fs.writeFile(
@@ -468,9 +487,10 @@ async function main() {
       {
         variant,
         source: 'English Wiktionary — TV/movie frequency lists (2006)',
-        sourceUrls: FREQUENCY_PAGES.map(
-          (page) => `https://en.wiktionary.org/wiki/${encodeURI(page.replace(/ /g, '_'))}`,
-        ),
+        // Derived from the committed ranked headword artifact rather than
+        // re-fetched: the ranks are already there, and one network round trip
+        // for data sitting in the repository is waste.
+        derivedFrom: `data/seed/${variant}.headwords.json`,
         sourceLicence: SOURCE_LICENCE,
         fetchedAt: new Date().toISOString(),
         // Sorted by rank, so the committed artifact reads as a frequency list

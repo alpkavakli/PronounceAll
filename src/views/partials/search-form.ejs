@@ -1,0 +1,32 @@
+<%# PronounceAll — Copyright (C) 2026 Alp Kavaklı
+    SPDX-License-Identifier: AGPL-3.0-or-later
+    See LICENSE-NOTICE.md at the repository root.
+
+    The word search form (FIND-10).
+
+    A plain GET form with no JavaScript at all: submitting it navigates, which
+    is why search works with scripting disabled and why the result is a real,
+    linkable URL. `role="search"` gives assistive technology the landmark, and
+    the label is a real <label> rather than a placeholder, which disappears the
+    moment someone starts typing.
+
+    Locals: variantCode, and optionally value. %>
+<form class="search" action="/search" method="get" role="search">
+  <input type="hidden" name="variant" value="<%= variantCode %>">
+  <label class="search__label" for="search-q">Look up a word</label>
+  <div class="search__row">
+    <input
+      class="search__input"
+      id="search-q"
+      type="search"
+      name="q"
+      value="<%= typeof value === 'undefined' ? '' : value %>"
+      placeholder="cupcake"
+      autocomplete="off"
+      autocapitalize="none"
+      spellcheck="false"
+      enterkeyhint="search"
+    >
+    <button class="search__submit" type="submit">Search</button>
+  </div>
+</form>

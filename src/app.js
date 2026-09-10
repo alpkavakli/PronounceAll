@@ -42,6 +42,7 @@ import {
 } from './middleware/index.js';
 import { healthRouter } from './routes/health.route.js';
 import { homeRouter } from './routes/home.route.js';
+import { searchRouter } from './routes/search.route.js';
 import { wordRouter } from './routes/word.route.js';
 import { checkHealth } from './services/health.service.js';
 
@@ -136,6 +137,9 @@ export function createApp() {
   //    fixed paths above.
   app.use(healthRouter({ probeHealth: () => checkHealth({ pingDatabase, pingRedis }) }));
   app.use(homeRouter());
+  // FIND-10, implemented ahead of the SRS. Top-level rather than
+  // `/:variant/search`, which would be indistinguishable from a word lookup.
+  app.use(searchRouter());
   app.use(
     wordRouter({
       // Appendix C / Foundational Decisions §10.3: 10 per hour, keyed on the

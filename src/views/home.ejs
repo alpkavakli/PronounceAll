@@ -13,6 +13,11 @@
       A free, open pronunciation reference and practice tool for English learners.
     </p>
 
+    <%# FIND-10: the way into the dictionary. Before this existed the only route
+        to a word was typing its URL, which meant a reader had to already know
+        the spelling they came to check. %>
+    <%- include('partials/search-form', { variantCode: 'en-us' }) %>
+
     <h2>Language variants</h2>
     <% if (variants.length === 0) { %>
       <p>No language variant is active yet.</p>

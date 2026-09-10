@@ -231,7 +231,13 @@ describe('FR-WORD-04 / E3 — the fuzzy 404', () => {
   });
 
   test('a word with no close match shows no suggestions but still offers the form', async () => {
-    const { status, text } = await request(app).get('/en-us/xqzzy');
+    // FR-WORD-04's acceptance criterion names `xqzzy` for this case, and that
+    // example has gone stale: against the ~6 000-word dictionary `xqzzy` is
+    // close enough to `sexy` to be offered, which is the matcher working, not
+    // failing. The criterion's INTENT — a genuinely unmatchable slug offers
+    // nothing — needs a slug that stays unmatchable as the corpus grows.
+    // Recorded as FIND-11.
+    const { status, text } = await request(app).get('/en-us/qxzjvwkmpf');
 
     expect(status).toBe(404);
     expect(text).not.toMatch(/Did you mean/);

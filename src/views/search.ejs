@@ -1,0 +1,63 @@
+<%# PronounceAll — Copyright (C) 2026 Alp Kavaklı
+    SPDX-License-Identifier: AGPL-3.0-or-later
+    See LICENSE-NOTICE.md at the repository root.
+
+    Search results (FIND-10).
+
+    Uncached and DYNAMIC, so unlike the word page this response may carry the
+    per-request CSP nonce and the `pa_uid` cookie. It still contains no inline
+    script or style, because there is nothing here that needs any.
+
+    An exact match never reaches this template: the route redirects to the word
+    page instead. What renders here is the near-miss list, the empty prompt, or
+    the nothing-found path. %>
+<!doctype html>
+<html lang="<%= variant.code %>">
+<head>
+  <%- include('partials/head', { title: title }) %>
+</head>
+<body>
+  <main class="page search-page">
+    <h1>Search</h1>
+
+    <%- include('partials/search-form', { variantCode: variant.code, value: rawQuery }) %>
+
+    <% if (kind === 'empty') { %>
+      <p class="search__hint">
+        Type a word to see how it is pronounced. Spelling does not have to be
+        exact — <code>cuppcake</code> will find <code>cupcake</code>.
+      </p>
+    <% } else if (kind === 'suggestions') { %>
+      <%# The E3 ranking, the same matcher the fuzzy 404 uses: closeness first,
+          then word frequency, then the headword itself (FR-WORD-04). %>
+      <h2 class="section-heading">
+        Did you mean<span class="visually-hidden"> one of these words</span>?
+      </h2>
+      <ul class="suggestion-list">
+        <% suggestions.forEach(function (suggestion) { %>
+          <li class="suggestion">
+            <a class="suggestion__link" href="/<%= variant.code %>/<%= encodeURIComponent(suggestion.slug) %>">
+              <%= suggestion.display %>
+            </a>
+          </li>
+        <% }); %>
+      </ul>
+    <% } else { %>
+      <p class="search__hint">
+        No word close to <strong><%= query %></strong> is in the dictionary yet.
+      </p>
+      <p>
+        <a href="/<%= variant.code %>/<%= encodeURIComponent(query) %>">
+          Request <%= query %>
+        </a>
+        so it can be added.
+      </p>
+    <% } %>
+
+    <p class="search__back"><a href="/">Back to the home page</a></p>
+  </main>
+
+  <%- include('partials/footer') %>
+  <script type="module" src="/js/bootstrap.js"></script>
+</body>
+</html>

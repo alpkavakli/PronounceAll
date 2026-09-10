@@ -68,7 +68,7 @@ const headwordCache = new Map();
  * @returns {Promise<Array<{ normalizedHeadword: string, displayHeadword: string,
  *   frequencyRank: number }>>}
  */
-async function getCachedHeadwords(variantId, variantCode) {
+export async function getCachedHeadwords(variantId, variantCode) {
   const cached = headwordCache.get(variantId);
   if (cached && cached.expiresAt > Date.now()) {
     return cached.headwords;
