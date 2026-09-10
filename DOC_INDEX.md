@@ -23,6 +23,7 @@ The SRS and current SDD are the two primary implementation baselines. Foundation
 | Register | `Backlog & Findings` (`docs/process/PronounceAll_Backlog_and_Findings.md`) | Deferred ideas `IDEA-*`, known defects `FIND-*` |
 | Process (live) | `SDD Handoff` (`docs/process/PronounceAll_SDD_Handoff.md`) | The SDD round plan; governs SDD Rounds 2 to 4. Not a source of requirements or design decisions |
 | Process (live) | `Iteration 1 Handoff` (`docs/process/PronounceAll_Iteration1_Handoff.md`) | Implementation-phase state record and reading router for Iteration 1. Routes to IDs and records what Iteration 0 built. Not a source of requirements or design decisions |
+| Process (live) | `Session Handoff 2026-09-11` (`docs/process/PronounceAll_Session_Handoff_2026-09-11.md`) | Resume point: what is built, what blocks Iteration 2, and the architecture traps. Not a source of requirements or design decisions |
 | Process (live) | `Iteration 2 Completion` (`docs/process/PronounceAll_Iteration2_Completion.md`) | What Iteration 2 built and what remains — notably that phoneme audio is not yet generated. Not a source of requirements or design decisions |
 | Process (live) | `Iteration 2 Handoff` (`docs/process/PronounceAll_Iteration2_Handoff.md`) | Implementation-phase state record and reading router for Iteration 2. Records what Iteration 1 built, and flags in its §0 that the D4 phoneme artifact the SDD treats as authoritative does not yet exist. Not a source of requirements or design decisions |
 

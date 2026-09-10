@@ -26,6 +26,7 @@
     "test:e2e": "playwright test",
     "migrate": "docker compose run --rm flyway migrate",
     "migrate:info": "docker compose run --rm flyway info",
+    "fetch:headwords": "node scripts/fetch-headwords.js",
     "fetch:wiktionary": "node scripts/fetch-wiktionary.js",
     "seed": "node scripts/seed-words.js",
     "seed:dry-run": "node scripts/seed-words.js --dry-run",
