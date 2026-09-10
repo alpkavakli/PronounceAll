@@ -1,0 +1,88 @@
+<%# PronounceAll — Copyright (C) 2026 Alp Kavaklı
+    SPDX-License-Identifier: AGPL-3.0-or-later
+    See LICENSE-NOTICE.md at the repository root.
+
+    The word page: the B2 CACHEABLE SHELL (SDD v1.1 §3.4, §5.3, §6.3).
+
+    This response is identical for every viewer of the word and is cached at the
+    edge, which fixes three properties of this template:
+
+      1. No inline <script> and no inline <style>. The shell cannot carry a
+         per-response CSP nonce, so it takes the nonce-free `script-src 'self'`
+         policy (amended NFR-SEC-03) and every asset is external.
+      2. Nothing per-viewer. Save/tag state and the FR-WORD-06 progress banner
+         belong to the hydration layer (B2) and arrive in later iterations.
+      3. Everything below reads with JavaScript disabled (FR-WORD-08).
+
+    ITERATION 1 SCOPE (Iteration 1 Handoff §8.1, §8.2). The IPA is STATIC TEXT.
+    There are deliberately no clickable phoneme elements, no `data-phoneme-id`
+    attributes, and NO AUDIO CONTROL: whole-word audio is entirely Iteration 2,
+    and a dead or disabled control is worse than temporarily leaving it out.
+    FR-WORD-03 is therefore intentionally only partially satisfied here. %>
+<!doctype html>
+<html lang="<%= variant.code %>">
+<head>
+  <%- include('partials/head', { title: title, metaDescription: metaDescription, canonicalUrl: canonicalUrl }) %>
+</head>
+<body>
+  <main class="page word-page">
+    <article class="word">
+      <header class="word__header">
+        <h1 class="word__headword"><%= word.displayHeadword %></h1>
+        <p class="word__variant"><%= variant.displayName %></p>
+      </header>
+
+      <%# FR-WORD-03: every pronunciation from `word_pronunciations`, in
+          `display_order`, with the single `is_primary` row leading. A heteronym
+          such as `lead` renders each of its pronunciations here. %>
+      <section class="pronunciations" aria-labelledby="pronunciations-heading">
+        <h2 id="pronunciations-heading" class="section-heading">Pronunciation</h2>
+
+        <ul class="pronunciation-list">
+          <% pronunciations.forEach(function (pronunciation) { %>
+            <li class="pronunciation<%= pronunciation.isPrimary ? ' pronunciation--primary' : '' %>">
+              <% if (pronunciation.gloss) { %>
+                <p class="pronunciation__gloss"><%= pronunciation.gloss %></p>
+              <% } %>
+
+              <p class="pronunciation__ipa">
+                <span class="visually-hidden">IPA transcription: </span>
+                <span class="ipa" lang="und-fonipa"><%= pronunciation.ipaTranscription %></span>
+                <% if (!pronunciation.isPrimary) { %>
+                  <span class="pronunciation__badge">also</span>
+                <% } %>
+              </p>
+
+              <%# FR-WORD-03: the written syllable and stress breakdown, marking
+                  primary stress with ˈ and secondary stress with ˌ. %>
+              <p class="pronunciation__syllables">
+                <span class="visually-hidden">Syllables and stress: </span>
+                <span class="syllables" lang="und-fonipa"><%= pronunciation.syllableBreakdown %></span>
+              </p>
+            </li>
+          <% }); %>
+        </ul>
+      </section>
+
+      <section class="meaning" aria-labelledby="meaning-heading">
+        <h2 id="meaning-heading" class="section-heading">Meaning</h2>
+        <p class="meaning__text"><%= word.meaning %></p>
+      </section>
+
+      <%# FR-CONTENT-05 and NFR-LEGAL-05: the upstream source and its licence,
+          visibly attributed with a link to the source entry. CC BY-SA 4.0
+          requires this, and Charter §7 pledges to preserve upstream terms. %>
+      <footer class="attribution">
+        <p>
+          Meaning from
+          <a href="<%= word.sourceUrl %>" rel="noopener noreferrer"><%= sourceName %></a>
+          · <%= word.sourceLicence %>
+        </p>
+      </footer>
+    </article>
+  </main>
+
+  <%- include('partials/footer') %>
+  <script type="module" src="/js/bootstrap.js"></script>
+</body>
+</html>

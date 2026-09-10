@@ -9,6 +9,7 @@ export {
   jsonErrorSurface,
   notFoundHandler,
 } from './error-handler.js';
+export { RATE_LIMITS, rateLimitMiddleware } from './rate-limit.js';
 export { requestContextMiddleware } from './request-context.js';
 export {
   RESPONSE_CLASS,
@@ -17,4 +18,8 @@ export {
   markHydration,
   responseClassMiddleware,
 } from './response-class.js';
-export { cspNonceMiddleware, securityHeadersMiddleware } from './security-headers.js';
+export {
+  contentSecurityPolicyMiddleware,
+  cspNonceMiddleware,
+  securityHeadersMiddleware,
+} from './security-headers.js';

@@ -25,11 +25,17 @@
     "test:integration": "cross-env NODE_OPTIONS=--experimental-vm-modules jest --selectProjects integration",
     "test:e2e": "playwright test",
     "migrate": "docker compose run --rm flyway migrate",
-    "migrate:info": "docker compose run --rm flyway info"
+    "migrate:info": "docker compose run --rm flyway info",
+    "fetch:wiktionary": "node scripts/fetch-wiktionary.js",
+    "seed": "node scripts/seed-words.js",
+    "seed:dry-run": "node scripts/seed-words.js --dry-run",
+    "capture:word-page": "node scripts/capture-word-page.js",
+    "size": "npm run capture:word-page && size-limit"
   },
   "dependencies": {
     "cookie-parser": "^1.4.7",
     "dotenv": "^17.2.3",
+    "double-metaphone": "^2.0.1",
     "ejs": "^3.1.10",
     "express": "^5.1.0",
     "helmet": "^8.1.0",
@@ -40,14 +46,17 @@
     "zod": "^4.1.13"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
     "@eslint/js": "^9.39.0",
     "@playwright/test": "^1.57.0",
+    "@size-limit/file": "^11.2.0",
     "cross-env": "^10.1.0",
     "eslint": "^9.39.0",
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-security": "^3.0.1",
     "globals": "^16.5.0",
     "jest": "^30.2.0",
+    "size-limit": "^11.2.0",
     "supertest": "^7.1.4"
   }
 }

@@ -149,6 +149,12 @@ jobs:
             -url="jdbc:mysql://127.0.0.1:3306/pronounceall?allowPublicKeyRetrieval=true&useSSL=false" \
             -user=root -password=ci-root -connectRetries=30 migrate
 
+      # The word-page e2e and size checks read the seeded dictionary. The seed
+      # loads from the committed ingestion artifact and touches no network, so
+      # it is deterministic and reproducible here (E1, FR-CONTENT-01).
+      - name: Seed the dictionary
+        run: npm run seed
+
       # Multi-browser including WebKit for Safari, plus the no-JavaScript
       # profile that proves progressive enhancement (NFR-COMPAT-03, §7.8).
       - name: Install browsers
@@ -192,6 +198,59 @@ jobs:
         uses: trufflesecurity/trufflehog@main
         with:
           extra_args: --results=verified,unknown
+
+  size:
+    name: Page weight budget
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: ci-root
+          MYSQL_DATABASE: pronounceall
+          MYSQL_USER: pronounceall_app
+          MYSQL_PASSWORD: ci-app
+        ports: ['3306:3306']
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -pci-root"
+          --health-interval=5s --health-timeout=5s --health-retries=20
+      redis:
+        image: redis:7-alpine
+        ports: ['6379:6379']
+        options: >-
+          --health-cmd="redis-cli ping"
+          --health-interval=5s --health-timeout=5s --health-retries=20
+
+    env:
+      NODE_ENV: test
+      LOG_LEVEL: silent
+      MYSQL_HOST: 127.0.0.1
+      MYSQL_DATABASE: pronounceall
+      MYSQL_USER: pronounceall_app
+      MYSQL_PASSWORD: ci-app
+      REDIS_URL: redis://127.0.0.1:6379
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+
+      - name: Apply migrations
+        run: |
+          docker run --rm --network host             -v "$PWD/migrations:/flyway/sql:ro"             flyway/flyway:11-alpine             -url="jdbc:mysql://127.0.0.1:3306/pronounceall?allowPublicKeyRetrieval=true&useSSL=false"             -user=root -password=ci-root -connectRetries=30 migrate
+
+      - name: Seed the dictionary
+        run: npm run seed
+
+      # NFR-PERF-07: a word page's document plus its critical CSS and core
+      # JavaScript must stay within 150 KB gzipped. The document is rendered and
+      # captured first, because it is server-composed rather than a file.
+      - name: size-limit
+        run: npm run size
 
   lighthouse:
     name: Lighthouse

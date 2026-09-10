@@ -44,13 +44,20 @@ services:
   flyway:
     image: flyway/flyway:11-alpine
     # Flyway owns schema migrations (C3). Run explicitly: `npm run migrate`.
-    command:
-      - -url=jdbc:mysql://mysql:3306/${MYSQL_DATABASE:-pronounceall}?allowPublicKeyRetrieval=true&useSSL=false
-      - -user=root
-      - -password=${MYSQL_ROOT_PASSWORD:-devroot}
-      - -locations=filesystem:/flyway/sql
-      - -connectRetries=30
-      - migrate
+    #
+    # The connection settings are ENVIRONMENT variables rather than command
+    # arguments on purpose. `docker compose run --rm flyway migrate` REPLACES a
+    # service's `command`, so connection arguments placed there would be
+    # discarded and Flyway would start unconfigured; environment variables
+    # survive the override, so the same configuration serves `docker compose up`
+    # and `docker compose run` alike.
+    environment:
+      FLYWAY_URL: jdbc:mysql://mysql:3306/${MYSQL_DATABASE:-pronounceall}?allowPublicKeyRetrieval=true&useSSL=false
+      FLYWAY_USER: root
+      FLYWAY_PASSWORD: ${MYSQL_ROOT_PASSWORD:-devroot}
+      FLYWAY_LOCATIONS: filesystem:/flyway/sql
+      FLYWAY_CONNECT_RETRIES: '30'
+    command: ['migrate']
     volumes:
       - ./migrations:/flyway/sql:ro
     depends_on:

@@ -113,6 +113,29 @@ export class AppError extends Error {
     });
   }
 
+  /**
+   * A word that is not in the dictionary for the requested variant. HTTP 404
+   * with the distinct `WORD_NOT_FOUND` code, which the error middleware
+   * surfaces as the fuzzy-suggestion page rather than the generic error view
+   * (FR-WORD-04, E3).
+   *
+   * The status is genuinely 404, not 200, so search engines do not index the
+   * page as a real entry.
+   *
+   * @param {string} slug the canonical slug that missed
+   * @param {object} [options]
+   * @param {object} [options.meta] carries `variant` and the ranked `suggestions`
+   */
+  static wordNotFound(slug, { cause, meta = {} } = {}) {
+    return new AppError({
+      code: ERROR_CODES.WORD_NOT_FOUND,
+      status: 404,
+      message: 'That word is not in the dictionary yet.',
+      cause,
+      meta: { ...meta, slug },
+    });
+  }
+
   /** Username or email collision. HTTP 409. */
   static conflict(message, { cause, meta } = {}) {
     return new AppError({

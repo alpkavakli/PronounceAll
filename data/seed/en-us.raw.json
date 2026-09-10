@@ -1,0 +1,6546 @@
+{
+  "variant": "en-us",
+  "source": "English Wiktionary",
+  "sourceLicence": "CC BY-SA 4.0",
+  "fetchedAt": "2026-09-09T15:43:19.481Z",
+  "entries": [
+    {
+      "headword": "cupcake",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/cupcake#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 91248190,
+      "definition": "A small cake baked in a usually paper container shaped like a cup, often with icing on top.",
+      "hyphenation": [],
+      "transcriptions": [
+        {
+          "ipa": "/ˈkʌpkeɪk/",
+          "accents": [],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "friend",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/friend#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92327804,
+      "definition": "A person, typically someone other than a family member, spouse or lover, whose company one enjoys and towards whom one feels affection.",
+      "hyphenation": [
+        "friend"
+      ],
+      "transcriptions": [
+        {
+          "ipa": "/fɹɛnd/",
+          "accents": [
+            "RP",
+            "GA"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/frɪnd/",
+          "accents": [
+            "dialectal",
+            "especially with <<pin-pen>>"
+          ],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "mother-in-law",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/mother-in-law#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92355995,
+      "definition": "The mother of one's spouse.",
+      "hyphenation": [],
+      "transcriptions": [
+        {
+          "ipa": "/ˈmʌ.ðəɹ.ɪnˌlɔː/",
+          "accents": [
+            "UK",
+            "US"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈmʌ.ðəɹ.ɪnˌlɑː/",
+          "accents": [
+            "cot-caught"
+          ],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "don't",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/don't#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92468713,
+      "definition": "Do not (negative auxiliary).",
+      "hyphenation": [],
+      "transcriptions": [
+        {
+          "ipa": "/dəʊnt/",
+          "accents": [
+            "RP"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/doʊnt/",
+          "accents": [
+            "GA",
+            "CA"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/doːnt/",
+          "accents": [
+            "CA",
+            "regional"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/dʊnt/",
+          "accents": [
+            "dialectal"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/dəʉnt/",
+          "accents": [
+            "AU"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/dʌnt/",
+          "accents": [],
+          "section": 1
+        }
+      ]
+    },
+    {
+      "headword": "record",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/record#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92094081,
+      "definition": "An item of information put into a temporary or permanent physical medium.",
+      "hyphenation": [
+        "rec",
+        "ord"
+      ],
+      "transcriptions": [
+        {
+          "ipa": "/ˈɹɛk.ɔːd/",
+          "accents": [
+            "RP"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈɹɛk.ɚd/",
+          "accents": [
+            "GA"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈɹɛk.ɔɹd/",
+          "accents": [
+            "GA"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ɹɪˈkɔːd/",
+          "accents": [
+            "RP"
+          ],
+          "section": 1
+        },
+        {
+          "ipa": "/ɹə-/",
+          "accents": [
+            "RP"
+          ],
+          "section": 1
+        },
+        {
+          "ipa": "/ɹɪˈkɔɹd/",
+          "accents": [
+            "GA"
+          ],
+          "section": 1
+        }
+      ]
+    },
+    {
+      "headword": "lead",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/lead#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92524906,
+      "definition": "A heavy, pliable, inelastic metal element, having a bright, bluish color, but easily tarnished; both malleable and ductile, though with little tenacity. It is easily fusible, forms alloys with other metals, and is an ingredient of solder and type metal. Atomic number 82.",
+      "hyphenation": [
+        "lead"
+      ],
+      "transcriptions": [
+        {
+          "ipa": "/lɛd/",
+          "accents": [
+            "RP",
+            "GA",
+            "CA"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/led/",
+          "accents": [
+            "AU",
+            "NZ"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈliːd/",
+          "accents": [],
+          "section": 1
+        }
+      ]
+    },
+    {
+      "headword": "read",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/read#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92122087,
+      "definition": "To look at and interpret letters or other information that is written.",
+      "hyphenation": [],
+      "transcriptions": [
+        {
+          "ipa": "/ɹiːd/",
+          "accents": [
+            "UK",
+            "AU",
+            "NZ"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ɹid/",
+          "accents": [
+            "GA",
+            "CA"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/rɛːd/",
+          "accents": [
+            "Early Modern"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/riːd/",
+          "accents": [
+            "Early Modern"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ɹɛd/",
+          "accents": [
+            "RP",
+            "GA",
+            "CA"
+          ],
+          "section": 1
+        },
+        {
+          "ipa": "/ɹed/",
+          "accents": [
+            "AU",
+            "NZ"
+          ],
+          "section": 1
+        }
+      ]
+    },
+    {
+      "headword": "live",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/live#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92429581,
+      "definition": "To be alive; to have life.",
+      "hyphenation": [
+        "live"
+      ],
+      "transcriptions": [
+        {
+          "ipa": "/ˈlɪv/",
+          "accents": [],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈlaɪ̯v/",
+          "accents": [],
+          "section": 1
+        },
+        {
+          "ipa": "/ˈlaːv/",
+          "accents": [
+            "Southern US",
+            "ZA"
+          ],
+          "section": 1
+        }
+      ]
+    },
+    {
+      "headword": "close",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/close#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 91925105,
+      "definition": "To remove or block an opening, gap or passage through.",
+      "hyphenation": [
+        "close"
+      ],
+      "transcriptions": [
+        {
+          "ipa": "/ˈkləʊz/",
+          "accents": [
+            "RP"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈklɵʊ̯z/",
+          "accents": [
+            "RP"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈkloʊ̯z/",
+          "accents": [
+            "GA"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈklɔʊ̯z/",
+          "accents": [
+            "GA"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/kləʊs/",
+          "accents": [
+            "RP"
+          ],
+          "section": 1
+        },
+        {
+          "ipa": "/kloʊs/",
+          "accents": [
+            "GA"
+          ],
+          "section": 1
+        }
+      ]
+    },
+    {
+      "headword": "object",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/object#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92012730,
+      "definition": "A t that has p e but is not alive.",
+      "hyphenation": [
+        "ob",
+        "ject"
+      ],
+      "transcriptions": [
+        {
+          "ipa": "/ˈɒb.d͡ʒɛkt/",
+          "accents": [
+            "RP"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈɑb.d͡ʒɛkt/",
+          "accents": [
+            "GA"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/əbˈd͡ʒɛkt/",
+          "accents": [
+            "RP",
+            "GA"
+          ],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "present",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/present#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92514989,
+      "definition": "Relating to now, for the time being; current.",
+      "hyphenation": [
+        "pres",
+        "ent"
+      ],
+      "transcriptions": [
+        {
+          "ipa": "/ˈpɹɛz.ənt/",
+          "accents": [
+            "RP",
+            "GA",
+            "CA"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈpɹez.ənt/",
+          "accents": [
+            "AU",
+            "NZ"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/pɹɪˈzɛnt/",
+          "accents": [
+            "RP"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/pɹɪˈzɛnt/",
+          "accents": [
+            "GA"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/pɹiˈzɛnt/",
+          "accents": [
+            "US"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/pɹɪˈzɛnt/",
+          "accents": [
+            "Canada"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/pɹəˈzɛnt/",
+          "accents": [
+            "Canada"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/pɹɪˈzent/",
+          "accents": [
+            "AU"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/pɹəˈzent/",
+          "accents": [
+            "NZ"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/pɹiːˈsɛnt/",
+          "accents": [
+            "RP"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/pɹiˈsɛnt/",
+          "accents": [
+            "GA",
+            "Canada"
+          ],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "content",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/content#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92513012,
+      "definition": "Satisfied, pleased, contented.",
+      "hyphenation": [
+        "con",
+        "tent"
+      ],
+      "transcriptions": [
+        {
+          "ipa": "/kənˈtɛnt/",
+          "accents": [],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈkɒn.tɛnt/",
+          "accents": [
+            "RP"
+          ],
+          "section": 1
+        },
+        {
+          "ipa": "/ˈkɔn.tɛnt/",
+          "accents": [
+            "UK"
+          ],
+          "section": 1
+        },
+        {
+          "ipa": "/ˈkɑn.tɛnt/",
+          "accents": [
+            "GA",
+            "CA"
+          ],
+          "section": 1
+        }
+      ]
+    },
+    {
+      "headword": "desert",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/desert#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92306877,
+      "definition": "A barren area of land or desolate terrain, especially one with little water or vegetation; a wasteland.",
+      "hyphenation": [],
+      "transcriptions": [
+        {
+          "ipa": "/ˈdɛz.ət/",
+          "accents": [
+            "RP"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈdɛz.ɚt/",
+          "accents": [
+            "GA"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/dəˈzɑɹt/",
+          "accents": [
+            "Appalachians",
+            "obsolete"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/dɪˈzɜːt/",
+          "accents": [
+            "RP"
+          ],
+          "section": 1
+        },
+        {
+          "ipa": "/dɪˈzɝt/",
+          "accents": [
+            "GA"
+          ],
+          "section": 1
+        },
+        {
+          "ipa": "/dəˈzɝt/",
+          "accents": [
+            "GA"
+          ],
+          "section": 1
+        },
+        {
+          "ipa": "/dɪˈzɜːt/",
+          "accents": [
+            "RP"
+          ],
+          "section": 2
+        },
+        {
+          "ipa": "/dɪˈzɝt/",
+          "accents": [
+            "GA"
+          ],
+          "section": 2
+        },
+        {
+          "ipa": "/dəˈzɝt/",
+          "accents": [
+            "GA"
+          ],
+          "section": 2
+        }
+      ]
+    },
+    {
+      "headword": "produce",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/produce#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92338519,
+      "definition": "To bring forth, to yield, make, manufacture, or otherwise generate.",
+      "hyphenation": [
+        "pro",
+        "duce"
+      ],
+      "transcriptions": [
+        {
+          "ipa": "/pɹəˈd͡ʒuːs/",
+          "accents": [
+            "yod-coalescence"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/pɹəˈdjuːs/",
+          "accents": [
+            "non-<<yod-coalescence>>"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/pɹəˈdus/",
+          "accents": [],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈpɹɒd͡ʒuːs/",
+          "accents": [
+            "yod-coalescence"
+          ],
+          "section": 1
+        },
+        {
+          "ipa": "/ˈpɹɒdjuːs/",
+          "accents": [
+            "non-<<yod-coalescence>>"
+          ],
+          "section": 1
+        },
+        {
+          "ipa": "/ˈpɹoʊ.dus/",
+          "accents": [],
+          "section": 1
+        },
+        {
+          "ipa": "/ˈpɹɑ.dus/",
+          "accents": [],
+          "section": 1
+        },
+        {
+          "ipa": "/ˈpɹɑ.dus/",
+          "accents": [
+            "Canada"
+          ],
+          "section": 1
+        }
+      ]
+    },
+    {
+      "headword": "water",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/water#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92439703,
+      "definition": "An inorganic compound (of molecular formula) found at room temperature and pressure as a clear liquid; it is present naturally as rain, and found in rivers, lakes and seas; its solid form is ice and its gaseous form is steam.",
+      "hyphenation": [
+        "wa",
+        "ter"
+      ],
+      "transcriptions": [
+        {
+          "ipa": "/ˈwɔ.tɚ/",
+          "accents": [
+            "non-cot-caught"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈwɑ.tɚ/",
+          "accents": [
+            "cot-caught"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈwɒ.tɚ/",
+          "accents": [
+            "cot-caught"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈwʊ.tɚ/",
+          "accents": [
+            "Baltimore",
+            "Philadelphia"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈwɔː.tə/",
+          "accents": [
+            "RP"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/wa.tɐ/",
+          "accents": [
+            "Northumbria"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈwoː.tə/",
+          "accents": [
+            "AU",
+            "NZ"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈwæ.tə/",
+          "accents": [
+            "Northern England",
+            "dated; obsolete elsewhere"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈwɔ.təɾ/",
+          "accents": [
+            "Scotland"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈwʊ.təɹ/",
+          "accents": [
+            "Philadelphia",
+            "Baltimore"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈwɔɹ.təɹ/",
+          "accents": [
+            "Western Pennsylvania"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈwɔː.təɹ/",
+          "accents": [
+            "Ireland"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈwoː.tə/",
+          "accents": [
+            "South Africa"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈwɔ.tə/",
+          "accents": [
+            "SG",
+            "Malaysia"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈwɐː.t̪ɛɾ/",
+          "accents": [
+            "Philippines"
+          ],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "people",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/people#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92423051,
+      "definition": "Plural of person.",
+      "hyphenation": [
+        "peo",
+        "ple"
+      ],
+      "transcriptions": [
+        {
+          "ipa": "/ˈpi.pəl/",
+          "accents": [
+            "GA"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈpiː.pəl/",
+          "accents": [
+            "RP"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈpipɨl/",
+          "accents": [
+            "Indic"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/-ɐl/",
+          "accents": [
+            "Indic"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈpipol/",
+          "accents": [
+            "Philippines",
+            "and",
+            "NNSE"
+          ],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "family",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/family#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92480300,
+      "definition": "A group of people who are closely related to one another (by blood, marriage or adoption); kin; in particular, a set of parents and their children; an immediate family.",
+      "hyphenation": [
+        "fa",
+        "mi",
+        "ly"
+      ],
+      "transcriptions": [
+        {
+          "ipa": "/ˈfæm(ɪ)li/",
+          "accents": [
+            "RP"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈfaməlɪj/",
+          "accents": [
+            "without the <<bad-lad split>>"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈfamɪlɪj/",
+          "accents": [
+            "without the <<bad-lad split>>"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈfamlɪj/",
+          "accents": [
+            "without the <<bad-lad split>>"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈfaːməlɪj/",
+          "accents": [
+            "bad-lad split"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈfaːmɪlɪj/",
+          "accents": [
+            "bad-lad split"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈfaːmlɪj/",
+          "accents": [
+            "bad-lad split"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈfæm(ə)li/",
+          "accents": [
+            "GA",
+            "CA",
+            "æ-tensing"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈfæm(ə)li/",
+          "accents": [
+            "NYC",
+            "New Orleans",
+            "Philadelphia",
+            "Baltimore"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈfæːm(ə)li/",
+          "accents": [
+            "AU"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈfɛm(ə)li/",
+          "accents": [
+            "NZ"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈfam(ɪ)le/",
+          "accents": [
+            "Scotland"
+          ],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "money",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/money#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92515644,
+      "definition": "A generally accepted means of exchange.",
+      "hyphenation": [
+        "mon",
+        "ey"
+      ],
+      "transcriptions": [
+        {
+          "ipa": "/ˈmʌn.i/",
+          "accents": [
+            "RP"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈmʌn.i/",
+          "accents": [
+            "GA"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈmʊn.i/",
+          "accents": [
+            "Northern England"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈmʌn.e/",
+          "accents": [
+            "Scotland"
+          ],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "business",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/business#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92284493,
+      "definition": "A specific commercial enterprise or establishment.",
+      "hyphenation": [
+        "busi",
+        "ness"
+      ],
+      "transcriptions": [
+        {
+          "ipa": "/ˈbɪz.nɪs/",
+          "accents": [],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈbɪz.nɪz/",
+          "accents": [],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈbɪz.nəs/",
+          "accents": [
+            "weak vowel"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈbɪz.nəz/",
+          "accents": [
+            "weak vowel"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈbɪz.nɪs/",
+          "accents": [
+            "Southern American English"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈbɪd.nɪs/",
+          "accents": [
+            "Southern American English"
+          ],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "school",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/school#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92432389,
+      "definition": "An institution dedicated to teaching and learning; an educational institution.",
+      "hyphenation": [],
+      "transcriptions": [
+        {
+          "ipa": "/skuːl/",
+          "accents": [
+            "RP"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/skul/",
+          "accents": [
+            "GA"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/skʉːl/",
+          "accents": [
+            "AU",
+            "NZ"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/skʉl/",
+          "accents": [
+            "Scotland",
+            "Northern Ireland",
+            "pull-pool"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/skɪʉːl/",
+          "accents": [
+            "Local Dublin"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/(ɪ)sk(h)uːl/",
+          "accents": [
+            "Indic"
+          ],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "student",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/student#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92419413,
+      "definition": "A person who studies or learns about a particular subject.",
+      "hyphenation": [
+        "stu",
+        "dent"
+      ],
+      "transcriptions": [
+        {
+          "ipa": "/ˈstjuː.dn̩t/",
+          "accents": [],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈst͡ʃuː.dn̩t/",
+          "accents": [
+            "yod-coalescence",
+            "RP"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈstu.dn̩t/",
+          "accents": [
+            "yod-dropping",
+            "US",
+            "CA"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈstɪʊ.dənt/",
+          "accents": [
+            "Wales",
+            "dialectal"
+          ],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "teacher",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/teacher#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 91427652,
+      "definition": "A person who teaches, especially one employed in a school; preceptor.",
+      "hyphenation": [
+        "tea",
+        "cher"
+      ],
+      "transcriptions": [
+        {
+          "ipa": "/ˈtiː.t͡ʃəː/",
+          "accents": [
+            "RP"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈti.t͡ʃɚ/",
+          "accents": [
+            "GA",
+            "[[w:Standard Canadian English"
+          ],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "question",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/question#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92341157,
+      "definition": "A worded or expressed sentence, phrase, or only a word on its own, which asks for information, a reply, or a response; an interrogative.",
+      "hyphenation": [
+        "ques",
+        "tion"
+      ],
+      "transcriptions": [
+        {
+          "ipa": "/ˈkwɛs.tʃən/",
+          "accents": [
+            "UK",
+            "US"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈkwɛs.tjən/",
+          "accents": [
+            "UK",
+            "US"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈkwɛʃ.tʃən/",
+          "accents": [
+            "UK",
+            "US"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈkwɛʃ.tən/",
+          "accents": [
+            "US also"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈkʋɛs.tʃən/",
+          "accents": [
+            "Indic"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈkʋɛʃ.tʃən/",
+          "accents": [
+            "Indic"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈkʋɛʃ.ən/",
+          "accents": [
+            "Indic"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈkʋɛs.ʈᵻn/",
+          "accents": [
+            "Indic"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈkʋɛʃ.ʈᵻn/",
+          "accents": [
+            "Indic"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈkwɛ.ʃən/",
+          "accents": [
+            "HK"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈkwɛʔ.ʃən/",
+          "accents": [
+            "HK"
+          ],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "answer",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/answer#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92492903,
+      "definition": "A response or reply; something said or done in reaction to a statement or question.",
+      "hyphenation": [
+        "an",
+        "swer"
+      ],
+      "transcriptions": [
+        {
+          "ipa": "/ˈɑːn.sə/",
+          "accents": [
+            "RP"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈæn.sə/",
+          "accents": [
+            "Northern England"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈæn.sɚ/",
+          "accents": [
+            "GA",
+            "CA",
+            "non-æ-tensing"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈæn.sə/",
+          "accents": [
+            "Boston",
+            "NYC",
+            "non-æ-tensing",
+            "non-rhotic"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈæn.sə/",
+          "accents": [
+            "AU"
+          ],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "language",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/language#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92479740,
+      "definition": "A body of words, and set of methods of combining them (called a grammar), understood by a community and used as a form of communication.",
+      "hyphenation": [
+        "lan",
+        "guage"
+      ],
+      "transcriptions": [
+        {
+          "ipa": "/ˈlæŋ.ɡwɪd͡ʒ/",
+          "accents": [
+            "RP",
+            "AU"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈlaŋ.ɡwɪd͡ʒ/",
+          "accents": [
+            "SSB",
+            "Northern England",
+            "Scotland",
+            "Wales"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈlæŋ.ɡwɪd͡ʒ/",
+          "accents": [
+            "US"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈleɪŋ-/",
+          "accents": [
+            "US"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈlæŋ.ɡwɪd͡ʒ/",
+          "accents": [
+            "NYC",
+            "New Orleans",
+            "Philadelphia",
+            "Baltimore"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈlæŋ.ɡwɪd͡ʒ/",
+          "accents": [
+            "Southern US"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈlæŋ.ɡwɪd͡ʒ/",
+          "accents": [
+            "Inland North"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈleɪŋ.ɡwɪd͡ʒ/",
+          "accents": [
+            "[[w:North-Central American English"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈleɪŋ.ɡwɪd͡ʒ/",
+          "accents": [
+            "Western US",
+            "Midland US",
+            "Western Pennsylvania",
+            "New England"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈlæŋ-/",
+          "accents": [
+            "Western US",
+            "Midland US",
+            "Western Pennsylvania",
+            "New England"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈlɛŋ.ɡwəd͡ʒ/",
+          "accents": [
+            "NZ"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈlæŋɡ.weːd͡ʒ/",
+          "accents": [
+            "India"
+          ],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "word",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/word#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92481404,
+      "definition": "The smallest unit of language that has a particular meaning and can be expressed by itself; the smallest discrete, meaningful unit of language.",
+      "hyphenation": [],
+      "transcriptions": [
+        {
+          "ipa": "/wɜːd/",
+          "accents": [
+            "RP"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/wɜɹd/",
+          "accents": [
+            "GA"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/wəɹd/",
+          "accents": [
+            "CA"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/wɛːd/",
+          "accents": [
+            "Humberside",
+            "Teesside",
+            "square-nurse"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/wøːd/",
+          "accents": [
+            "NZ"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/wʌrd/",
+          "accents": [
+            "Scotland"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/weːd/",
+          "accents": [
+            "Scouse",
+            "square-nurse"
+          ],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "letter",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/letter#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 91976712,
+      "definition": "A symbol in an alphabet.",
+      "hyphenation": [
+        "let",
+        "ter"
+      ],
+      "transcriptions": [
+        {
+          "ipa": "/ˈlɛtə/",
+          "accents": [
+            "RP"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈlɛtɚ/",
+          "accents": [
+            "GA"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈletə/",
+          "accents": [
+            "AusE"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈlɛʈ(ː)əʳ/",
+          "accents": [
+            "Indic"
+          ],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "number",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/number#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92352866,
+      "definition": "Quantity of countable things.",
+      "hyphenation": [
+        "num",
+        "ber"
+      ],
+      "transcriptions": [
+        {
+          "ipa": "/ˈnʌmbər/",
+          "accents": [],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈnʊmbə/",
+          "accents": [
+            "Northern England"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈnʌmə/",
+          "accents": [
+            "RP"
+          ],
+          "section": 1
+        },
+        {
+          "ipa": "/ˈnʌmɚ/",
+          "accents": [
+            "US"
+          ],
+          "section": 1
+        },
+        {
+          "ipa": "/ˈnʌmə/",
+          "accents": [
+            "RP"
+          ],
+          "section": 2
+        },
+        {
+          "ipa": "/ˈnʌmɚ/",
+          "accents": [
+            "US"
+          ],
+          "section": 2
+        }
+      ]
+    },
+    {
+      "headword": "picture",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/picture#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92027835,
+      "definition": "A representation of anything (as a person, a landscape, a building) upon canvas, paper, or other surface, by drawing, painting, printing, photography, etc.",
+      "hyphenation": [
+        "pic",
+        "ture"
+      ],
+      "transcriptions": [
+        {
+          "ipa": "/ˈpɪk.t͡ʃə/",
+          "accents": [
+            "RP",
+            "AU"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈpək.t͡ʃə/",
+          "accents": [
+            "NZ"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈpɪk.t͡ʃɚ/",
+          "accents": [
+            "GA",
+            "[[w:Standard Canadian English"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈpɪ.t͡ʃɚ/",
+          "accents": [
+            "regional",
+            "informal"
+          ],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "computer",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/computer#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92503916,
+      "definition": "A programmable electronic device that performs mathematical calculations and logical operations, especially one that can process, store and retrieve large amounts of data very quickly; now especially, a small one for personal or home use employed for manipulating text or graphics, accessing the Internet, or playing games or media.",
+      "hyphenation": [
+        "com",
+        "put",
+        "er"
+      ],
+      "transcriptions": [
+        {
+          "ipa": "/kəmˈpjuː.tə/",
+          "accents": [
+            "RP"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/kəmˈpjʉw.tə/",
+          "accents": [
+            "SSB"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/kəmˈpɪʊtə/",
+          "accents": [
+            "Wales"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/kəmˈpjʉː.tə/",
+          "accents": [
+            "AU",
+            "NZ"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/kəmˈpju.tɚ/",
+          "accents": [
+            "GA"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/kəmˈpjʉtər<!--tap or approx-->/",
+          "accents": [
+            "Scotland"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/kəmˈpjʉtəɹ/",
+          "accents": [
+            "Northern Ireland"
+          ],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "telephone",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/telephone#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92202712,
+      "definition": "A telecommunication device which converts data or sounds (usually speech) into electrical signals which are then transmitted to enable two or more people to communicate with each other over a distance; now usually a device having a dial or keypad with numerals for entering a number, etc., to connect with a person, and means (such as a sound or vibration) for alerting one to an incoming call or transmission; also, the handset or receiver of such a device.",
+      "hyphenation": [
+        "tel",
+        "e",
+        "phone"
+      ],
+      "transcriptions": [
+        {
+          "ipa": "/ˈtɛlɪfəʊn/",
+          "accents": [
+            "RP"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈtɛləˌfoʊn/",
+          "accents": [
+            "GA"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈtɛlɪfon/",
+          "accents": [
+            "Scotland"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈtɛlɪfoːn/",
+          "accents": [
+            "Wales",
+            "non-toe-tow"
+          ],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "address",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/address#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92334633,
+      "definition": "# Guidance; help.",
+      "hyphenation": [
+        "ad",
+        "dress"
+      ],
+      "transcriptions": [
+        {
+          "ipa": "/əˈdɹɛs/",
+          "accents": [
+            "noun"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈædɹɛs/",
+          "accents": [
+            "noun"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/əˈdɹɛs/",
+          "accents": [
+            "verb"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈædɹɛs/",
+          "accents": [
+            "verb"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/əˈdɹɛs/",
+          "accents": [
+            "noun"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈædɹɛs/",
+          "accents": [
+            "noun"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/əˈdɹɛs/",
+          "accents": [
+            "verb"
+          ],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "city",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/city#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92516982,
+      "definition": "A large settlement, bigger than a town; sometimes with a specific legal definition, depending on the place.",
+      "hyphenation": [
+        "cit",
+        "y"
+      ],
+      "transcriptions": [
+        {
+          "ipa": "/ˈsɪti/",
+          "accents": [],
+          "section": 0
+        },
+        {
+          "ipa": "/sɪtɪ/",
+          "accents": [
+            "Northern England",
+            "Conservative RP"
+          ],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "country",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/country#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92419271,
+      "definition": "The territory of a nation; a sovereign state or a region once independent and still distinct in institutions, language, etc.",
+      "hyphenation": [
+        "coun",
+        "try"
+      ],
+      "transcriptions": [
+        {
+          "ipa": "/ˈkʌntɹi/",
+          "accents": [
+            "RP",
+            "US",
+            "CA"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈkʌntɹɪj/",
+          "accents": [
+            "SSB"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈkʊntɹi/",
+          "accents": [
+            "Northern England",
+            "Midlands"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈkʌntɾe/",
+          "accents": [
+            "Scotland"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/-tɾɪ/",
+          "accents": [
+            "Scotland"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/-tɾi/",
+          "accents": [
+            "Scotland"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈkʌntɾi/",
+          "accents": [
+            "Wales"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈkɐntɹi/",
+          "accents": [
+            "AuE",
+            "NZ"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈkən.ʈri/",
+          "accents": [
+            "Indic"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈkaʊntɹi/",
+          "accents": [
+            "common for [[ESL]] speakers"
+          ],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "island",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/island#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92522188,
+      "definition": "A contiguous area of land, smaller than a continent, totally surrounded by water.",
+      "hyphenation": [
+        "is",
+        "land"
+      ],
+      "transcriptions": [
+        {
+          "ipa": "/ˈaɪ.lənd/",
+          "accents": [],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "mountain",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/mountain#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92519748,
+      "definition": "An elevation of land of considerable dimensions rising more or less abruptly, forming a conspicuous figure in the landscape, usually having a small extent of surface at its summit.",
+      "hyphenation": [
+        "moun",
+        "tain"
+      ],
+      "transcriptions": [
+        {
+          "ipa": "/ˈmaʊn.tɪn/",
+          "accents": [
+            "RP"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈmuːn.tɪn/",
+          "accents": [
+            "Northumbrian"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈmaʊn.t(ə)n/",
+          "accents": [
+            "GA",
+            "CA"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈmaʊn.tən/",
+          "accents": [
+            "IE"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈmæʊn.tən/",
+          "accents": [
+            "Dublin"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈmɛʊn.tən/",
+          "accents": [
+            "Dublin"
+          ],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "weather",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/weather#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92065817,
+      "definition": "The short-term state of the atmosphere at a specific time and place, including the temperature, relative humidity, cloud cover, precipitation, wind, etc.",
+      "hyphenation": [
+        "wea",
+        "ther"
+      ],
+      "transcriptions": [
+        {
+          "ipa": "/ˈwɛðə/",
+          "accents": [
+            "RP"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈwɛðɚ/",
+          "accents": [
+            "GA"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈweðə/",
+          "accents": [
+            "AU",
+            "NZ"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈwɛðəɾ/",
+          "accents": [
+            "Scotland"
+          ],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "morning",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/morning#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92352831,
+      "definition": "The early part of the day, especially from midnight to noon.",
+      "hyphenation": [
+        "morn",
+        "ing"
+      ],
+      "transcriptions": [
+        {
+          "ipa": "/ˈmɔːnɪŋ/",
+          "accents": [
+            "RP"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈmoːnɪŋ/",
+          "accents": [
+            "SSB",
+            "AU",
+            "NZ"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈmoɹnɪŋ/",
+          "accents": [
+            "GenAm"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈmɔːnɪŋɡ/",
+          "accents": [
+            "Northern England",
+            "Midlands",
+            "non-ng-coalescence!without NG-coalescence"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈmoɹnɪŋ/",
+          "accents": [
+            "IE"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈmɑːɹnən/",
+          "accents": [
+            "Dublin"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈmɑːɹnəŋ/",
+          "accents": [
+            "Dublin"
+          ],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "evening",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/evening#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92525029,
+      "definition": "The time of day between afternoon and night.",
+      "hyphenation": [],
+      "transcriptions": [
+        {
+          "ipa": "/ˈiːv.nɪŋ/",
+          "accents": [
+            "RP"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈiv.nɪŋ/",
+          "accents": [
+            "GA"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈiːvənɪŋ/",
+          "accents": [],
+          "section": 1
+        }
+      ]
+    },
+    {
+      "headword": "birthday",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/birthday#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92528755,
+      "definition": "The anniversary of the day on which someone is born.",
+      "hyphenation": [],
+      "transcriptions": [
+        {
+          "ipa": "/ˈbɜːθ.deɪ/",
+          "accents": [
+            "UK"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈbɜːθ.dei/",
+          "accents": [
+            "RP"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈbɝθˌdeɪ/",
+          "accents": [
+            "US",
+            "Canada"
+          ],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "holiday",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/holiday#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92352083,
+      "definition": "A day on which a religious event or secular celebration is traditionally observed.",
+      "hyphenation": [
+        "hol",
+        "i",
+        "day"
+      ],
+      "transcriptions": [
+        {
+          "ipa": "/ˈhɒlɪˌdeɪ/",
+          "accents": [
+            "RP"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈhɒlədi/",
+          "accents": [
+            "RP"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈhɒlɪdi/",
+          "accents": [
+            "RP"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈhɑləˌdeɪ/",
+          "accents": [
+            "GA"
+          ],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "restaurant",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/restaurant#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92526858,
+      "definition": "An eating establishment in which diners are served food, usually by waiters at their tables but sometimes (as in a fast food restaurant) at a counter.",
+      "hyphenation": [
+        "res",
+        "tau",
+        "rant"
+      ],
+      "transcriptions": [
+        {
+          "ipa": "/ˈɹɛs.t(ə.)ɹɒnt/",
+          "accents": [
+            "UK"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈɹɛs.t(ə.)ɹɒ̃/",
+          "accents": [
+            "UK"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈɹɛst.(ə.)ɹənt/",
+          "accents": [
+            "UK"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈɹɛs.t(ə)ˌɹɑnt/",
+          "accents": [
+            "US"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈɹɛs.t(ə.)ɹənt/",
+          "accents": [
+            "US"
+          ],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "hospital",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/hospital#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92391437,
+      "definition": "A large medical facility, usually in a building with multiple floors, where seriously ill or injured patients are given extensive medical or surgical treatment.",
+      "hyphenation": [
+        "hos",
+        "pit",
+        "al"
+      ],
+      "transcriptions": [
+        {
+          "ipa": "/ˈhɒs.pɪ.tl̩/",
+          "accents": [
+            "RP"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈɒs.pɪ.tl̩/",
+          "accents": [
+            "obsolete",
+            "RP"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈhɑs.pɪ.tl̩/",
+          "accents": [
+            "GenAm"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈhɑs.pɪ.ɾl̩/",
+          "accents": [
+            "GenAm"
+          ],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "library",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/library#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92364472,
+      "definition": "An institution which holds books and/or other forms of media for use by the public or qualified people often lending them out, as well as providing various other services for its users.",
+      "hyphenation": [],
+      "transcriptions": [
+        {
+          "ipa": "/ˈlaɪ.bɹi/",
+          "accents": [
+            "UK"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈlaɪ.bɹə.ɹi/",
+          "accents": [
+            "RP"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈlaɪˌbɹɛɹ.i/",
+          "accents": [
+            "GA"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈlaɪ.bɹəɹ.i/",
+          "accents": [
+            "GA"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈlaɪˌbɛɹ.i/",
+          "accents": [
+            "non-standard",
+            "often stigmatized",
+            "see below"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈlaɪ.bəɹi/",
+          "accents": [
+            "non-standard",
+            "often stigmatized",
+            "see below"
+          ],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "kitchen",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/kitchen#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92359635,
+      "definition": "A room or area for preparing food.",
+      "hyphenation": [
+        "kit",
+        "chen"
+      ],
+      "transcriptions": [
+        {
+          "ipa": "/ˈkɪt͡ʃ(ɪ)n/",
+          "accents": [
+            "RP"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈkɪt͡ʃ(ə)n/",
+          "accents": [
+            "GA"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈkit͡ʃin/",
+          "accents": [
+            "SG"
+          ],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "garden",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/garden#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92328225,
+      "definition": "An outdoor area containing one or more types of plants, usually plants grown for food or ornamental purposes.",
+      "hyphenation": [
+        "gar",
+        "den"
+      ],
+      "transcriptions": [
+        {
+          "ipa": "/ˈɡɑː.d(ə)n/",
+          "accents": [
+            "RP"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈɡɑɹ.d(ə)n/",
+          "accents": [
+            "GA",
+            "CA"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈɡäː.d(ə)n/",
+          "accents": [
+            "AU"
+          ],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "window",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/window#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92527544,
+      "definition": "An opening, usually covered by one or more panes of clear glass, to allow light and air from outside to enter a building or vehicle.",
+      "hyphenation": [
+        "win",
+        "dow"
+      ],
+      "transcriptions": [
+        {
+          "ipa": "/ˈwɪndəʊ/",
+          "accents": [
+            "RP"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈwɪndo/",
+          "accents": [
+            "Scotland"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈwɪndou/",
+          "accents": [
+            "Wales",
+            "non-toe-tow"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈwɪndə/",
+          "accents": [
+            "Northumbria"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈwɪndoʊ/",
+          "accents": [
+            "US"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈwɪndə/",
+          "accents": [
+            "colloquial",
+            "folk speech",
+            "nonstandard"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈwɪndəʉ/",
+          "accents": [
+            "AU"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈwəndɐʉ/",
+          "accents": [
+            "NZ"
+          ],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "bottle",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/bottle#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92442517,
+      "definition": "A container, typically made of glass or plastic and having a tapered neck, used primarily for holding liquids.",
+      "hyphenation": [
+        "bot",
+        "tle"
+      ],
+      "transcriptions": [
+        {
+          "ipa": "/ˈbɒtəl/",
+          "accents": [
+            "RP",
+            "Northern England",
+            "Wales"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈbɔtəl/",
+          "accents": [
+            "SSB",
+            "Scotland"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈbɑtəl/",
+          "accents": [
+            "GA",
+            "CA"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈbɑɾɫ̩/",
+          "accents": [
+            "GA",
+            "CA"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈbɔtəl/",
+          "accents": [
+            "AU"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈbɒtəl/",
+          "accents": [
+            "NZ"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈbɔʈɪl/",
+          "accents": [
+            "Indic"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/-əl/",
+          "accents": [
+            "Indic"
+          ],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "banana",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/banana#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92524480,
+      "definition": "The elongated curved tropical fruit of a banana plant, which grows in bunches and has a creamy flesh and a smooth skin.",
+      "hyphenation": [
+        "ba",
+        "na",
+        "na"
+      ],
+      "transcriptions": [
+        {
+          "ipa": "/bəˈnɑːnə/",
+          "accents": [
+            "RP",
+            "SSB",
+            "Northern England",
+            "Wales"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/bəˈnænə/",
+          "accents": [
+            "GA"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/bəˈnɐːnə/",
+          "accents": [
+            "AU",
+            "NZ"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/bəˈnanə/",
+          "accents": [
+            "Scotland"
+          ],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "orange",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/orange#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92483925,
+      "definition": "An evergreen tree of the genus Citrus such as which yields oranges (the fruit).",
+      "hyphenation": [
+        "or",
+        "ange"
+      ],
+      "transcriptions": [
+        {
+          "ipa": "/ˈɒɹɪnd͡ʒ/",
+          "accents": [
+            "RP"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈ-ənd͡ʒ/",
+          "accents": [
+            "RP"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/-ɪnʒ/",
+          "accents": [
+            "RP"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/-ənʒ/",
+          "accents": [
+            "RP"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈɔɹɪnd͡ʒ/",
+          "accents": [
+            "SSB"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈ-ənd͡ʒ/",
+          "accents": [
+            "SSB"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/-ɪnʒ/",
+          "accents": [
+            "SSB"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/-ənʒ/",
+          "accents": [
+            "SSB"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈoɹənd͡ʒ/",
+          "accents": [
+            "GA",
+            "CA"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/oɹnd͡ʒ/",
+          "accents": [
+            "GA",
+            "CA"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈɑɹənd͡ʒ/",
+          "accents": [
+            "US",
+            "East Coast"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/-əŋʒ/",
+          "accents": [
+            "US",
+            "East Coast"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈɔɹɪnd͡ʒ/",
+          "accents": [
+            "AU"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈɒɹənd͡ʒ/",
+          "accents": [
+            "NZ"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈɔɾɪnd͡ʒ/",
+          "accents": [
+            "Scotland"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈɒɾɪnd͡ʒ/",
+          "accents": [
+            "Wales"
+          ],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "vegetable",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/vegetable#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92066162,
+      "definition": "Any plant.",
+      "hyphenation": [],
+      "transcriptions": [
+        {
+          "ipa": "/ˈvɛd͡ʒ.tə.bəl/",
+          "accents": [
+            "RP",
+            "GA",
+            "CA"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈvɛd͡ʒ.ə.tə.bəl/",
+          "accents": [
+            "UK",
+            "dialectal"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈvɛt͡ʃ.tə.bəl/",
+          "accents": [
+            "US",
+            "CA",
+            "dialectal"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈved͡ʒ.tə.bəl/",
+          "accents": [
+            "AU",
+            "NZ"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˌvɛdʒɪˈʈebəl/",
+          "accents": [
+            "North India"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈvɛdʒɪʈəbɪl/",
+          "accents": [
+            "South India"
+          ],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "chocolate",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/chocolate#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92493784,
+      "definition": "A food made from ground roasted cocoa beans.",
+      "hyphenation": [
+        "choc",
+        "o",
+        "late"
+      ],
+      "transcriptions": [
+        {
+          "ipa": "/ˈtʃɒk.(ə.)lət/",
+          "accents": [
+            "RP"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈtʃɔk.(ə.)lɪt/",
+          "accents": [
+            "GA"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈtʃɒk.lət/",
+          "accents": [
+            "Canada"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈtʃɔːk.le(ː)ʈ/",
+          "accents": [
+            "India"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈtʃɑk.(ə.)lɪt/",
+          "accents": [
+            "Ireland"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈtʃɔk.(ə.)lɪt/",
+          "accents": [
+            "Ireland"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈtʃo.ko.leɪt/",
+          "accents": [
+            "Philippine"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈtʃɔk.(ə.)lət/",
+          "accents": [],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "breakfast",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/breakfast#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92309763,
+      "definition": "The first meal of the day, usually eaten in the morning.",
+      "hyphenation": [],
+      "transcriptions": [
+        {
+          "ipa": "/ˈbɹɛk.fəst/",
+          "accents": [],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈbɹeɪkˌfæst/",
+          "accents": [
+            "GA"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈbreɪkˌfɑːst/",
+          "accents": [
+            "RP"
+          ],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "dinner",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/dinner#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92368144,
+      "definition": "The main meal of the day, often eaten in the evening.",
+      "hyphenation": [
+        "din",
+        "ner"
+      ],
+      "transcriptions": [
+        {
+          "ipa": "/ˈdɪnə/",
+          "accents": [
+            "RP"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈdɪnɚ/",
+          "accents": [
+            "US"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈdɪnːa/",
+          "accents": [
+            "Caribbean"
+          ],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "coffee",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/coffee#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92496464,
+      "definition": "A beverage made by infusing the beans of the coffee plant in hot water.",
+      "hyphenation": [
+        "cof",
+        "fee"
+      ],
+      "transcriptions": [
+        {
+          "ipa": "/ˈkɒfi/",
+          "accents": [
+            "RP"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈkɔfɪj/",
+          "accents": [
+            "SSB"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈkɔfi/",
+          "accents": [
+            "non-cot-caught"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈkɑfi/",
+          "accents": [
+            "cot-caught"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈkɒfi/",
+          "accents": [
+            "Canada"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈkɔfi/",
+          "accents": [
+            "AU"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈkɒfi/",
+          "accents": [
+            "NZ"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈkɔfe/",
+          "accents": [
+            "Scotland"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/-fɪ/",
+          "accents": [
+            "Scotland"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/-fi/",
+          "accents": [
+            "Scotland"
+          ],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "sugar",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/sugar#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92199705,
+      "definition": "A food consisting of small, sweet crystals, principally of sucrose, obtained from sugar cane or sugar beet and used as sweetener and preservative.",
+      "hyphenation": [],
+      "transcriptions": [
+        {
+          "ipa": "/ˈʃʊɡə/",
+          "accents": [
+            "RP",
+            "AU"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈʃɵɡə/",
+          "accents": [
+            "SSB"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈʃʊɡɚ/",
+          "accents": [
+            "GA",
+            "CA"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈʃʉɡəɾ/",
+          "accents": [
+            "Scotland"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈʃʉɡəɻ/",
+          "accents": [
+            "NI"
+          ],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "butter",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/butter#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92479811,
+      "definition": "A soft, fatty foodstuff made by churning the cream of milk (generally cow's milk).",
+      "hyphenation": [
+        "but",
+        "ter"
+      ],
+      "transcriptions": [
+        {
+          "ipa": "/ˈbʌtəɹ/",
+          "accents": [],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈbʌtə/",
+          "accents": [
+            "RP"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈbʌtɚ/",
+          "accents": [
+            "GA"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈbatə/",
+          "accents": [
+            "NZ"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈbʌtəɾ/",
+          "accents": [
+            "Scotland"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈbʊtə/",
+          "accents": [
+            "Northern England",
+            "Midlands"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈbʊhɐ/",
+          "accents": [
+            "[[w:Dublin English#Local Dublin English"
+          ],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "knife",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/knife#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92513145,
+      "definition": "A utensil or a tool designed for cutting, consisting of a flat piece of hard material, usually steel or other metal (the blade), usually sharpened on one edge, attached to a handle. The blade may be pointed for piercing.",
+      "hyphenation": [
+        "knife"
+      ],
+      "transcriptions": [
+        {
+          "ipa": "/ˈnaɪ̯f/",
+          "accents": [
+            "RP",
+            "GA"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈnɐɪ̯f/",
+          "accents": [
+            "CA",
+            "Canadian raising"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈnɜɪ̯f/",
+          "accents": [
+            "CA",
+            "Canadian raising"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈnʌɪ̯f/",
+          "accents": [
+            "CA",
+            "Canadian raising"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈnəɪ̯f/",
+          "accents": [
+            "CA",
+            "Canadian raising"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈnɑɪ̯f/",
+          "accents": [
+            "AU",
+            "NZ"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈnɒ̈ɪ̯f/",
+          "accents": [
+            "AU",
+            "NZ"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈnaːf/",
+          "accents": [
+            "[[w:Southern accent (United States)"
+          ],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "clothes",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/clothes#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 91650409,
+      "definition": "Items of clothing; apparel.",
+      "hyphenation": [],
+      "transcriptions": [
+        {
+          "ipa": "/kləʊ(ð)z/",
+          "accents": [
+            "RP"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/kloʊ(ð)z/",
+          "accents": [
+            "US"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/klo(ð)z/",
+          "accents": [
+            "Scotland"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/kloː(ð)z/",
+          "accents": [
+            "Wales",
+            "non-toe-tow"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/kləʊðz/",
+          "accents": [
+            "UK"
+          ],
+          "section": 1
+        },
+        {
+          "ipa": "/kloʊðz/",
+          "accents": [
+            "US"
+          ],
+          "section": 1
+        }
+      ]
+    },
+    {
+      "headword": "shoes",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/shoes#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 85559891,
+      "definition": "Plural of shoe.",
+      "hyphenation": [],
+      "transcriptions": []
+    },
+    {
+      "headword": "pocket",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/pocket#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92093073,
+      "definition": "A bag stitched to an item of clothing, used for carrying small items.",
+      "hyphenation": [
+        "pock",
+        "et"
+      ],
+      "transcriptions": [
+        {
+          "ipa": "/ˈpɒk.ɪt/",
+          "accents": [
+            "RP"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈpɑ.kɪt/",
+          "accents": [
+            "GA",
+            "dialects of Canada"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈpɑ.kət/",
+          "accents": [
+            "weak vowel"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈpɒk.ɪt/",
+          "accents": [
+            "CA",
+            "dialects of the US"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈpɔk.ɪt/",
+          "accents": [
+            "AU",
+            "SSB"
+          ],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "camera",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/camera#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92412400,
+      "definition": "A device for taking still or moving pictures or photographs.",
+      "hyphenation": [
+        "cam",
+        "er",
+        "a"
+      ],
+      "transcriptions": [
+        {
+          "ipa": "/ˈkæməɹə/",
+          "accents": [
+            "RP",
+            "AU"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈkæmɹə/",
+          "accents": [
+            "RP",
+            "AU"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈkaməɹə/",
+          "accents": [
+            "SSB",
+            "Northern England"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈkamɹə/",
+          "accents": [
+            "SSB",
+            "Northern England"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈkaməɾə/",
+          "accents": [
+            "Scotland",
+            "Wales"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈkamɾə/",
+          "accents": [
+            "Scotland",
+            "Wales"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈkæməɹə/",
+          "accents": [
+            "GA",
+            "CA"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈkæmɚ.ə/",
+          "accents": [
+            "GA",
+            "CA"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈkæmɹə/",
+          "accents": [
+            "GA",
+            "CA"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈkɛməɹə/",
+          "accents": [
+            "NZ"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈkɛmɹə/",
+          "accents": [
+            "NZ"
+          ],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "music",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/music#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92498704,
+      "definition": "A series of sounds organized in time, usually employing some combination of harmony, melody, rhythm, tempo, timbre, sound design, lyrics, etc., often to convey a mood.",
+      "hyphenation": [
+        "mus",
+        "ic"
+      ],
+      "transcriptions": [
+        {
+          "ipa": "/ˈmjuːzɪk/",
+          "accents": [
+            "RP"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈmjʉwzɪk/",
+          "accents": [
+            "SSB"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈmju.zɪk/",
+          "accents": [
+            "GA"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈmjʉːzɪk/",
+          "accents": [
+            "AU"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈmjʉːzək/",
+          "accents": [
+            "NZ"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈmjʉ.zɪk/",
+          "accents": [
+            "Scotland",
+            "NI"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈmɪʊ.zɪk/",
+          "accents": [
+            "Wales"
+          ],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "movie",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/movie#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92417031,
+      "definition": "A recorded sequence of images displayed on a screen at a rate sufficiently fast to create the appearance of motion; a film; a video.",
+      "hyphenation": [],
+      "transcriptions": [
+        {
+          "ipa": "/ˈmuːvi/",
+          "accents": [],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "color",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/color#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92517798,
+      "definition": "The spectral composition of visible light.",
+      "hyphenation": [
+        "col",
+        "or"
+      ],
+      "transcriptions": [
+        {
+          "ipa": "/ˈkʌl.ə/",
+          "accents": [
+            "UK",
+            "etc"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈkʌl.ə(ɹ)/",
+          "accents": [
+            "RP"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈkʌl.ɚ/",
+          "accents": [
+            "GA"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈkʊl.ə(ɹ)/",
+          "accents": [
+            "Northern England",
+            "Ireland"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈkʊl.ɚ/",
+          "accents": [
+            "Dublin"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈkʊlɐ/",
+          "accents": [
+            "Dublin"
+          ],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "animal",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/animal#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92504500,
+      "definition": "A multicellular organism of the kingdom that is usually mobile, with cells that are not encased in a rigid cell wall (distinguishing them from plants and fungi) and derives energy solely from the consumption of other organisms.",
+      "hyphenation": [
+        "an",
+        "i",
+        "mal"
+      ],
+      "transcriptions": [
+        {
+          "ipa": "/ˈænɪməl/",
+          "accents": [
+            "RP"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈanɪməl/",
+          "accents": [
+            "SSB",
+            "Northern England",
+            "Scotland",
+            "Wales"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈænəməl/",
+          "accents": [
+            "GA",
+            "CA"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈænɪməl/",
+          "accents": [
+            "GA",
+            "CA"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈænəməl/",
+          "accents": [
+            "AU",
+            "ZA"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈɛnəməl/",
+          "accents": [
+            "NZ"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈæːnɪməl/",
+          "accents": [
+            "India"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈənɪməl/",
+          "accents": [
+            "India"
+          ],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "elephant",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/elephant#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 91949584,
+      "definition": "A large mammal of the family in the order, having a trunk, and native to Africa and Asia.",
+      "hyphenation": [
+        "ele",
+        "phant"
+      ],
+      "transcriptions": [
+        {
+          "ipa": "/ˈɛlɪfənt/",
+          "accents": [
+            "RP"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈɛləfənt/",
+          "accents": [
+            "GA",
+            "CA"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈeləfənt/",
+          "accents": [
+            "AU",
+            "NZ"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/elefant/",
+          "accents": [
+            "Philippines"
+          ],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "butterfly",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/butterfly#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92513510,
+      "definition": "A flying insect of the order, distinguished from moths by their diurnal activity and generally brighter colouring.",
+      "hyphenation": [],
+      "transcriptions": [
+        {
+          "ipa": "/ˈbʌ.tə(ɹ).flaɪ/",
+          "accents": [],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "daughter",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/daughter#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92399145,
+      "definition": "One’s female offspring.",
+      "hyphenation": [
+        "daugh",
+        "ter"
+      ],
+      "transcriptions": [
+        {
+          "ipa": "/ˈdɔːtə/",
+          "accents": [
+            "RP"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈdoːtə/",
+          "accents": [
+            "SSB",
+            "AU",
+            "NZ"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈdɔ.tɚ/",
+          "accents": [
+            "GA",
+            "non-cot-caught"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈdɔ.t̬ɚ/",
+          "accents": [
+            "GA",
+            "non-cot-caught"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈdɑ.tɚ/",
+          "accents": [
+            "GA",
+            "cot-caught"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈdɔtəɾ/",
+          "accents": [
+            "Scotland"
+          ],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "brother",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/brother#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92528441,
+      "definition": "Son of the same parents as another person.",
+      "hyphenation": [],
+      "transcriptions": [
+        {
+          "ipa": "/ˈbɹʌðə/",
+          "accents": [
+            "RP"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈbɹʌðɚ/",
+          "accents": [
+            "GA",
+            "CA"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈbɹɐðə/",
+          "accents": [
+            "AU",
+            "NZ"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈbɹʊðə/",
+          "accents": [
+            "Northern England"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/bɹʊˈðɜː/",
+          "accents": [
+            "Bradford South Asian"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈbɹʊðəɹ/",
+          "accents": [
+            "Ireland"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈbɹʊdəɹ/",
+          "accents": [
+            "Dublin"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈbɹʊdɐ/",
+          "accents": [
+            "Dublin"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈbɹʌðəɹ/",
+          "accents": [
+            "Scotland",
+            "Northern Ireland"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈbɹʌvə(ɹ)/",
+          "accents": [
+            "th-fronting"
+          ],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "neighbor",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/neighbor#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 89925816,
+      "definition": "Standard American spelling of neighbour.",
+      "hyphenation": [
+        "neigh",
+        "bor"
+      ],
+      "transcriptions": [
+        {
+          "ipa": "/ˈneɪ.bɚ/",
+          "accents": [
+            "US"
+          ],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "doctor",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/doctor#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92116914,
+      "definition": "A physician; a member of the medical profession; one who is trained and licensed to heal the sick or injured. The final examination and qualification may award a doctor degree in which case the post-nominal letters are DO, DPM, MD, DMD, or DDS in the US, or MBBS or BDS in the UK.",
+      "hyphenation": [
+        "doc",
+        "tor"
+      ],
+      "transcriptions": [
+        {
+          "ipa": "/ˈdɒktə(ɹ)/",
+          "accents": [
+            "RP"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈdɑktɚ/",
+          "accents": [
+            "GA"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈdɔktə/",
+          "accents": [
+            "AU",
+            "NZ"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈdɒktə/",
+          "accents": [
+            "AU",
+            "NZ"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈdɒktəɹ/",
+          "accents": [
+            "CA"
+          ],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "engineer",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/engineer#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92523311,
+      "definition": "# A soldier engaged in designing or constructing military works for attack or defence, or other engineering works.",
+      "hyphenation": [
+        "en",
+        "gin",
+        "eer"
+      ],
+      "transcriptions": [
+        {
+          "ipa": "/ˌɛn(d)ʒɪˈnɪə/",
+          "accents": [
+            "RP"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˌɛnd͡ʒɪˈnɪ(ə)ɹ/",
+          "accents": [
+            "GA"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈɪn.dʒɪ.ˈniː.jər/",
+          "accents": [
+            "India"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ɪnˈdʒiː.nɪ.jər/",
+          "accents": [
+            "India"
+          ],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "ask",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/ask#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92367220,
+      "definition": "To request or petition.",
+      "hyphenation": [],
+      "transcriptions": [
+        {
+          "ipa": "/ɑːsk/",
+          "accents": [
+            "RP"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ask/",
+          "accents": [
+            "Northern England",
+            "Scotland"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ɑːks/",
+          "accents": [
+            "also",
+            "MLE"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/æsk/",
+          "accents": [
+            "GA",
+            "CA"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/æks/",
+          "accents": [
+            "AAVE",
+            "Cajun",
+            "Nigeria",
+            "nonstandard"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈas(k̚), ˈɛs/",
+          "accents": [
+            "Singapore",
+            "Hong Kong"
+          ],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "begin",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/begin#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 91645900,
+      "definition": "To start, to initiate or take the first step into something.",
+      "hyphenation": [],
+      "transcriptions": [
+        {
+          "ipa": "/bɪˈɡɪn/",
+          "accents": [],
+          "section": 0
+        },
+        {
+          "ipa": "/bəˈɡɪn/",
+          "accents": [],
+          "section": 0
+        },
+        {
+          "ipa": "/biˈɡɪn/",
+          "accents": [],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "believe",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/believe#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92317082,
+      "definition": "To accept as true, particularly without absolute certainty (i.e., as opposed to knowing).",
+      "hyphenation": [
+        "be",
+        "lieve"
+      ],
+      "transcriptions": [
+        {
+          "ipa": "/bɪˈliːv/",
+          "accents": [
+            "RP"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/bɪˈliv/",
+          "accents": [
+            "GA"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/bi-/",
+          "accents": [
+            "GA"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/bə-/",
+          "accents": [
+            "GA"
+          ],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "bring",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/bring#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92495051,
+      "definition": "To transport toward somebody/somewhere.",
+      "hyphenation": [],
+      "transcriptions": [
+        {
+          "ipa": "/ˈbɹɪŋ/",
+          "accents": [],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈbɹɪŋɡ/",
+          "accents": [
+            "Northern England",
+            "Midlands",
+            "non-ng-coalescence"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ʙɹɪŋ/",
+          "accents": [],
+          "section": 1
+        }
+      ]
+    },
+    {
+      "headword": "buy",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/buy#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92521507,
+      "definition": "To obtain (something) in exchange for money or goods.",
+      "hyphenation": [],
+      "transcriptions": [
+        {
+          "ipa": "/baɪ/",
+          "accents": [],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "choose",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/choose#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92448304,
+      "definition": "To pick; to make the choice of; to select.",
+      "hyphenation": [],
+      "transcriptions": [
+        {
+          "ipa": "/t͡ʃuːz/",
+          "accents": [
+            "RP"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/t͡ʃuz/",
+          "accents": [
+            "GA",
+            "CA"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ʃʉːz/",
+          "accents": [
+            "AU",
+            "NZ"
+          ],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "develop",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/develop#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92530058,
+      "definition": "To discover, find out; to uncover.",
+      "hyphenation": [
+        "de",
+        "ve",
+        "lop"
+      ],
+      "transcriptions": [
+        {
+          "ipa": "/dɪˈvɛl.əp/",
+          "accents": [
+            "RP",
+            "GA"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈɖeʋᵊ.ləp/",
+          "accents": [
+            "India"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ɖɪˈʋɛː.ləp/",
+          "accents": [
+            "India"
+          ],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "enough",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/enough#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92524218,
+      "definition": "Sufficient; all that is required, needed, or appropriate.",
+      "hyphenation": [],
+      "transcriptions": [
+        {
+          "ipa": "/ɪˈnʌf/",
+          "accents": [
+            "RP"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ɪˈnʌf/",
+          "accents": [
+            "GA"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/i-/",
+          "accents": [
+            "GA"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ə-/",
+          "accents": [
+            "GA"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/əˈnɐf/",
+          "accents": [
+            "AU"
+          ],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "explain",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/explain#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92414370,
+      "definition": "To make plain, manifest, or intelligible; to clear of obscurity; to illustrate the meaning of.",
+      "hyphenation": [],
+      "transcriptions": [
+        {
+          "ipa": "/ɪkˈspleɪn/",
+          "accents": [],
+          "section": 0
+        },
+        {
+          "ipa": "/ɛkˈspleɪn/",
+          "accents": [],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "finish",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/finish#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92052803,
+      "definition": "An end; the end of anything.",
+      "hyphenation": [],
+      "transcriptions": [
+        {
+          "ipa": "/ˈfɪnɪʃ/",
+          "accents": [],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "follow",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/follow#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92327258,
+      "definition": "To go after; to pursue; to move behind in the same path or direction, especially with the intent of catching.",
+      "hyphenation": [
+        "fol",
+        "low"
+      ],
+      "transcriptions": [
+        {
+          "ipa": "/ˈfɒləʊ/",
+          "accents": [
+            "RP"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈfɒlə/",
+          "accents": [
+            "Northumbria"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈfɔlo/",
+          "accents": [
+            "Scotland"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈfɑloʊ/",
+          "accents": [
+            "GenAm",
+            "dialects of Canada"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈfɑlə/",
+          "accents": [
+            "colloquial",
+            "folk speech",
+            "nonstandard"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈfɒloʊ/",
+          "accents": [
+            "CA",
+            "dialects of the US"
+          ],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "imagine",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/imagine#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92425420,
+      "definition": "To form a mental image of something; to envision or create something in one's mind.",
+      "hyphenation": [
+        "i",
+        "ma",
+        "gine"
+      ],
+      "transcriptions": [
+        {
+          "ipa": "/ɪˈmæd͡ʒ.ɪn/",
+          "accents": [
+            "non-weak vowel"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/əˈmæd͡ʒ.ɪn/",
+          "accents": [
+            "weak vowel"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ɘˈmɛd͡ʒ.ɘn/",
+          "accents": [
+            "NZ"
+          ],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "listen",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/listen#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 91969262,
+      "definition": "To use one's sense of hearing and auditory cognition in an intentional way; to make deliberate use of one's ears; to pay attention to or wait for a specific sound.",
+      "hyphenation": [
+        "lis",
+        "ten"
+      ],
+      "transcriptions": [
+        {
+          "ipa": "/ˈlɪsən/",
+          "accents": [],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "measure",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/measure#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92520148,
+      "definition": "A prescribed quantity or extent.",
+      "hyphenation": [
+        "meas",
+        "ure"
+      ],
+      "transcriptions": [
+        {
+          "ipa": "/ˈmɛʒ.ə/",
+          "accents": [
+            "RP"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈmɛʒ.ɚ/",
+          "accents": [
+            "GA",
+            "CA"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈmeɪ.ʒɚ/",
+          "accents": [
+            "US",
+            "dialectal"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈmɪ.ʒɚ/",
+          "accents": [
+            "US",
+            "dialectal"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈmeʒ.ə/",
+          "accents": [
+            "AU"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈmeʒ.ə/",
+          "accents": [
+            "NZ"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈmeɪ.ʒə/",
+          "accents": [
+            "NZ"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈmɛʃ.ɚ/",
+          "accents": [
+            "Philippines"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈmɛʃ.ʊɹ/",
+          "accents": [
+            "Philippines"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈmɛʒ.ə(ɾ)/",
+          "accents": [
+            "Pakistan",
+            "North India"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈmə(j).jəɾ/",
+          "accents": [
+            "{{w"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈme.jəɾ/",
+          "accents": [
+            "{{w"
+          ],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "promise",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/promise#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92424813,
+      "definition": "An oath or affirmation; a vow.",
+      "hyphenation": [
+        "prom",
+        "ise"
+      ],
+      "transcriptions": [
+        {
+          "ipa": "/ˈpɹɒmɪs/",
+          "accents": [
+            "RP"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈpɹɑmɪs/",
+          "accents": [
+            "GA",
+            "Atlantic Canada"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈpɹɒmɪs/",
+          "accents": [
+            "CA",
+            "dialects of the US"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈpɹɔmɪs/",
+          "accents": [
+            "AU"
+          ],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "remember",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/remember#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 91987577,
+      "definition": "To recall from one's memory; to have an image in one's memory.",
+      "hyphenation": [
+        "re",
+        "mem",
+        "ber"
+      ],
+      "transcriptions": [
+        {
+          "ipa": "/ɹɪˈmɛm.bə/",
+          "accents": [
+            "RP"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ɹɪˈmɛm.bɚ/",
+          "accents": [
+            "GenAm",
+            "CA"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ɹəˈmɛm.bɚ/",
+          "accents": [
+            "GenAm",
+            "CA"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈmɛm.bɚ/",
+          "accents": [
+            "GenAm",
+            "uncommon or dialectal",
+            "in rapid speech"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈɹɪm.bɚ/",
+          "accents": [
+            "GenAm",
+            "uncommon or dialectal",
+            "in rapid speech"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈɹɛm.bɚ/",
+          "accents": [
+            "GenAm",
+            "uncommon or dialectal",
+            "in rapid speech"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ɹɪˈmɪm.bɚ/",
+          "accents": [
+            "US",
+            "pin-pen"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ɹəˈmɪm.bɚ/",
+          "accents": [
+            "US",
+            "pin-pen"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ɹɪˈmem.bə/",
+          "accents": [
+            "AU"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ɹəˈmem.bə/",
+          "accents": [
+            "NZ"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ɹəˈmɛmbɐ/",
+          "accents": [
+            "Dublin"
+          ],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "suggest",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/suggest#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 91152823,
+      "definition": "To imply but stop short of explicitly stating (something).",
+      "hyphenation": [],
+      "transcriptions": [
+        {
+          "ipa": "/səˈd͡ʒɛst/",
+          "accents": [
+            "RP"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/sə(ɡ)ˈd͡ʒɛst/",
+          "accents": [
+            "GenAm"
+          ],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "thought",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/thought#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92366426,
+      "definition": "A representation created in the mind without the use of one's faculties of vision, sound, smell, touch, or taste; an instance of thinking.",
+      "hyphenation": [],
+      "transcriptions": [
+        {
+          "ipa": "/θɔt/",
+          "accents": [
+            "non-cot-caught"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/θɑt/",
+          "accents": [
+            "cot-caught"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/θɔːt/",
+          "accents": [
+            "RP"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/θoːt/",
+          "accents": [
+            "SSB",
+            "Australia",
+            "New Zealand"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/θɔt/",
+          "accents": [
+            "Scotland"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/θaʊt/",
+          "accents": [
+            "Northumbria"
+          ],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "through",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/through#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92059066,
+      "definition": "From one side or end of (something) to the other.",
+      "hyphenation": [
+        "through"
+      ],
+      "transcriptions": [
+        {
+          "ipa": "/θɹuː/",
+          "accents": [
+            "RP"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/θɹʉw/",
+          "accents": [
+            "SSB"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/θɹu/",
+          "accents": [
+            "GA",
+            "CA"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/θɹʉː/",
+          "accents": [
+            "AU",
+            "NZ"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/θɾʉ/",
+          "accents": [
+            "Scotland"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/θɻʉ/",
+          "accents": [
+            "NI"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/θɾuː/",
+          "accents": [
+            "Wales"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/θɹʌf/",
+          "accents": [],
+          "section": 1
+        },
+        {
+          "ipa": "/θɹuː/",
+          "accents": [],
+          "section": 1
+        }
+      ]
+    },
+    {
+      "headword": "travel",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/travel#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92060148,
+      "definition": "To be on a journey, often for pleasure or business and with luggage; to go from one place to another.",
+      "hyphenation": [],
+      "transcriptions": [
+        {
+          "ipa": "/ˈtɹævəl/",
+          "accents": [],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "understand",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/understand#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92513005,
+      "definition": "To know the meaning of; to parse or have parsed correctly; to comprehend.",
+      "hyphenation": [
+        "un",
+        "der",
+        "stand"
+      ],
+      "transcriptions": [
+        {
+          "ipa": "/ˌʌndəˈstænd/",
+          "accents": [
+            "RP"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˌʌndəˈstand/",
+          "accents": [
+            "SSB"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˌʊndəˈstand/",
+          "accents": [
+            "Northern England"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˌəndəˈstand/",
+          "accents": [
+            "Wales"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˌʌndəɾˈstand/",
+          "accents": [
+            "Scotland"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˌʌndɚˈstænd/",
+          "accents": [
+            "US",
+            "CA"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˌʊndəɹˈstand/",
+          "accents": [
+            "Ireland",
+            "non-foot-strut split"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˌɐndəˈstæːnd/",
+          "accents": [
+            "AU"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˌɐndəˈstɛnd/",
+          "accents": [
+            "NZ"
+          ],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "visit",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/visit#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92392193,
+      "definition": "To habitually go to (someone in distress, sickness etc.) to comfort them. (Now generally merged into later senses, below.)",
+      "hyphenation": [
+        "vis",
+        "it"
+      ],
+      "transcriptions": [
+        {
+          "ipa": "/ˈvɪzɪt/",
+          "accents": [],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "walk",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/walk#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92427965,
+      "definition": "To move on the feet by alternately setting each foot (or pair or group of feet, in the case of animals with four or more feet) forward, with at least one foot on the ground at all times. Compare run.",
+      "hyphenation": [],
+      "transcriptions": [
+        {
+          "ipa": "/wɔːk/",
+          "accents": [
+            "RP"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/woːk/",
+          "accents": [
+            "SSBE"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/waːk/",
+          "accents": [
+            "Northumbria"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/wɔk/",
+          "accents": [
+            "Scotland"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/wɔk/",
+          "accents": [
+            "non-cot-caught"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/wɑk/",
+          "accents": [
+            "cot-caught"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/woːk/",
+          "accents": [
+            "AU",
+            "NZ"
+          ],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "watch",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/watch#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92187617,
+      "definition": "A portable or wearable timepiece.",
+      "hyphenation": [],
+      "transcriptions": [
+        {
+          "ipa": "/ˈwɒt͡ʃ/",
+          "accents": [
+            "RP"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈwɔt͡ʃ/",
+          "accents": [
+            "SSB",
+            "Scotland",
+            "Aus"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈwɑt͡ʃ/",
+          "accents": [
+            "non-cot-caught"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈwɔt͡ʃ/",
+          "accents": [
+            "non-cot-caught"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈwɑt͡ʃ/",
+          "accents": [
+            "cot-caught"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈwɒt͡ʃ/",
+          "accents": [
+            "CA"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈwɒt͡ʃ/",
+          "accents": [
+            "NZ"
+          ],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "work",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/work#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92481462,
+      "definition": "# Labour, occupation, job.",
+      "hyphenation": [
+        "work"
+      ],
+      "transcriptions": [
+        {
+          "ipa": "/wɜː(ɹ)k/",
+          "accents": [],
+          "section": 0
+        },
+        {
+          "ipa": "/wɜːk/",
+          "accents": [
+            "RP"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/wʌɾk/",
+          "accents": [
+            "Scotland"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/wɚːk/",
+          "accents": [
+            "IE"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/wɝk/",
+          "accents": [
+            "GenAm"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/wɜɪ̯k/",
+          "accents": [
+            "NYC",
+            "Southern US",
+            "dated"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/wɵːk/",
+          "accents": [
+            "AU"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/wøːk/",
+          "accents": [
+            "NZ"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ʋərk/",
+          "accents": [
+            "Indic",
+            "rhotic"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ʋɜk/",
+          "accents": [
+            "Indic",
+            "non-rhotic"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/wɔɹk/",
+          "accents": [
+            "NNSE"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/work/",
+          "accents": [
+            "NNSE"
+          ],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "write",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/write#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92490840,
+      "definition": "To form letters, words or symbols on a surface in order to communicate.",
+      "hyphenation": [],
+      "transcriptions": [
+        {
+          "ipa": "/ɹaɪt/",
+          "accents": [],
+          "section": 0
+        },
+        {
+          "ipa": "/ɹəɪt/",
+          "accents": [
+            "US"
+          ],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "beautiful",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/beautiful#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92436918,
+      "definition": "Possessing beauty, impressing the eye; attractive.",
+      "hyphenation": [
+        "beau",
+        "ti",
+        "ful"
+      ],
+      "transcriptions": [
+        {
+          "ipa": "/ˈbjuːtɪ.fəl/",
+          "accents": [
+            "UK"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈbjuːtɪ.fʊl/",
+          "accents": [
+            "UK"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈbju.tɪ.fəl/",
+          "accents": [
+            "US"
+          ],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "busy",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/busy#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92318713,
+      "definition": "Crowded with business or activities; having a great deal going on.",
+      "hyphenation": [
+        "bus",
+        "y"
+      ],
+      "transcriptions": [
+        {
+          "ipa": "/ˈbɪz.i/",
+          "accents": [],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "careful",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/careful#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 91946052,
+      "definition": "Taking care; attentive to potential danger, error or harm; cautious.",
+      "hyphenation": [],
+      "transcriptions": [
+        {
+          "ipa": "/ˈkɛɹfəl/",
+          "accents": [
+            "GA"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈkɛːfl̩/",
+          "accents": [
+            "RP"
+          ],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "comfortable",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/comfortable#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92132249,
+      "definition": "Providing physical comfort and ease; agreeable.",
+      "hyphenation": [],
+      "transcriptions": [
+        {
+          "ipa": "/ˈkʌm(p)f.tə.bəl/",
+          "accents": [],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈkʌm.fə.tə.bəl/",
+          "accents": [],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈkʌmf.tə(ɹ).bəl/",
+          "accents": [],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈkʌm.fə(ɹ).tə.bəl/",
+          "accents": [],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈkʌmf.tə(ɹ).bəl/",
+          "accents": [
+            "CA"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈkʌm.fəɹ.tə.bəl/",
+          "accents": [
+            "CA"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈkɐmf.tə.bəl/",
+          "accents": [],
+          "section": 0
+        },
+        {
+          "ipa": "/kəm.fə(r).ʈə.bɘl/",
+          "accents": [],
+          "section": 0
+        },
+        {
+          "ipa": "/kəm.fə(r).ʈeː.bɘl/",
+          "accents": [],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "dangerous",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/dangerous#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92460762,
+      "definition": "Full of danger.",
+      "hyphenation": [
+        "dan",
+        "ger",
+        "ous"
+      ],
+      "transcriptions": [
+        {
+          "ipa": "/ˈdeɪn.ʒ(ə.)ɹəs/",
+          "accents": [
+            "RP"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈdeɪn.d͡ʒ(ə.)ɹəs/",
+          "accents": [
+            "RP"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈdeɪn.d͡ʒ(ə.)ɹəs/",
+          "accents": [
+            "GA",
+            "CA"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈdeɪn.d͡ʒɚ.əs/",
+          "accents": [
+            "GA",
+            "CA"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈdeɪn.d͡ʒɚs/",
+          "accents": [
+            "GA",
+            "CA"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈdeɪn.ʒɹəs/",
+          "accents": [
+            "GA",
+            "CA"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈdæɪn.ʒ(ə.)ɹəs/",
+          "accents": [
+            "AU",
+            "NZ"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈdæɪn.d͡ʒ(ə.)ɹəs/",
+          "accents": [
+            "AU",
+            "NZ"
+          ],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "different",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/different#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92425265,
+      "definition": "Not the same; exhibiting a difference.",
+      "hyphenation": [
+        "dif",
+        "fer",
+        "ent"
+      ],
+      "transcriptions": [
+        {
+          "ipa": "/ˈdɪf.ə.ɹənt/",
+          "accents": [
+            "RP",
+            "GA"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈdɪf.ɹənt/",
+          "accents": [
+            "RP",
+            "GA"
+          ],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "difficult",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/difficult#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92335172,
+      "definition": "Hard, not easy, requiring much effort.",
+      "hyphenation": [],
+      "transcriptions": [
+        {
+          "ipa": "/ˈdɪfɪkəlt/",
+          "accents": [],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "early",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/early#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92521024,
+      "definition": "At a time in advance of the usual or expected event.",
+      "hyphenation": [
+        "ear",
+        "ly"
+      ],
+      "transcriptions": [
+        {
+          "ipa": "/ˈɜːli/",
+          "accents": [
+            "RP"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈɝli/",
+          "accents": [
+            "GA",
+            "CA"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ɚ̞li/",
+          "accents": [
+            "GA",
+            "CA"
+          ],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "famous",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/famous#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 91623414,
+      "definition": "In the public eye.",
+      "hyphenation": [],
+      "transcriptions": [
+        {
+          "ipa": "/ˈfeɪ.məs/",
+          "accents": [],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "favorite",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/favorite#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 91959408,
+      "definition": "Standard American spelling of favourite.",
+      "hyphenation": [],
+      "transcriptions": [
+        {
+          "ipa": "/ˈfeɪv.ɹɪt/",
+          "accents": [],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "important",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/important#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 91794622,
+      "definition": "Having relevant and crucial value; having import.",
+      "hyphenation": [],
+      "transcriptions": [
+        {
+          "ipa": "/ɪmˈpɔː.tənt/",
+          "accents": [
+            "RP"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ɪmˈpɔɹ.tənt/",
+          "accents": [
+            "GA",
+            "CA"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ɪmˈpo(ː)ɹ.tənt/",
+          "accents": [
+            "rhotic",
+            "non-horse-hoarse"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ɪmˈpoə.tənt/",
+          "accents": [
+            "non-rhotic",
+            "non-horse-hoarse"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ɪmˈpɔɹ.ɾənt/",
+          "accents": [
+            "US",
+            "T-Flapping"
+          ],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "interesting",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/interesting#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92339052,
+      "definition": "Of concern; affecting, important.",
+      "hyphenation": [
+        "in",
+        "ter",
+        "est",
+        "ing"
+      ],
+      "transcriptions": [
+        {
+          "ipa": "/ˈɪntɹəstɪŋ/",
+          "accents": [
+            "RP"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈɪntɹɛstɪŋ/",
+          "accents": [
+            "RP"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈɪntəɹəstɪŋ/",
+          "accents": [
+            "US"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈɪntɹɛstɪŋ/",
+          "accents": [
+            "US"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈɪntɹɪstɪŋ/",
+          "accents": [
+            "US"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈɪn(t)əɹɛstɪŋ/",
+          "accents": [
+            "US"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈɪnt͡ʃɹɛstɪŋ/",
+          "accents": [
+            "US"
+          ],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "necessary",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/necessary#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 91679732,
+      "definition": "Required, essential, whether logically inescapable or needed in order to achieve a desired result or avoid some penalty.",
+      "hyphenation": [
+        "ne",
+        "ces",
+        "sar",
+        "y"
+      ],
+      "transcriptions": [
+        {
+          "ipa": "/ˈnɛs.ə.sɹi/",
+          "accents": [
+            "RP"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈnɛs.əˌsɛ.ɹi/",
+          "accents": [
+            "RP"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈnɛs.əˌsɛ.ɹi/",
+          "accents": [
+            "GA"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈnɛs.ə.ɹi/",
+          "accents": [],
+          "section": 0
+        },
+        {
+          "ipa": "/nᵻˈsɛsᵊ.ri/",
+          "accents": [
+            "North India"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈnɛs.ə.sə.ri/",
+          "accents": [
+            "South India"
+          ],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "quiet",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/quiet#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92093741,
+      "definition": "With little or no sound; free of disturbing noise.",
+      "hyphenation": [
+        "qui",
+        "et"
+      ],
+      "transcriptions": [
+        {
+          "ipa": "/ˈkwaɪ̯.ət/",
+          "accents": [],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "serious",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/serious#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92360438,
+      "definition": "Without humor or expression of happiness; grave in manner or disposition.",
+      "hyphenation": [],
+      "transcriptions": [
+        {
+          "ipa": "/ˈsɪə̯.ɹi.əs/",
+          "accents": [
+            "RP"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈsɪː.ɹi.əs/",
+          "accents": [
+            "RP"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈsɪɹ.i.əs/",
+          "accents": [
+            "GenAm",
+            "CA",
+            "mirror-nearer"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈsɪɚ.i.əs/",
+          "accents": [
+            "US",
+            "non-mirror-nearer"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈsiɹ.i.əs/",
+          "accents": [
+            "US",
+            "non-mirror-nearer"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈsiə.ɹi.əs/",
+          "accents": [
+            "NZ"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈsi.ɹi.əs/",
+          "accents": [
+            "Scotland"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈsɛː.ɹi.əs/",
+          "accents": [
+            "East Anglia",
+            "cheer-chair"
+          ],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "strange",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/strange#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92493483,
+      "definition": "Not normal; odd, unusual, surprising, out of the ordinary, often with a negative connotation.",
+      "hyphenation": [
+        "strange"
+      ],
+      "transcriptions": [
+        {
+          "ipa": "/stɹeɪnd͡ʒ/",
+          "accents": [],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "terrible",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/terrible#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92284022,
+      "definition": "Dreadful; causing terror, alarm and fear; awesome",
+      "hyphenation": [],
+      "transcriptions": [
+        {
+          "ipa": "/ˈtɛɹəbəl/",
+          "accents": [
+            "RP",
+            "GA",
+            "CA"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈtɛɹɪbəl/",
+          "accents": [
+            "RP",
+            "GA",
+            "CA"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈteɹəbəl/",
+          "accents": [
+            "AU",
+            "NZ"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈtɛɾəbəl/",
+          "accents": [
+            "Scotland",
+            "Wales"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈtɛɾɪbəl/",
+          "accents": [
+            "Scotland",
+            "Wales"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈtɝ.bəl/",
+          "accents": [
+            "US",
+            "dialectal",
+            "archaic"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈtɛɚ.bəl/",
+          "accents": [
+            "US",
+            "dialectal",
+            "archaic"
+          ],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "usually",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/usually#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92441700,
+      "definition": "less than always, but more than occasionally.",
+      "hyphenation": [],
+      "transcriptions": [
+        {
+          "ipa": "/ˈjuːʒʊəli/",
+          "accents": [
+            "RP",
+            "US",
+            "CA"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈjuːʒli/",
+          "accents": [
+            "RP",
+            "US",
+            "CA"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈjuːʒəli/",
+          "accents": [
+            "RP",
+            "US",
+            "CA"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈju.ʒu.(ə.)li/",
+          "accents": [
+            "US"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈju.ʒə.li/",
+          "accents": [
+            "US"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈjʉːʒʊə.li/",
+          "accents": [
+            "Aus"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈjuʒ(ʊ)wəli/",
+          "accents": [
+            "Indic"
+          ],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "wonderful",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/wonderful#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92481288,
+      "definition": "Tending to excite wonder; surprising, extraordinary.",
+      "hyphenation": [],
+      "transcriptions": [
+        {
+          "ipa": "/ˈwʌndəfl̩/",
+          "accents": [
+            "RP"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈwʌndɚfl̩/",
+          "accents": [
+            "GA",
+            "CA"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈwɐndəfl̩/",
+          "accents": [
+            "AU",
+            "NZ"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈwʊndəfl̩/",
+          "accents": [
+            "Northern England"
+          ],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "because",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/because#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 91556639,
+      "definition": "By or for the cause that; on this account that; for the reason that.",
+      "hyphenation": [
+        "be",
+        "cause"
+      ],
+      "transcriptions": [
+        {
+          "ipa": "/bɪkəz/",
+          "accents": [
+            "weak form"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/bɪˈkɒz/",
+          "accents": [
+            "strong form"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/bɪˈkʌz/",
+          "accents": [
+            "strong form"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/bɪˈkɔːz/",
+          "accents": [
+            "strong form"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/bɪˈkɔːs/",
+          "accents": [
+            "strong form"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/bɪkəz/",
+          "accents": [
+            "weak form"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/biˈkɔz/",
+          "accents": [
+            "strong form"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/biˈkʌz/",
+          "accents": [
+            "strong form"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/bəˈkɔz/",
+          "accents": [
+            "strong form"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/bəˈkʌz/",
+          "accents": [
+            "strong form"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/bɪˈkɔz/",
+          "accents": [
+            "strong form"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/bɪˈkʌz/",
+          "accents": [
+            "strong form"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/bɪkəz/",
+          "accents": [
+            "weak form"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/bɪˈkɑz/",
+          "accents": [
+            "strong form"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/bəˈkoːz/",
+          "accents": [
+            "weak form"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/biːˈkoːz/",
+          "accents": [
+            "strong form"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/bɪkəz/",
+          "accents": [
+            "weak form"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/bɪˈkeɪz/",
+          "accents": [
+            "strong form",
+            "obsolete"
+          ],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "another",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/another#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92355879,
+      "definition": "One more further, in addition to the quantity by then; a second or additional one, similar in likeness or in effect.",
+      "hyphenation": [
+        "an",
+        "oth",
+        "er"
+      ],
+      "transcriptions": [
+        {
+          "ipa": "/əˈnʌð.ə(ɹ)/",
+          "accents": [
+            "weak form"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ænˈʌð.ə(ɹ)/",
+          "accents": [
+            "strong form"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/əˈnʌð.ɚ/",
+          "accents": [
+            "weak form"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ænˈʌð.ɚ/",
+          "accents": [
+            "strong form"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/eɪˈnʌð.ɚ/",
+          "accents": [
+            "strong form"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/əˈnʌð.ɚ/",
+          "accents": [
+            "weak form"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/əˈnʊð.ə(ɹ)/",
+          "accents": [
+            "weak form"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ænˈʊð.ə(ɹ)/",
+          "accents": [
+            "strong form"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈə.nə.d̪ɜ(r)/",
+          "accents": [],
+          "section": 0
+        },
+        {
+          "ipa": "/ˌɜ ˈnə.d̪ɜ(r)/",
+          "accents": [],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "together",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/together#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92523483,
+      "definition": "At the same time, in the same place; in close association or proximity.",
+      "hyphenation": [
+        "to",
+        "geth",
+        "er"
+      ],
+      "transcriptions": [
+        {
+          "ipa": "/tʊˈɡɛð.ə/",
+          "accents": [
+            "RP"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/təˈɡɛð.ə/",
+          "accents": [
+            "RP"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/tʊˈɡɛðɚ/",
+          "accents": [
+            "GA",
+            "[[w:Standard Canadian English"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/təˈɡɛðɚ/",
+          "accents": [
+            "GA",
+            "[[w:Standard Canadian English"
+          ],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "whether",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/whether#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92510748,
+      "definition": "Which of two.",
+      "hyphenation": [
+        "wheth",
+        "er"
+      ],
+      "transcriptions": [
+        {
+          "ipa": "/ˈwɛðə(ɹ)/",
+          "accents": [],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈʍɛðə(ɹ)/",
+          "accents": [],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "women",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/women#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92481240,
+      "definition": "Plural of woman.",
+      "hyphenation": [
+        "wom",
+        "en"
+      ],
+      "transcriptions": [
+        {
+          "ipa": "/ˈwɪmɪn/",
+          "accents": [
+            "RP"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈwɪmɪn/",
+          "accents": [
+            "SSB"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈwɵmɪn/",
+          "accents": [
+            "SSB"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈwɪmɪn/",
+          "accents": [
+            "US",
+            "CA"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈwɪmən/",
+          "accents": [
+            "US",
+            "CA"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈwʊmən/",
+          "accents": [
+            "US",
+            "CA"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈwʊmən/",
+          "accents": [
+            "NZ"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈwəmən/",
+          "accents": [
+            "NZ"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ʋɪmen/",
+          "accents": [
+            "India"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ʋɪmɛːn/",
+          "accents": [
+            "India"
+          ],
+          "section": 0
+        }
+      ]
+    },
+    {
+      "headword": "children",
+      "variant": "en-us",
+      "sourceUrl": "https://en.wiktionary.org/wiki/children#English",
+      "sourceLicence": "CC BY-SA 4.0",
+      "retrievedAt": "2026-09-09",
+      "revisionId": 92412642,
+      "definition": "Plural of child.",
+      "hyphenation": [
+        "chil",
+        "dren"
+      ],
+      "transcriptions": [
+        {
+          "ipa": "/ˈt͡ʃɪldɹən/",
+          "accents": [
+            "UK",
+            "US",
+            "AU",
+            "NZ"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈtʃɪl.ɹən/",
+          "accents": [
+            "Southern US",
+            "AAVE"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈtʃɪl.ə(ɹ)n/",
+          "accents": [
+            "Southern US",
+            "AAVE"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈt͡ʃʊldɹən/",
+          "accents": [
+            "UK dialectal",
+            "AU",
+            "NZ"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈt͡ʃɪldɹən/",
+          "accents": [
+            "HK"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/ˈt͡ʃɪl.dən/",
+          "accents": [
+            "HK"
+          ],
+          "section": 0
+        }
+      ]
+    }
+  ]
+}

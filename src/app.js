@@ -19,18 +19,30 @@ import express from 'express';
 
 import { config } from './config/index.js';
 import { enforceUtcSessions, getPool, pingDatabase } from './lib/mysql.js';
+import {
+  createInMemoryRateLimitStore,
+  createRedisRateLimitStore,
+} from './lib/rate-limit-store.js';
 import { pingRedis } from './lib/redis.js';
 import {
+  createTurnstileVerifier,
+  createUnconfiguredTurnstileVerifier,
+} from './lib/turnstile.js';
+import {
   anonymousIdentityMiddleware,
+  contentSecurityPolicyMiddleware,
   cspNonceMiddleware,
   errorHandler,
   notFoundHandler,
+  rateLimitMiddleware,
+  RATE_LIMITS,
   requestContextMiddleware,
   responseClassMiddleware,
   securityHeadersMiddleware,
 } from './middleware/index.js';
 import { healthRouter } from './routes/health.route.js';
 import { homeRouter } from './routes/home.route.js';
+import { wordRouter } from './routes/word.route.js';
 import { checkHealth } from './services/health.service.js';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -51,7 +63,26 @@ export function createApp() {
   app.set('views', path.join(here, 'views'));
   app.disable('x-powered-by');
 
+  // The Turnstile SITE key is public by design — it identifies the widget to
+  // the browser. Only the SECRET key is a credential, and it never leaves the
+  // server. Exposed through `app.locals` so any view can decide whether to
+  // render the challenge (FR-WORD-05).
+  app.locals.turnstileSiteKey = config.turnstile.isConfigured ? config.turnstile.siteKey : '';
+
   enforceUtcSessions(getPool());
+
+  // Infrastructure adapters are constructed HERE and injected downwards, which
+  // is what keeps the NFR-SEC-11 store selection and the FR-WORD-05 Turnstile
+  // selection single decisions made once at boot rather than branches repeated
+  // at every call site (C4).
+  const rateLimitStore =
+    config.rateLimitStore === 'redis'
+      ? createRedisRateLimitStore()
+      : createInMemoryRateLimitStore();
+
+  const verifyTurnstile = config.turnstile.isConfigured
+    ? createTurnstileVerifier(config.turnstile.secretKey)
+    : createUnconfiguredTurnstileVerifier();
 
   // 1. Observability first, so every later failure carries a correlation id.
   app.use(requestContextMiddleware());
@@ -62,6 +93,9 @@ export function createApp() {
   // 3. Security headers. The nonce is minted before the CSP that consumes it.
   app.use(cspNonceMiddleware());
   app.use(securityHeadersMiddleware());
+  // The CSP is written at header-flush time, because its shape depends on the
+  // response class the route selects later (amended NFR-SEC-03).
+  app.use(contentSecurityPolicyMiddleware());
 
   // 4. Static assets. Mounted ahead of the identity middleware so a shared,
   //    cacheable asset response never carries a per-viewer `Set-Cookie`.
@@ -81,9 +115,23 @@ export function createApp() {
   app.use(express.json({ limit: '32kb' }));
   app.use(anonymousIdentityMiddleware());
 
-  // 6. Routes.
+  // 6. Routes. The word router is mounted LAST of the routers, because its
+  //    `/:variant` and `/:variant/:word` patterns would otherwise shadow the
+  //    fixed paths above.
   app.use(healthRouter({ probeHealth: () => checkHealth({ pingDatabase, pingRedis }) }));
   app.use(homeRouter());
+  app.use(
+    wordRouter({
+      // Appendix C / Foundational Decisions §10.3: 10 per hour, keyed on the
+      // `pa_uid` UUID.
+      wordRequestRateLimit: rateLimitMiddleware({
+        store: rateLimitStore,
+        bucket: 'word-request',
+        ...RATE_LIMITS.WORD_REQUEST,
+      }),
+      verifyTurnstile,
+    }),
+  );
 
   // 7. One terminal 404 and one error middleware (C2).
   app.use(notFoundHandler());

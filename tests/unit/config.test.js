@@ -14,6 +14,10 @@ const PRODUCTION_ENV = {
   MYSQL_USER: 'pronounceall_app',
   MYSQL_PASSWORD: 'supplied-at-deploy-time',
   REDIS_URL: 'redis://cache.internal:6379',
+  // FR-WORD-05 gates the word-request form behind Turnstile, so a
+  // production-like boot requires both keys (Iteration 1).
+  TURNSTILE_SITE_KEY: 'supplied-at-deploy-time',
+  TURNSTILE_SECRET_KEY: 'supplied-at-deploy-time',
 };
 
 describe('loadConfig (SDD v1.1 §6.4, NFR-SEC-06)', () => {
@@ -43,6 +47,34 @@ describe('loadConfig (SDD v1.1 §6.4, NFR-SEC-06)', () => {
     expect(() => loadConfig({ PORT: 'not-a-port' })).toThrow(/PORT/);
     expect(() => loadConfig({ APP_BASE_URL: 'not-a-url' })).toThrow(/APP_BASE_URL/);
     expect(() => loadConfig({ NODE_ENV: 'prod' })).toThrow(/NODE_ENV/);
+  });
+
+  test('production requires the Turnstile keys (FR-WORD-05)', () => {
+    // A deployment without the secret cannot verify a token, so the abuse gate
+    // the requirement mandates would exist in name only.
+    const { TURNSTILE_SECRET_KEY, ...incomplete } = PRODUCTION_ENV;
+    expect(() => loadConfig(incomplete)).toThrow(/TURNSTILE_SECRET_KEY/);
+  });
+
+  test('in-memory rate limiting is refused outside development (NFR-SEC-11)', () => {
+    expect(() => loadConfig({ ...PRODUCTION_ENV, RATE_LIMIT_STORE: 'memory' })).toThrow(
+      /RATE_LIMIT_STORE/,
+    );
+    expect(() => loadConfig({ ...PRODUCTION_ENV, NODE_ENV: 'staging', RATE_LIMIT_STORE: 'memory' }))
+      .toThrow(/RATE_LIMIT_STORE/);
+    // Permitted locally, which is exactly what NFR-SEC-11 allows.
+    expect(loadConfig({ RATE_LIMIT_STORE: 'memory' }).rateLimitStore).toBe('memory');
+  });
+
+  test('Turnstile and cache purge report themselves unconfigured when keys are absent', () => {
+    const config = loadConfig({});
+    expect(config.turnstile.isConfigured).toBe(false);
+    expect(config.cloudflareCachePurge.isConfigured).toBe(false);
+    // Both halves are needed: a site key with no secret behind it would render
+    // a challenge that nothing verifies.
+    expect(loadConfig({ TURNSTILE_SITE_KEY: 'only-the-public-half' }).turnstile.isConfigured).toBe(
+      false,
+    );
   });
 
   test('the returned configuration is frozen', () => {

@@ -1,0 +1,373 @@
+{
+  "_comment": [
+    "Maintainer curation for the en-us seed (decision E1, FR-CONTENT-01).",
+    "",
+    "E1's validate stage exists to keep content changes reviewable before load.",
+    "This file is where a review decision is RECORDED, as committed data rather",
+    "than as an edit to fetched upstream content: the raw artifact stays a",
+    "faithful copy of what Wiktionary served, and every departure from it is",
+    "visible here and in version control.",
+    "",
+    "Three kinds of entry:",
+    "  ipa      - pin the American transcriptions for a word whose upstream",
+    "             accent tags do not narrow it to American English. Listed in",
+    "             display order; the first becomes is_primary.",
+    "  skip     - exclude a headword, with the reason.",
+    "  pronunciations[<ipa>].syllableBreakdown - override a breakdown that the",
+    "             upstream transcription left unsyllabified.",
+    "",
+    "Overrides are applied by the normalise stage in",
+    "src/services/word-ingestion.service.js."
+  ],
+  "words": {
+    "shoes": {
+      "skip": "the Wiktionary entry is a plural form and carries no Pronunciation section, so it cannot satisfy FR-WORD-03"
+    },
+    "because": {
+      "ipa": [
+        "/bɪˈkɔz/",
+        "/bɪˈkʌz/",
+        "/bɪˈkɑz/"
+      ]
+    },
+    "another": {
+      "ipa": [
+        "/əˈnʌð.ɚ/",
+        "/ænˈʌð.ɚ/"
+      ]
+    },
+    "remember": {
+      "ipa": [
+        "/ɹɪˈmɛm.bɚ/",
+        "/ɹəˈmɛm.bɚ/"
+      ]
+    },
+    "comfortable": {
+      "ipa": [
+        "/ˈkʌmf.tə(ɹ).bəl/",
+        "/ˈkʌm.fə(ɹ).tə.bəl/"
+      ]
+    },
+    "interesting": {
+      "ipa": [
+        "/ˈɪntɹɛstɪŋ/",
+        "/ˈɪntəɹəstɪŋ/",
+        "/ˈɪntɹɪstɪŋ/"
+      ],
+      "pronunciations": {
+        "ˈɪntɹɛstɪŋ": {
+          "syllableBreakdown": "ˈɪn·tɹɛs·tɪŋ"
+        },
+        "ˈɪntəɹəstɪŋ": {
+          "syllableBreakdown": "ˈɪn·tə·ɹəs·tɪŋ"
+        },
+        "ˈɪntɹɪstɪŋ": {
+          "syllableBreakdown": "ˈɪn·tɹɪs·tɪŋ"
+        }
+      }
+    },
+    "usually": {
+      "ipa": [
+        "/ˈju.ʒu.(ə.)li/",
+        "/ˈju.ʒə.li/"
+      ]
+    },
+    "cupcake": {
+      "pronunciations": {
+        "ˈkʌpkeɪk": {
+          "syllableBreakdown": "ˈkʌp·keɪk"
+        }
+      }
+    },
+    "banana": {
+      "pronunciations": {
+        "bəˈnænə": {
+          "syllableBreakdown": "bə·ˈnæn·ə"
+        }
+      }
+    },
+    "letter": {
+      "pronunciations": {
+        "ˈlɛtɚ": {
+          "syllableBreakdown": "ˈlɛt·ɚ"
+        }
+      }
+    },
+    "number": {
+      "pronunciations": {
+        "ˈnʌmɚ": {
+          "syllableBreakdown": "ˈnʌm·ɚ"
+        }
+      }
+    },
+    "city": {
+      "pronunciations": {
+        "ˈsɪti": {
+          "syllableBreakdown": "ˈsɪt·i"
+        }
+      }
+    },
+    "telephone": {
+      "pronunciations": {
+        "ˈtɛləˌfoʊn": {
+          "syllableBreakdown": "ˈtɛl·ə·ˌfoʊn"
+        }
+      }
+    },
+    "country": {
+      "pronunciations": {
+        "ˈkʌntɹi": {
+          "syllableBreakdown": "ˈkʌn·tɹi"
+        }
+      }
+    },
+    "weather": {
+      "pronunciations": {
+        "ˈwɛðɚ": {
+          "syllableBreakdown": "ˈwɛð·ɚ"
+        }
+      }
+    },
+    "morning": {
+      "pronunciations": {
+        "ˈmoɹnɪŋ": {
+          "syllableBreakdown": "ˈmoɹn·ɪŋ"
+        }
+      }
+    },
+    "window": {
+      "pronunciations": {
+        "ˈwɪndoʊ": {
+          "syllableBreakdown": "ˈwɪn·doʊ"
+        }
+      }
+    },
+    "address": {
+      "pronunciations": {
+        "ˈædɹɛs": {
+          "syllableBreakdown": "ˈæd·ɹɛs"
+        }
+      }
+    },
+    "early": {
+      "ipa": [
+        "/ˈɝli/"
+      ],
+      "pronunciations": {
+        "ˈɝli": {
+          "syllableBreakdown": "ˈɝ·li"
+        }
+      }
+    },
+    "orange": {
+      "ipa": [
+        "/ˈoɹənd͡ʒ/",
+        "/ˈɑɹənd͡ʒ/"
+      ],
+      "pronunciations": {
+        "ˈoɹənd͡ʒ": {
+          "syllableBreakdown": "ˈoɹ·ənd͡ʒ"
+        },
+        "ˈɑɹənd͡ʒ": {
+          "syllableBreakdown": "ˈɑɹ·ənd͡ʒ"
+        }
+      }
+    },
+    "camera": {
+      "ipa": [
+        "/ˈkæməɹə/",
+        "/ˈkæmɚ.ə/",
+        "/ˈkæmɹə/"
+      ],
+      "pronunciations": {
+        "ˈkæməɹə": {
+          "syllableBreakdown": "ˈkæm·ə·ɹə"
+        },
+        "ˈkæmɚ.ə": {
+          "syllableBreakdown": "ˈkæm·ɚ·ə"
+        },
+        "ˈkæmɹə": {
+          "syllableBreakdown": "ˈkæm·ɹə"
+        }
+      }
+    },
+    "family": {
+      "pronunciations": {
+        "ˈfæm(ə)li": {
+          "syllableBreakdown": "ˈfæm·(ə)·li"
+        }
+      }
+    },
+    "holiday": {
+      "pronunciations": {
+        "ˈhɑləˌdeɪ": {
+          "syllableBreakdown": "ˈhɑ·lə·ˌdeɪ"
+        }
+      }
+    },
+    "kitchen": {
+      "pronunciations": {
+        "ˈkɪt͡ʃ(ə)n": {
+          "syllableBreakdown": "ˈkɪt͡ʃ·(ə)n"
+        }
+      }
+    },
+    "bottle": {
+      "pronunciations": {
+        "ˈbɑtəl": {
+          "syllableBreakdown": "ˈbɑt·əl"
+        },
+        "ˈbɑɾɫ̩": {
+          "syllableBreakdown": "ˈbɑɾ·ɫ̩"
+        }
+      }
+    },
+    "dinner": {
+      "pronunciations": {
+        "ˈdɪnɚ": {
+          "syllableBreakdown": "ˈdɪn·ɚ"
+        }
+      }
+    },
+    "coffee": {
+      "pronunciations": {
+        "ˈkɔfi": {
+          "syllableBreakdown": "ˈkɔf·i"
+        },
+        "ˈkɑfi": {
+          "syllableBreakdown": "ˈkɑf·i"
+        }
+      }
+    },
+    "butter": {
+      "pronunciations": {
+        "ˈbʌtɚ": {
+          "syllableBreakdown": "ˈbʌt·ɚ"
+        }
+      }
+    },
+    "animal": {
+      "pronunciations": {
+        "ˈænəməl": {
+          "syllableBreakdown": "ˈæn·ə·məl"
+        },
+        "ˈænɪməl": {
+          "syllableBreakdown": "ˈæn·ɪ·məl"
+        }
+      }
+    },
+    "elephant": {
+      "pronunciations": {
+        "ˈɛləfənt": {
+          "syllableBreakdown": "ˈɛl·ə·fənt"
+        }
+      }
+    },
+    "doctor": {
+      "pronunciations": {
+        "ˈdɑktɚ": {
+          "syllableBreakdown": "ˈdɑk·tɚ"
+        }
+      }
+    },
+    "engineer": {
+      "pronunciations": {
+        "ˌɛnd͡ʒɪˈnɪ(ə)ɹ": {
+          "syllableBreakdown": "ˌɛn·d͡ʒɪ·ˈnɪ(ə)ɹ"
+        }
+      }
+    },
+    "follow": {
+      "pronunciations": {
+        "ˈfɑloʊ": {
+          "syllableBreakdown": "ˈfɑl·oʊ"
+        }
+      }
+    },
+    "listen": {
+      "pronunciations": {
+        "ˈlɪsən": {
+          "syllableBreakdown": "ˈlɪs·ən"
+        }
+      }
+    },
+    "promise": {
+      "pronunciations": {
+        "ˈpɹɑmɪs": {
+          "syllableBreakdown": "ˈpɹɑm·ɪs"
+        }
+      }
+    },
+    "understand": {
+      "pronunciations": {
+        "ˌʌndɚˈstænd": {
+          "syllableBreakdown": "ˌʌn·dɚ·ˈstænd"
+        }
+      }
+    },
+    "visit": {
+      "pronunciations": {
+        "ˈvɪzɪt": {
+          "syllableBreakdown": "ˈvɪz·ɪt"
+        }
+      }
+    },
+    "dangerous": {
+      "pronunciations": {
+        "ˈdeɪn.d͡ʒɚs": {
+          "syllableBreakdown": "ˈdeɪn·d͡ʒɚs"
+        },
+        "ˈdeɪn.ʒɹəs": {
+          "syllableBreakdown": "ˈdeɪn·ʒɹəs"
+        }
+      }
+    },
+    "different": {
+      "pronunciations": {
+        "ˈdɪf.ɹənt": {
+          "syllableBreakdown": "ˈdɪf·ɹənt"
+        }
+      }
+    },
+    "together": {
+      "pronunciations": {
+        "tʊˈɡɛðɚ": {
+          "syllableBreakdown": "tʊ·ˈɡɛð·ɚ"
+        },
+        "təˈɡɛðɚ": {
+          "syllableBreakdown": "tə·ˈɡɛð·ɚ"
+        }
+      }
+    },
+    "whether": {
+      "pronunciations": {
+        "ˈwɛðə(ɹ)": {
+          "syllableBreakdown": "ˈwɛð·ə(ɹ)"
+        },
+        "ˈʍɛðə(ɹ)": {
+          "syllableBreakdown": "ˈʍɛð·ə(ɹ)"
+        }
+      }
+    },
+    "women": {
+      "pronunciations": {
+        "ˈwɪmɪn": {
+          "syllableBreakdown": "ˈwɪm·ɪn"
+        },
+        "ˈwɪmən": {
+          "syllableBreakdown": "ˈwɪm·ən"
+        },
+        "ˈwʊmən": {
+          "syllableBreakdown": "ˈwʊm·ən"
+        }
+      }
+    },
+    "children": {
+      "pronunciations": {
+        "ˈt͡ʃɪldɹən": {
+          "syllableBreakdown": "ˈt͡ʃɪl·dɹən"
+        }
+      }
+    }
+  }
+}

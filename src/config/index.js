@@ -40,6 +40,23 @@ const schema = z.object({
   MYSQL_POOL_SIZE: z.coerce.number().int().min(1).max(100).default(10),
 
   REDIS_URL: z.string().min(1).default('redis://127.0.0.1:6379'),
+
+  /**
+   * Rate-limit counter store (NFR-SEC-11). Redis in staging and production;
+   * `memory` is permitted for local development only and is rejected below in a
+   * strict environment, so the restriction is enforced rather than documented.
+   */
+  RATE_LIMIT_STORE: z.enum(['redis', 'memory']).default('redis'),
+
+  // Cloudflare Turnstile, gating the word-request form (FR-WORD-05).
+  TURNSTILE_SITE_KEY: z.string().default(''),
+  TURNSTILE_SECRET_KEY: z.string().default(''),
+
+  // Cloudflare cache purge on re-seed (SDD v1.1 §6.3). Optional: Iteration 1
+  // builds the adapter seam and the credentials follow with the production-edge
+  // work. An unconfigured seam purges nothing and says so; it never pretends.
+  CLOUDFLARE_ZONE_ID: z.string().default(''),
+  CLOUDFLARE_CACHE_PURGE_TOKEN: z.string().default(''),
 });
 
 /**
@@ -54,6 +71,11 @@ const REQUIRED_IN_STRICT_ENVIRONMENTS = [
   'MYSQL_USER',
   'MYSQL_PASSWORD',
   'REDIS_URL',
+  // FR-WORD-05 gates the word-request form behind Turnstile. A real deployment
+  // must therefore hold real keys: without the secret the verifier cannot
+  // verify anything, and the gate would exist in name only.
+  'TURNSTILE_SITE_KEY',
+  'TURNSTILE_SECRET_KEY',
 ];
 
 /**
@@ -91,6 +113,17 @@ export function loadConfig(env) {
 
   const isProductionLike = STRICT_ENVIRONMENTS.has(value.NODE_ENV);
 
+  // NFR-SEC-11: in-memory counters are permitted for local development ONLY.
+  // A staging or production boot configured for them fails here rather than
+  // running with a rate limit that neither survives a restart nor holds across
+  // processes.
+  if (isProductionLike && value.RATE_LIMIT_STORE !== 'redis') {
+    throw new Error(
+      `RATE_LIMIT_STORE must be 'redis' in ${value.NODE_ENV} (NFR-SEC-11); ` +
+        "'memory' is permitted in local development only.",
+    );
+  }
+
   // Test runs are silent unless the operator asks for output, so a failing
   // assertion is readable and a log line is never mistaken for test output.
   const logLevel =
@@ -115,6 +148,28 @@ export function loadConfig(env) {
 
     redis: Object.freeze({
       url: value.REDIS_URL,
+    }),
+
+    /** Rate-limit counter store selection (NFR-SEC-11). */
+    rateLimitStore: value.RATE_LIMIT_STORE,
+
+    /**
+     * Cloudflare Turnstile (FR-WORD-05). `isConfigured` is what the composition
+     * root selects the verifier on, and what the views test before rendering
+     * the widget — a site key with no secret behind it would render a challenge
+     * nothing verifies.
+     */
+    turnstile: Object.freeze({
+      siteKey: value.TURNSTILE_SITE_KEY,
+      secretKey: value.TURNSTILE_SECRET_KEY,
+      isConfigured: value.TURNSTILE_SITE_KEY !== '' && value.TURNSTILE_SECRET_KEY !== '',
+    }),
+
+    /** Cloudflare cache purge on re-seed (SDD v1.1 §6.3). */
+    cloudflareCachePurge: Object.freeze({
+      zoneId: value.CLOUDFLARE_ZONE_ID,
+      apiToken: value.CLOUDFLARE_CACHE_PURGE_TOKEN,
+      isConfigured: value.CLOUDFLARE_ZONE_ID !== '' && value.CLOUDFLARE_CACHE_PURGE_TOKEN !== '',
     }),
 
     /**

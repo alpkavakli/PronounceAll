@@ -12,8 +12,16 @@ playwright-report/
 test-results/
 *.tsbuildinfo
 
-# Runtime data
-data/
+# Runtime data. `data/seed/` is the ONE exception and is deliberately
+# committed: FR-CONTENT-01 requires the seed to be deterministic and
+# reproducible from a documented command, which holds only because the load
+# stage reads a fixed, reviewed artifact rather than re-fetching a Wiktionary
+# that changes under it. CI seeds from these files too (E1).
+# Note the shape: a wholly excluded directory cannot have its contents
+# re-included, so `data/` is excluded by its CONTENTS and `data/seed/` is
+# negated before anything below it is considered.
+/data/*
+!/data/seed/
 logs/
 *.log
 
@@ -25,3 +33,4 @@ Thumbs.db
 
 ## Notes to myself
 NotesToMyself.md
+dist/

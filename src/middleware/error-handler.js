@@ -128,6 +128,29 @@ export function errorHandler() {
       return;
     }
 
+    // A missing word gets its own view: a genuine 404 carrying the E3 fuzzy
+    // suggestions and the word-request control (FR-WORD-04, FR-WORD-05). The
+    // status is unchanged — only the surface differs.
+    if (error.code === ERROR_CODES.WORD_NOT_FOUND) {
+      res.render('errors/word-not-found', {
+        status: error.status,
+        code: error.code,
+        message: error.message,
+        correlationId,
+        slug: error.meta.slug,
+        variant: error.meta.variant,
+        suggestions: error.meta.suggestions ?? [],
+        // Set by the POST-redirect-GET of the word-request form, so the
+        // acknowledgement survives with JavaScript disabled (FR-WORD-08).
+        // Constrained to the two known values: the query string is
+        // client-controlled and is used to pick a message, never rendered.
+        requested: ['new', 'upvoted'].includes(req.query?.requested)
+          ? req.query.requested
+          : null,
+      });
+      return;
+    }
+
     res.render('errors/error', {
       status: error.status,
       code: error.code,

@@ -1,0 +1,77 @@
+<%# PronounceAll — Copyright (C) 2026 Alp Kavaklı
+    SPDX-License-Identifier: AGPL-3.0-or-later
+    See LICENSE-NOTICE.md at the repository root.
+
+    The unknown-word page (FR-WORD-04, FR-WORD-05, E3).
+
+    Served at a GENUINE 404 status, never 200, so search engines do not index it
+    as a real entry. It states that the word is missing, offers up to five
+    E3-ranked suggestions, and carries the word-request control.
+
+    Unlike the word page this is NOT a cacheable shell: it is a DYNAMIC response
+    (private, no-store), which is what lets it carry the per-request CSP nonce
+    the Turnstile widget needs and the `Set-Cookie` that issues `pa_uid` for the
+    rate-limit key. It still carries no inline script or style of its own.
+
+    The whole page works with JavaScript disabled (FR-WORD-08): the form is a
+    plain POST. Where Turnstile is configured its widget needs JavaScript, which
+    is a property of the challenge itself rather than a choice made here. %>
+<!doctype html>
+<html lang="en">
+<head>
+  <%- include('../partials/head', { title: slug + ' — not in the dictionary yet' }) %>
+  <% if (locals.turnstileSiteKey) { %>
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer nonce="<%= cspNonce %>"></script>
+  <% } %>
+</head>
+<body>
+  <main class="page word-missing">
+    <h1 class="word-missing__headword"><%= slug %></h1>
+    <p class="lede">This word is not in the dictionary yet.</p>
+
+    <% if (locals.requested === 'new') { %>
+      <p class="notice" role="status">Thanks — we have added this word to the request list.</p>
+    <% } else if (locals.requested === 'upvoted') { %>
+      <p class="notice" role="status">Thanks — this word was already requested, and your vote has been counted.</p>
+    <% } %>
+
+    <%# FR-WORD-04: up to five suggestions, covering both typing slips and
+        phonetic misspellings. A slug with no sufficiently close match shows
+        none at all rather than five poor ones. %>
+    <% if (suggestions.length > 0) { %>
+      <section aria-labelledby="suggestions-heading">
+        <h2 id="suggestions-heading" class="section-heading">Did you mean</h2>
+        <ul class="suggestion-list">
+          <% suggestions.forEach(function (suggestion) { %>
+            <li>
+              <a href="/<%= variant.code %>/<%= encodeURIComponent(suggestion.slug) %>"><%= suggestion.display %></a>
+            </li>
+          <% }); %>
+        </ul>
+      </section>
+    <% } %>
+
+    <%# FR-WORD-05: the word-request control. It captures only the variant and
+        the word — no personal data — and is rate limited and Turnstile-gated
+        on the server. %>
+    <section aria-labelledby="request-heading">
+      <h2 id="request-heading" class="section-heading">Request this word</h2>
+      <p>Ask us to add <strong><%= slug %></strong> to the <%= variant.displayName %> dictionary.</p>
+
+      <form class="word-request" method="post" action="/request-word">
+        <input type="hidden" name="variant" value="<%= variant.code %>">
+        <input type="hidden" name="word" value="<%= slug %>">
+        <% if (locals.turnstileSiteKey) { %>
+          <div class="cf-turnstile" data-sitekey="<%= locals.turnstileSiteKey %>"></div>
+        <% } %>
+        <button type="submit" class="button">Request this word</button>
+      </form>
+    </section>
+
+    <p><a href="/">Back to the home page</a></p>
+  </main>
+
+  <%- include('../partials/footer') %>
+  <script type="module" src="/js/bootstrap.js"></script>
+</body>
+</html>

@@ -1,0 +1,8 @@
+[
+  {
+    "name": "word page — document + critical CSS + core JS (NFR-PERF-07)",
+    "path": ["dist/word-page.html", "src/public/css/main.css", "src/public/js/bootstrap.js"],
+    "limit": "150 kB",
+    "gzip": true
+  }
+]

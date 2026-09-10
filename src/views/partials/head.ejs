@@ -1,7 +1,16 @@
 <%# PronounceAll — Copyright (C) 2026 Alp Kavaklı
     SPDX-License-Identifier: AGPL-3.0-or-later
-    See LICENSE-NOTICE.md at the repository root. %>
+    See LICENSE-NOTICE.md at the repository root.
+
+    `metaDescription` and `canonicalUrl` are optional (FR-WORD-09): the word
+    page supplies both, and the pages that predate them render unchanged. %>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title><%= title %> · PronounceAll</title>
+<% if (typeof metaDescription !== 'undefined' && metaDescription) { %>
+<meta name="description" content="<%= metaDescription %>">
+<% } %>
+<% if (typeof canonicalUrl !== 'undefined' && canonicalUrl) { %>
+<link rel="canonical" href="<%= canonicalUrl %>">
+<% } %>
 <link rel="stylesheet" href="/css/main.css">

@@ -117,4 +117,25 @@ Several English phonemes cannot satisfy this. The sound written `/ŋ/` never beg
 
 ---
 
+### FIND-09 — Appendix C `GET` word-page rate limit cannot be enforced at the origin under B2
+
+**Recorded:** 10 September 2026
+**Source:** Iteration 1 implementation (word pages)
+**Status:** Deferred — to the Cloudflare/WAF deployment work
+**Affects:** SRS Appendix C, Foundational Decisions §10.3, decision B2, SDD v1.1 §6.3
+
+**The problem.** Appendix C and Foundational Decisions §10.3 both list `GET` word pages at 120 per minute keyed by the `pa_uid` cookie UUID, as a scraping defence. Iteration 1 implements every other Appendix C limit it owns, but not this one, because enforcing it in Express contradicts B2 on two counts.
+
+First, the word-page shell is a SHARED, edge-cached response. Reading `pa_uid` to key a counter makes the response depend on per-viewer identity, which is precisely what B2 and the amended FR-AUTH-01 forbid on that response class — the shell carries no `Set-Cookie` and must be identical for every viewer.
+
+Second, the limit would not work where it matters. A cached shell is served by Cloudflare and never reaches the origin, so an origin-side counter sees only cache misses. A scraper walking the dictionary would be counted only on the words it happened to miss on, while the enforcement cost would fall on exactly the response B2 exists to make cheap.
+
+**Resolution.** Deferred, not dropped. The limit belongs at the edge, alongside the Appendix C row that is already Cloudflare's (`All endpoints (edge)`, 1000/min per IP, NFR-SEC-02). Cloudflare sees every request, cached or not, which is the only vantage point from which a scraping limit on a cached resource is meaningful.
+
+Implement it as a Cloudflare rate-limiting rule during the deployment/production-edge work. Do NOT implement origin-side UUID limiting for cached word-page `GET`s in the meantime. When it lands, note whether the identity key stays the `pa_uid` cookie or becomes IP at the edge, since the edge cannot depend on a cookie the cached response never sets.
+
+**Iteration 1 status:** every other Appendix C limit this iteration owns is enforced — `POST /request-word` at 10/hour per UUID, Redis-backed in staging and production per NFR-SEC-11, returning 429 with `Retry-After`.
+
+---
+
 *End of register.*

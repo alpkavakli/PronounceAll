@@ -24,6 +24,7 @@ import crypto from 'node:crypto';
 import helmet from 'helmet';
 
 import { config } from '../config/index.js';
+import { onHeaders } from '../lib/http.js';
 import { getResponseClass, RESPONSE_CLASS } from './response-class.js';
 
 /**
@@ -37,39 +38,92 @@ export function cspNonceMiddleware() {
 }
 
 /**
+ * Cloudflare Turnstile serves its challenge script and its iframe from this
+ * origin (FR-WORD-05). It is added to the policy ONLY when Turnstile is
+ * actually configured, so a deployment that does not use it keeps the tighter
+ * `'self'`-only policy rather than carrying a permanently widened CSP.
+ */
+const TURNSTILE_ORIGIN = 'https://challenges.cloudflare.com';
+
+/** @returns {string[]} the extra script origins this deployment permits */
+function extraScriptSources() {
+  return config.turnstile.isConfigured ? [TURNSTILE_ORIGIN] : [];
+}
+
+/**
+ * Compose the policy for one response, given its class.
+ *
+ * @param {string} responseClass
+ * @param {string} nonce
+ * @returns {string}
+ */
+function buildPolicy(responseClass, nonce) {
+  const isShell = responseClass === RESPONSE_CLASS.SHELL;
+
+  // The shell is shared across viewers and edge-cached, so a per-response nonce
+  // in its policy would be reused by every later viewer and would authorise
+  // nothing meaningfully. It carries no inline script or style, so it takes the
+  // nonce-free `'self'` policy instead (amended NFR-SEC-03).
+  const scriptSrc = isShell
+    ? ["'self'", ...extraScriptSources()]
+    : ["'self'", ...extraScriptSources(), `'nonce-${nonce}'`];
+  const styleSrc = isShell ? ["'self'"] : ["'self'", `'nonce-${nonce}'`];
+
+  const directives = [
+    ['default-src', ["'self'"]],
+    ['base-uri', ["'self'"]],
+    ['form-action', ["'self'"]],
+    ['frame-ancestors', ["'none'"]],
+    ['object-src', ["'none'"]],
+    ['img-src', ["'self'", 'data:']],
+    ['font-src', ["'self'"]],
+    ['connect-src', ["'self'"]],
+    ['media-src', ["'self'"]],
+    ['script-src', scriptSrc],
+    ['style-src', styleSrc],
+    // The Turnstile widget renders in a cross-origin iframe. `default-src`
+    // would otherwise restrict it to `'self'` and the challenge would not load.
+    // Absent entirely when Turnstile is not configured.
+    ...(config.turnstile.isConfigured ? [['frame-src', [TURNSTILE_ORIGIN]]] : []),
+    ...(config.isProductionLike ? [['upgrade-insecure-requests', []]] : []),
+  ];
+
+  return directives
+    .map(([name, values]) => (values.length === 0 ? name : `${name} ${values.join(' ')}`))
+    .join(';');
+}
+
+/**
+ * Write the Content Security Policy at header-flush time.
+ *
+ * It cannot be written when this middleware runs: the policy depends on the
+ * response CLASS, and the class is chosen later by the route that renders. That
+ * ordering is why the CSP is written here rather than through helmet's own
+ * `contentSecurityPolicy` option — helmet resolves its directives eagerly, when
+ * the middleware executes, at which point every response still looks DYNAMIC
+ * and the shell would be handed a nonce it must not carry.
+ *
+ * @returns {import('express').RequestHandler}
+ */
+export function contentSecurityPolicyMiddleware() {
+  return function applyContentSecurityPolicy(req, res, next) {
+    onHeaders(res, () => {
+      res.setHeader(
+        'Content-Security-Policy',
+        buildPolicy(getResponseClass(res), res.locals.cspNonce),
+      );
+    });
+    next();
+  };
+}
+
+/**
  * @returns {import('express').RequestHandler}
  */
 export function securityHeadersMiddleware() {
   return helmet({
-    contentSecurityPolicy: {
-      useDefaults: false,
-      directives: {
-        'default-src': ["'self'"],
-        'base-uri': ["'self'"],
-        'form-action': ["'self'"],
-        'frame-ancestors': ["'none'"],
-        'object-src': ["'none'"],
-        'img-src': ["'self'", 'data:'],
-        'font-src': ["'self'"],
-        'connect-src': ["'self'"],
-        'media-src': ["'self'"],
-        'script-src': [
-          "'self'",
-          (req, res) =>
-            getResponseClass(res) === RESPONSE_CLASS.SHELL
-              ? "'self'"
-              : `'nonce-${res.locals.cspNonce}'`,
-        ],
-        'style-src': [
-          "'self'",
-          (req, res) =>
-            getResponseClass(res) === RESPONSE_CLASS.SHELL
-              ? "'self'"
-              : `'nonce-${res.locals.cspNonce}'`,
-        ],
-        ...(config.isProductionLike ? { 'upgrade-insecure-requests': [] } : {}),
-      },
-    },
+    // Written by `contentSecurityPolicyMiddleware` instead; see above.
+    contentSecurityPolicy: false,
     // TLS is terminated at Cloudflare and Nginx; HSTS is only meaningful, and
     // only safe, on a production-like origin.
     strictTransportSecurity: config.isProductionLike
