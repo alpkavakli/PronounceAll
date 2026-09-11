@@ -120,9 +120,16 @@ export async function upsertPending(asset, executor = defaultExecutor()) {
  * Atomically claim an asset for generation (C6).
  *
  * The compare-and-set is the whole mechanism: two workers that both observe a
- * `pending` row race here, and exactly one sees `affectedRows === 1`. Nothing
+ * claimable row race here, and exactly one sees `affectedRows === 1`. Nothing
  * about this may move into application code, where the check and the write
  * would stop being one operation.
+ *
+ * A `failed` row is claimable again. Generation must be safe to re-run, and
+ * `produceAsset` marks a row `failed` precisely so a crashed attempt does not
+ * leave the claim dangling; if `failed` were terminal, the recovery state would
+ * itself be unrecoverable, because `upsertPending` deliberately never rewrites
+ * `generation_status` and no other path resets it. `ready` is NOT claimable:
+ * a produced asset is immutable, and regenerating it is a new key (V4).
  *
  * @param {string} assetKey
  * @param {object} [executor]
@@ -132,7 +139,7 @@ export async function claimForGeneration(assetKey, executor = defaultExecutor())
   const [result] = await executor.execute(
     `UPDATE audio_assets
         SET generation_status = 'claimed'
-      WHERE asset_key = ? AND generation_status = 'pending'`,
+      WHERE asset_key = ? AND generation_status IN ('pending', 'failed')`,
     [assetKey],
   );
   return result.affectedRows === 1;

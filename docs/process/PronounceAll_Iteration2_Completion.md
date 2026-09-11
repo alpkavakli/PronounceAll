@@ -159,8 +159,22 @@ The options, briefly:
 3. **Commons plus word exemplars for diphthongs**, explicitly labelled as
    exemplars in the popover. Cheapest, but changes what a click means.
 
-The infrastructure is finished for any of them: register the asset, claim it,
-produce bytes, store content-addressed, mark ready. Only the producer differs.
+**Correction (2026-09-11).** The sentence that stood here — that the
+infrastructure is finished for any of them and "only the producer differs" — was
+wrong. The register/claim/produce/store/verify path is indeed finished and is
+source-agnostic, but the *asset identity* is not. `assetKeyFor()` embeds
+`sourceKind`, so a Commons unit gets a different `asset_key` than the `tts_piper`
+row already registered for it; `registerAsset` upserts on `asset_key`, so the
+existing `pending` rows for those units would survive as orphans needing
+cleanup. `source_kind` is an `ENUM('wiktionary_human','tts_piper','tts_cloud')`
+with no value for a Commons isolated articulation, so options 2 and 3 additionally
+require a `V6` migration (or a deliberate decision to record them as
+`wiktionary_human`), a re-seed, and per-row licence/author/`source_reference`
+metadata. That is schema and data work, not a producer swap.
+
+**Decision (2026-09-11): option 1 — Piper for all 41.** Options 2 and 3 are
+rejected for v1 and are not to be implemented. The existing `tts_piper` rows and
+asset keys are reused as they stand; no `V6` is added for this work.
 
 ---
 

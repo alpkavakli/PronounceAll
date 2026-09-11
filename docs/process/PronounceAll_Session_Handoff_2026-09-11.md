@@ -36,8 +36,7 @@ A survey was run against Wikimedia Commons on 2026-09-11:
   would play the word "eight". Mixing those in unannounced would be the same
   class of problem as fake audio, so it was not done.
 
-Three options, all of which the finished infrastructure supports — only the
-producer function differs:
+Three options were considered:
 
 1. **Piper for all 41** (decision V1, the already-chosen TTS path). Uniform,
    regenerable, clean provenance. Needs the Piper batch built and run.
@@ -45,6 +44,25 @@ producer function differs:
    provenance, two licences to attribute.
 3. **Commons plus word exemplars for the diphthongs**, explicitly labelled as
    exemplars. Cheapest, but changes what a click means.
+
+**Correction (2026-09-11).** An earlier draft of this section said the finished
+infrastructure supports all three and that "only the producer function differs."
+That is wrong, and it understated options 2 and 3. `assetKeyFor()` embeds
+`sourceKind` in the key, so a Commons unit has a *different* `asset_key` than the
+Piper row already registered for it; `registerAsset` upserts on `asset_key`, so
+the 34 existing `pending` rows would not be updated but left behind and would
+need explicit cleanup. `source_kind` is also an `ENUM('wiktionary_human',
+'tts_piper','tts_cloud')`, and a Commons isolated-articulation recording is not a
+Wiktionary word recording, so options 2 and 3 need either a `V6` migration
+extending the ENUM or a deliberate decision to file them under
+`wiktionary_human`. They are a migration plus a re-seed plus per-row licence,
+author and `source_reference` plumbing — not a producer swap.
+
+**Decision (2026-09-11): option 1, Piper for all 41.** Options 2 and 3 are not to
+be implemented. Rationale: one consistent voice across the inventory, no `V6`
+migration, no stale rows or mixed provenance, and clicking a phoneme keeps
+meaning "the teaching sound" rather than a whole example word. Human-recorded
+phoneme audio may be revisited after v1 if Piper quality proves inadequate.
 
 Full detail: `docs/process/PronounceAll_Iteration2_Completion.md` §3.
 
@@ -168,6 +186,10 @@ no-JavaScript profile all pass in full.
 Linux CI is the authoritative parallel-environment check. Run projects serially
 locally: `npx playwright test --project=chromium --workers=1`.
 
+**Update, later on 2026-09-11:** Firefox ran clean, 55/55, serially on this same
+machine. The teardown crash did not reproduce. Treat it as intermittent rather
+than fixed; the standing instruction above is unchanged.
+
 ---
 
 ## 5. Documentation debt — three open register entries
@@ -192,6 +214,20 @@ enough to `sexy` to be suggested — the matcher working, not failing; tests use
 `qxzjvwkmpf` and E3 is untouched), and a coverage tripwire now exists.
 
 None of these are code defects. They are specification catch-up.
+
+**Frontend Design Baseline — PROPOSED, not authoritative.**
+`docs/current/PronounceAll_Frontend_Design_Baseline_v1.md` is new and untracked.
+It is marked *"Proposed owner baseline — freeze after maintainer approval"*, it is
+NOT in `DOC_INDEX.md`'s authority table, and by maintainer instruction it stays
+that way for now: **do not treat it as governing, and do not redesign existing
+pages from it.** It will be approved and frozen separately, and only then routed
+in `DOC_INDEX.md`.
+
+One thing to reconcile when it is: its §10 says not to use the native
+`<audio controls>` strip in the primary word/pronunciation UI once a custom
+control exists, while `src/views/word.ejs` uses it deliberately as the FR-IPA-05
+no-JavaScript baseline. Not a conflict today — §10 conditions itself on a custom
+control existing — but the two must be reconciled before §10 is frozen.
 
 ---
 
@@ -231,35 +267,73 @@ inflected "form-of" entries with no independent definition (`went`, `said`), and
 
 ```bash
 npm run lint             # architecture + SQL rules; the build enforces C4
-npm run lint:licence     # NFR-LEGAL-03, 89 files
+npm run lint:licence     # NFR-LEGAL-03, 93 files
 npm run inventory:check  # D4 drift
-npm test                 # 140 unit + 131 integration
+npm run audio:verify     # FR-CONTENT-02/04 — fails until audio is generated
+npm test                 # 158 unit + 149 integration
 npm run test:e2e         # run per project, --workers=1 locally
 npm run size             # NFR-PERF-07
 npm audit --audit-level=high --omit=dev
 ```
 
-Last full run: lint clean, licence 89 files, inventory matches, **140 unit**,
-**131 integration**, chromium **54**, webkit **54**, no-javascript **34**, size
-**6.79 kB** against 150 kB, audit clean.
+Last full run (2026-09-11, after the audio-mechanism work): lint clean, licence
+93 files, inventory matches, **158 unit**, **149 integration**, chromium **55**,
+webkit **55**, firefox **55**, no-javascript **35** passed / 11 skipped, size
+**6.79 kB** against 150 kB, audit clean. `npm run audio:verify` FAILS by design:
+0 of 41 canonical units have ready audio.
+
+**Correction to the previous entry.** It recorded chromium **54** / webkit **54**
+/ no-javascript **34** and called the gate green. Those were the PASSING counts;
+one test was failing and was not recorded. `tests/e2e/word-page.spec.js` still
+asserted `[data-phoneme-id]` count **0**, an Iteration 1 statement that Iteration 2
+superseded when it made phonemes clickable (FR-IPA-02). It has been corrected to
+assert presence, with the interaction itself left to
+`phoneme-interaction.spec.js`. Do not read the earlier "gate green" line as
+evidence that a clean e2e run existed at `e71800e`.
 
 ---
 
 ## 8. Suggested next steps, in order
 
-1. **Decide the phoneme audio source** (§0). Everything else in Iteration 2 is
-   downstream of it.
-2. **Build the producer** for that choice — the Piper batch under C6, or the
-   Commons ingest. `src/services/audio-asset.service.js` already has
-   claim/produce/verify; only the `produce` function is missing.
-3. **Generate the 41 assets.** Every phoneme's asset reaches `ready`, the popover
-   replay control and the learning-page audio appear on their own.
-4. **Whole-word audio and the FR-IPA-05 fallback chain**, honouring SDD §4.12:
+1. ~~**Decide the phoneme audio source**~~ — **DECIDED 2026-09-11: option 1,
+   Piper for all 41.** See §0.
+2. **Decide the phoneme generation input. THIS IS THE OPEN BLOCKER.** V1 fixes
+   the engine (Piper), the voice (`en_US-libritts-high`) and the licensing, and
+   E1 routes a phoneme lacking a human recording into the TTS batch — but NO
+   authoritative source says what is fed to Piper to obtain an isolated
+   articulation of a single unit. Checked and found silent: `V1`, `E1`, `E2`,
+   `D4`, `FR-CONTENT-02/03/04`, and SDD v1.1 §3/§4.2/§8. Piper is a general TTS
+   engine; feeding it the literal character `ɝ` is not a specification. Two
+   further gaps sit in the same place: V1 says "on a chosen speaker id" and no
+   speaker id is recorded anywhere in the repository or config, and Piper's
+   documented CLI/Python surface does not expose a speaker selector, so the
+   multi-speaker `en_US-libritts-high` needs its selection method confirmed.
+   Piper is also not installed — no binary, no compose service, no voice model.
+   This is teaching content and wants the same sign-off D4's example words got.
+   Do not invent a strategy here.
+3. **Build the producer** once (2) is decided — the Piper batch under C6.
+   `src/services/audio-asset.service.js` already has claim/produce/verify, and
+   the mechanism is now tested (`tests/integration/audio-asset-generation.test.js`);
+   only the injected `produce` function is missing.
+4. **Generate the 41 assets.** Every phoneme's asset reaches `ready`, and the
+   popover replay control and the learning-page audio appear on their own —
+   verified by `tests/integration/audio-surfacing.test.js`, which flips one unit
+   to ready against a fixture and asserts both directions.
+5. **Whole-word audio and the FR-IPA-05 fallback chain**, honouring SDD §4.12:
    a secondary pronunciation gets a control only when an asset matches THAT
    pronunciation; primary audio is never reused for it; Web Speech is never
-   presented as pronunciation-specific secondary audio.
-5. **Re-run the FR-CONTENT-04 integrity check** once assets exist.
-6. **Close Iteration 2** and write its completion report.
+   presented as pronunciation-specific secondary audio. Nothing of tiers 1–3 is
+   built yet: `grep` finds no `rel="preload" as="audio"` (FR-IPA-06), no
+   `speechSynthesis` (FR-IPA-05 tier 3), and no "Audio unavailable" indicator.
+   Note that FR-IPA-05 reads "every word page **shall** present a whole-word
+   audio control", and its tier 3 is client-side, so that requirement is
+   satisfiable WITHOUT Piper — but building it would give every word page a
+   speaking control today, which is a visible product change and wants a
+   maintainer decision, not a silent implementation.
+6. **Run `npm run audio:verify`** once assets exist — the FR-CONTENT-04
+   integrity check plus the FR-CONTENT-02 canonical-coverage assertion. It
+   currently fails honestly at 0 of 41.
+7. **Close Iteration 2** and write its completion report.
 
 Optional, unblocked, small: `FR-IPA-09`'s web-delivered font. The system half of
 the stack is in place; the remaining half is a real decision about family,

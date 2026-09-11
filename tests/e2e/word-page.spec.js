@@ -50,12 +50,20 @@ test.describe('FR-WORD-03 — content', () => {
     );
   });
 
-  test('renders NO audio control — whole-word audio is Iteration 2', async ({ page }) => {
+  test('renders NO audio control while no asset is ready', async ({ page }) => {
     await page.goto(WORD_URL);
 
     // A control that cannot work is worse than temporarily leaving it out.
+    // This holds until a whole-word asset actually reaches `ready`; the page
+    // then renders one on its own, which `audio-surfacing.test.js` covers.
     await expect(page.locator('audio')).toHaveCount(0);
-    await expect(page.locator('[data-phoneme-id]')).toHaveCount(0);
+
+    // Iteration 2 made the phonemes clickable (FR-IPA-02), superseding this
+    // test's original assertion that no `data-phoneme-id` existed. The
+    // interaction itself belongs to `phoneme-interaction.spec.js`; asserting
+    // presence here keeps the two iterations' expectations from silently
+    // contradicting each other again.
+    await expect(page.locator('[data-phoneme-id]').first()).toBeVisible();
   });
 });
 

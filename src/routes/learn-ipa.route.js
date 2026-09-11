@@ -31,6 +31,7 @@
 
 import { Router } from 'express';
 
+import { config } from '../config/index.js';
 import { listActiveVariants } from '../services/catalogue.service.js';
 import { listGlobalInventory, listVariantInventory } from '../services/phoneme-page.service.js';
 import { requireActiveVariant } from '../services/word-page.service.js';
@@ -80,6 +81,10 @@ export function learnIpaRouter() {
         variant: null,
         variants,
         phonemes,
+        // The view emits an <audio> src for any unit whose asset is ready, so
+        // the prefix must be present on EVERY render, not only where audio
+        // happens to exist today (V4).
+        audioPublicPrefix: config.audio.publicPrefix,
         title: 'Learn IPA',
       });
     } catch (error) {
@@ -106,6 +111,7 @@ export function learnIpaRouter() {
         variant,
         variants: [variant],
         phonemes,
+        audioPublicPrefix: config.audio.publicPrefix,
         title: `Learn IPA — ${variant.displayName}`,
       });
     } catch (error) {
