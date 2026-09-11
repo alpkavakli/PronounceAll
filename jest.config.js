@@ -22,6 +22,16 @@ export default {
       testMatch: ['<rootDir>/tests/unit/**/*.test.js'],
     },
     {
+      // Run with `--runInBand` (see the `test:integration` script). Every
+      // integration suite shares ONE database: some insert fixture rows, others
+      // assert corpus-wide invariants, and a few mutate a real row and restore
+      // it. In parallel those overlap — a fixture word with no
+      // `pronunciation_phonemes` makes the seed-coverage invariant fail, and a
+      // suite that detaches a word's audio makes another suite's render
+      // assertion fail — with the failure landing on whichever suite happened
+      // to read mid-flight. The fault is the shared fixture, not the assertion,
+      // so the suites run serially rather than being weakened to tolerate each
+      // other. This mirrors the e2e guidance to use `--workers=1` locally.
       displayName: 'integration',
       testEnvironment: 'node',
       transform: {},

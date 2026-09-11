@@ -191,10 +191,25 @@ export async function getWordPage(variant, slug) {
     occurrences: occurrencesByPronunciation.get(pronunciation.pronunciationId) ?? [],
   }));
 
+  // FR-IPA-06: a word page preloads the phoneme audio for the phonemes it
+  // actually contains — typically 3 to 10 files, which is negligible — while
+  // the learnIPA pages preload nothing and lazy-load on demand. Distinct keys
+  // only: `cupcake` uses /k/ three times and must not emit three links. A unit
+  // whose asset is not ready contributes nothing to preload.
+  const preloadAudioKeys = [
+    ...new Set(
+      composed
+        .flatMap((pronunciation) => pronunciation.occurrences)
+        .map((occurrence) => occurrence.detail?.audioStorageKey)
+        .filter(Boolean),
+    ),
+  ];
+
   return {
     variant,
     word,
     pronunciations: composed,
+    preloadAudioKeys,
     // Ingestion guarantees exactly one primary at the lowest `display_order`,
     // so the ordered read already leads with it (E4, FR-WORD-03).
     primaryPronunciation: composed.find((entry) => entry.isPrimary) ?? composed[0],

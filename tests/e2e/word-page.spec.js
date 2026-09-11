@@ -50,13 +50,17 @@ test.describe('FR-WORD-03 — content', () => {
     );
   });
 
-  test('renders NO audio control while no asset is ready', async ({ page }) => {
+  test('renders no audio control that cannot play', async ({ page }) => {
     await page.goto(WORD_URL);
 
-    // A control that cannot work is worse than temporarily leaving it out.
-    // This holds until a whole-word asset actually reaches `ready`; the page
-    // then renders one on its own, which `audio-surfacing.test.js` covers.
-    await expect(page.locator('audio')).toHaveCount(0);
+    // A control that cannot work is worse than leaving it out. This began as
+    // "no audio element at all", which held only while every asset was still
+    // pending; the durable rule is that any control on the page has a real
+    // source behind it.
+    const sources = await page.locator('audio').evaluateAll((nodes) => nodes.map((n) => n.getAttribute('src')));
+    for (const source of sources) {
+      expect(source).toMatch(/^\/audio\/[0-9a-f]{2}\/[0-9a-f]{64}\./);
+    }
 
     // Iteration 2 made the phonemes clickable (FR-IPA-02), superseding this
     // test's original assertion that no `data-phoneme-id` existed. The

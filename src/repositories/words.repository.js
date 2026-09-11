@@ -364,3 +364,60 @@ export async function setPronunciationPrimary(
     [isPrimary ? 1 : 0, pronunciationId],
   );
 }
+
+/**
+ * Primary pronunciations that still have no whole-word audio asset.
+ *
+ * The work list for the FR-CONTENT-03 word TTS batch. It is deliberately
+ * restricted to PRIMARY pronunciations: D-R3-08 gives a secondary pronunciation
+ * a control only when an asset is known to correspond to that specific
+ * pronunciation, and a clip synthesised from the spelling carries no such
+ * guarantee, so it is attached to the primary reading only.
+ *
+ * @param {number} variantId
+ * @param {import('./transaction.js').Executor} [executor]
+ * @returns {Promise<Array<{pronunciationId: number, displayHeadword: string, normalizedHeadword: string}>>}
+ */
+export async function listPrimaryPronunciationsWithoutAudio(
+  variantId,
+  executor = defaultExecutor(),
+) {
+  const [rows] = await executor.execute(
+    `SELECT p.pronunciation_id, w.display_headword, w.normalized_headword
+       FROM word_pronunciations p
+       JOIN words w ON w.word_id = p.word_id
+      WHERE w.variant_id = ?
+        AND p.is_primary = 1
+        AND p.whole_word_audio_asset_id IS NULL
+      ORDER BY w.normalized_headword`,
+    [variantId],
+  );
+  return rows.map((row) => ({
+    pronunciationId: row.pronunciation_id,
+    displayHeadword: row.display_headword,
+    normalizedHeadword: row.normalized_headword,
+  }));
+}
+
+/**
+ * Point one pronunciation at its whole-word audio asset.
+ *
+ * Set only once the asset is actually `ready`: the render path treats a
+ * non-ready asset as no audio at all, but leaving a dangling reference would
+ * make the join meaningless.
+ *
+ * @param {number} pronunciationId
+ * @param {number} audioAssetId
+ * @param {import('./transaction.js').Executor} [executor]
+ * @returns {Promise<void>}
+ */
+export async function attachWholeWordAudio(
+  pronunciationId,
+  audioAssetId,
+  executor = defaultExecutor(),
+) {
+  await executor.execute(
+    'UPDATE word_pronunciations SET whole_word_audio_asset_id = ? WHERE pronunciation_id = ?',
+    [audioAssetId, pronunciationId],
+  );
+}

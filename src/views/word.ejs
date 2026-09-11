@@ -25,6 +25,13 @@
 <html lang="<%= variant.code %>">
 <head>
   <%- include('partials/head', { title: title, metaDescription: metaDescription, canonicalUrl: canonicalUrl }) %>
+  <%# FR-IPA-06: preload the phoneme audio this word actually uses, so a click
+      is audible inside the FR-IPA-04 budget. Distinct keys only, and only for
+      units whose asset is ready. The learnIPA pages deliberately emit none of
+      these and lazy-load instead. %>
+  <% preloadAudioKeys.forEach((storageKey) => { %>
+  <link rel="preload" as="audio" href="<%= audioPublicPrefix %>/<%= storageKey %>">
+  <% }); %>
 </head>
 <body>
   <main class="page word-page">
@@ -105,6 +112,26 @@
                     Your browser cannot play this recording.
                   </audio>
                 </p>
+              <% } else if (pronunciation.isPrimary) { %>
+                <%# FR-IPA-05 tier 3: with no server-side asset for the PRIMARY
+                    pronunciation, the last resort is the visitor's own Web
+                    Speech API. It is offered only here — D-R3-08 forbids
+                    presenting an uncontrolled synthesis as though it were a
+                    specific secondary pronunciation.
+
+                    Rendered hidden and unhidden by the script only where
+                    speechSynthesis actually exists, so a no-JS or unsupported
+                    browser is never shown a control that cannot speak. The
+                    failure message is a live region: FR-IPA-05 requires a
+                    visible error rather than a silent failure. %>
+                <p class="pronunciation__audio">
+                  <button type="button" class="pronunciation__speak" hidden
+                          data-speak="<%= word.displayHeadword %>"
+                          data-lang="<%= variant.code %>">
+                    Play <span class="visually-hidden"><%= word.displayHeadword %></span>
+                  </button>
+                  <span class="pronunciation__audio-status" role="status" hidden></span>
+                </p>
               <% } %>
 
               <%# FR-WORD-03: the written syllable and stress breakdown, marking
@@ -142,5 +169,8 @@
       already reads without it. External module, so the nonce-free shell CSP
       (`script-src 'self'`) admits it. %>
   <script type="module" src="/js/phoneme-popover.js"></script>
+  <%# FR-IPA-05 tier 3. Only reveals a control where the browser can actually
+      speak; every word with a server-side asset already played without it. %>
+  <script type="module" src="/js/whole-word-audio.js"></script>
 </body>
 </html>

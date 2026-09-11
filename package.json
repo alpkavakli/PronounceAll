@@ -22,7 +22,7 @@
     "lint:licence": "node scripts/check-licence-headers.js",
     "test": "npm run test:unit && npm run test:integration",
     "test:unit": "cross-env NODE_OPTIONS=--experimental-vm-modules jest --selectProjects unit",
-    "test:integration": "cross-env NODE_OPTIONS=--experimental-vm-modules jest --selectProjects integration",
+    "test:integration": "cross-env NODE_OPTIONS=--experimental-vm-modules jest --selectProjects integration --runInBand",
     "test:e2e": "playwright test",
     "migrate": "docker compose run --rm flyway migrate",
     "migrate:info": "docker compose run --rm flyway info",
@@ -35,6 +35,7 @@
     "inventory:check": "node scripts/extract-phoneme-inventory.js --check",
     "audio:preflight": "node scripts/generate-phoneme-audio.js --dry-run",
     "audio:generate": "node scripts/generate-phoneme-audio.js",
+    "audio:generate:words": "node scripts/generate-word-audio.js",
     "audio:verify": "node scripts/verify-audio-assets.js",
     "capture:word-page": "node scripts/capture-word-page.js",
     "size": "npm run capture:word-page && size-limit"

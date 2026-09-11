@@ -316,3 +316,85 @@ export function createSynthesiser(profile, { toolRoot = DEFAULT_TOOL_ROOT } = {}
     }
   };
 }
+
+/**
+ * Synthesise many texts in ONE Piper invocation.
+ *
+ * Loading the 131 MB model dominates a single-item run: 41 separate invocations
+ * cost about 1.6 s each, while one invocation over many lines costs that once
+ * and roughly 0.1 s per additional item. For the several-thousand-word batch
+ * that is the difference between hours and minutes.
+ *
+ * Piper names each output file after its input line, so the mapping back is by
+ * text and the caller must pass distinct texts within a chunk. Anything Piper
+ * did not write is simply absent from the returned map; the caller decides
+ * whether to retry it singly rather than having a partial chunk throw away the
+ * work that did succeed.
+ *
+ * The trade-off against {@link createSynthesiser} is that audio is produced
+ * BEFORE the C6 claim rather than after it. That is safe for an offline,
+ * single-operator content batch — `produceAsset` still performs the atomic
+ * claim and refuses to store twice — but it means a losing worker would have
+ * spent the synthesis. Do not reuse this shape for concurrent workers.
+ *
+ * @param {object} profile
+ * @param {{toolRoot?: string}} [options]
+ * @returns {(items: Array<{id: string, text: string}>) => Promise<Map<string, {bytes: Buffer, mimeType: string, info: object}>>}
+ */
+export function createBatchSynthesiser(profile, { toolRoot = DEFAULT_TOOL_ROOT } = {}) {
+  const tooling = resolveTooling(profile, toolRoot);
+
+  return async function synthesiseBatch(items) {
+    const scratch = await fs.mkdtemp(path.join(os.tmpdir(), 'pronounceall-piper-batch-'));
+    const inputFile = path.join(scratch, 'input.txt');
+    const outputDir = path.join(scratch, 'out');
+    const produced = new Map();
+
+    try {
+      // eslint-disable-next-line security/detect-non-literal-fs-filename
+      await fs.mkdir(outputDir, { recursive: true });
+      // eslint-disable-next-line security/detect-non-literal-fs-filename
+      await fs.writeFile(inputFile, `${items.map((item) => item.text).join('\n')}\n`, 'utf8');
+
+      await execFileAsync(
+        tooling.python,
+        [
+          '-m',
+          'piper',
+          '-m',
+          tooling.model,
+          '-c',
+          tooling.config,
+          '-s',
+          String(profile.voice.speakerId),
+          '-i',
+          inputFile,
+          '-d',
+          outputDir,
+          '--output-dir-naming',
+          'text',
+        ],
+        { env: { ...process.env, PYTHONIOENCODING: 'utf-8' }, maxBuffer: 64 * 1024 * 1024 },
+      );
+
+      for (const item of items) {
+        const file = path.join(outputDir, `${item.text}.wav`);
+        // eslint-disable-next-line security/detect-non-literal-fs-filename
+        const bytes = await fs.readFile(file).catch(() => null);
+        if (!bytes) {
+          continue;
+        }
+        try {
+          const info = assertUsableAudio(bytes, profile.output);
+          produced.set(item.id, { bytes, mimeType: profile.output.mimeType, info });
+        } catch {
+          // Leave it out; the caller retries it singly and reports honestly.
+        }
+      }
+
+      return produced;
+    } finally {
+      await fs.rm(scratch, { recursive: true, force: true });
+    }
+  };
+}

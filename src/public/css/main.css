@@ -356,6 +356,25 @@ a:focus-visible,
   max-width: 100%;
 }
 
+/* FR-IPA-05 tier 3. Matches the popover's replay control, and holds the same
+   44 px floor NFR-A11Y-08 requires of every touch target. */
+.pronunciation__speak {
+  min-height: 44px;
+  padding: 0.4rem 0.9rem;
+  font: inherit;
+  color: #16324f;
+  background: #e8eef7;
+  border: 1px solid #c8d2e0;
+  border-radius: 0.35rem;
+  cursor: pointer;
+}
+
+/* The end of the fallback chain is reported, never silent (FR-IPA-05). */
+.pronunciation__audio-status {
+  margin-left: 0.6rem;
+  color: #8a2b2b;
+}
+
 /* ---------------------------------------------------------------------------
    Word search (FIND-10)
    ---------------------------------------------------------------------------

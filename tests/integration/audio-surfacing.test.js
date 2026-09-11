@@ -198,12 +198,38 @@ describe('the word page popover data (FR-IPA-03/04)', () => {
 });
 
 describe('no whole-word audio is invented from phoneme audio (SDD §4.12, D-R3-08)', () => {
-  test('ready phoneme assets do not produce a whole-word control', async () => {
+  // This began as "a ready phoneme asset produces no whole-word control", which
+  // was checkable only while no word had audio at all. The durable rule is that
+  // a pronunciation gets a native control for ITS OWN ready asset and for
+  // nothing else — never the primary's audio reused, and never a phoneme clip
+  // promoted into a word clip.
+  test('each pronunciation gets a native control only for its own ready asset', async () => {
+    const rows = await query(
+      `SELECT COUNT(*) AS withAudio
+         FROM word_pronunciations p
+         JOIN words w ON w.word_id = p.word_id
+         JOIN language_variants v ON v.variant_id = w.variant_id
+         JOIN audio_assets a ON a.audio_asset_id = p.whole_word_audio_asset_id
+        WHERE v.code = 'en-us' AND w.normalized_headword = 'cupcake'
+          AND a.generation_status = 'ready'`,
+    );
+
+    const response = await request(app).get('/en-us/cupcake');
+    const controls = response.text.match(/<audio controls/g)?.length ?? 0;
+
+    expect(controls).toBe(Number(rows[0].withAudio));
+  });
+
+  test('a phoneme asset is never rendered as whole-word audio', async () => {
     const response = await request(app).get('/en-us/cupcake');
 
-    // `cupcake` has no whole-word asset. A phoneme asset must never be
-    // promoted into one.
-    expect(response.text).not.toContain('pronunciation__audio');
-    expect(response.text).not.toContain('<audio controls');
+    // The ready phoneme clips reach the page only as popover `data-audio`
+    // attributes, never as a `<audio controls>` source.
+    const wholeWordSources = [...response.text.matchAll(/<audio controls[^>]*src="([^"]+)"/g)].map((m) => m[1]);
+    const phonemeSources = [...response.text.matchAll(/data-audio="([^"]+)"/g)].map((m) => m[1]);
+
+    for (const source of wholeWordSources) {
+      expect(phonemeSources).not.toContain(source);
+    }
   });
 });
