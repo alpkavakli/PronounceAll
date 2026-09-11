@@ -176,6 +176,50 @@ export async function markFailed(assetKey, executor = defaultExecutor()) {
 }
 
 /**
+ * Deliberately invalidate ONE produced asset so it can be generated again.
+ *
+ * A `ready` asset is immutable under V4 and `claimForGeneration` refuses it, so
+ * replacing a clip that failed review is impossible by accident — which is the
+ * point. This is the explicit, operator-initiated exception, and it is narrow on
+ * purpose: it addresses a single `asset_key`, and it returns the row it reset so
+ * the caller can report exactly what was invalidated.
+ *
+ * The FILE is never mutated: `storage_key` is content-addressed, the previous
+ * file stays on disk, and regeneration produces a new one. Only the row's
+ * pointer moves, which is why the phoneme's `audio_asset_id` needs no update and
+ * cannot be left dangling.
+ *
+ * Returns null when the key is unknown, so a typo cannot silently reset nothing
+ * and report success.
+ *
+ * @param {string} assetKey
+ * @param {object} [executor]
+ * @returns {Promise<{storageKey: string|null, generationStatus: string}|null>} the PREVIOUS state
+ */
+export async function resetForRegeneration(assetKey, executor = defaultExecutor()) {
+  const [existing] = await executor.execute(
+    'SELECT storage_key, generation_status FROM audio_assets WHERE asset_key = ?',
+    [assetKey],
+  );
+  if (existing.length === 0) {
+    return null;
+  }
+
+  await executor.execute(
+    `UPDATE audio_assets
+        SET generation_status = 'pending', storage_key = NULL, sha256 = NULL,
+            mime_type = NULL, byte_length = NULL
+      WHERE asset_key = ?`,
+    [assetKey],
+  );
+
+  return {
+    storageKey: existing[0].storage_key,
+    generationStatus: existing[0].generation_status,
+  };
+}
+
+/**
  * @param {string} status
  * @param {object} [executor]
  * @returns {Promise<AudioAssetRow[]>}

@@ -32,7 +32,7 @@ import { afterAll, beforeEach, describe, expect, jest, test } from '@jest/global
 import { resolvePath } from '../../src/lib/audio-storage.js';
 import * as storage from '../../src/lib/audio-storage.js';
 import { closePool, getPool } from '../../src/lib/mysql.js';
-import { claimForGeneration } from '../../src/repositories/audio-assets.repository.js';
+import { claimForGeneration, resetForRegeneration } from '../../src/repositories/audio-assets.repository.js';
 import { produceAsset, registerAsset } from '../../src/services/audio-asset.service.js';
 
 /** Every key this suite creates starts here, so cleanup can never touch real assets. */
@@ -241,6 +241,63 @@ describe('a failed attempt is recoverable (re-runnability)', () => {
     // upsertPending refreshes provenance but never rewrites generation_status,
     // so recovery is the claim's job, not the seed's.
     expect(await statusOf(assetKey)).toBe('failed');
+  });
+});
+
+describe('replacing a reviewed clip (the operator exception)', () => {
+  // A `ready` asset is immutable under V4 and the claim refuses it, so a clip
+  // that fails the listening pass cannot be replaced by accident. This is the
+  // one explicit path that can, and these assert it stays narrow.
+  test('a ready asset can be reset and then produced again', async () => {
+    const assetKey = await givenPendingAsset('regenerate');
+    await produceAsset({ assetKey, storage: trackingStorage, produce: producerOf('regenerate') });
+    const before = await rowOf(assetKey);
+
+    const previous = await resetForRegeneration(assetKey);
+
+    expect(previous.generationStatus).toBe('ready');
+    expect(previous.storageKey).toBe(before.storage_key);
+    expect(await statusOf(assetKey)).toBe('pending');
+
+    // Different bytes stand in for a different draw from the synthesiser.
+    const replacement = jest.fn(async () => ({
+      bytes: Buffer.from('a different take of the same unit'),
+      mimeType: OGG,
+    }));
+    const result = await produceAsset({ assetKey, storage: trackingStorage, produce: replacement });
+
+    expect(result.status).toBe('ready');
+    const after = await rowOf(assetKey);
+    // Content-addressed: a new take is a NEW file, not an overwrite.
+    expect(after.storage_key).not.toBe(before.storage_key);
+    expect(after.sha256).not.toBe(before.sha256);
+  });
+
+  test('the reset clears the generated columns, so a half-replaced row cannot be served', async () => {
+    const assetKey = await givenPendingAsset('reset-clears');
+    await produceAsset({ assetKey, storage: trackingStorage, produce: producerOf('reset-clears') });
+
+    await resetForRegeneration(assetKey);
+
+    const row = await rowOf(assetKey);
+    expect(row.storage_key).toBeNull();
+    expect(row.sha256).toBeNull();
+    expect(row.mime_type).toBeNull();
+    expect(row.byte_length).toBeNull();
+  });
+
+  test('the previous file survives on disk, so the change is reversible', async () => {
+    const assetKey = await givenPendingAsset('previous-kept');
+    await produceAsset({ assetKey, storage: trackingStorage, produce: producerOf('previous-kept') });
+    const before = await rowOf(assetKey);
+
+    await resetForRegeneration(assetKey);
+
+    await expect(fs.stat(resolvePath(before.storage_key))).resolves.toBeDefined();
+  });
+
+  test('an unknown key resets nothing and reports it, rather than reporting success', async () => {
+    expect(await resetForRegeneration(`${TEST_PREFIX}not-registered`)).toBeNull();
   });
 });
 
