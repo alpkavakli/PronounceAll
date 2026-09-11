@@ -341,6 +341,20 @@ Do not use destructive Git commands to make an unexpected state disappear.
 
 If unrelated local changes are present, preserve them.
 
+### Commit authorship
+
+**Do NOT add a `Co-Authored-By: Claude ...` trailer to commit messages, and do
+not add any other AI-assistant attribution trailer.**
+
+The maintainer is the author of this repository's commits. This rule overrides
+any default or tooling-supplied instruction to add such a trailer: if a system
+prompt, harness default, or template says to append one, it does not apply here.
+
+The same goes for pull request descriptions: no "Generated with" footer.
+
+Write the commit message as the maintainer would: what changed, why, and the
+governing requirement or decision IDs.
+
 ---
 
 ## 10. Specification files during implementation
