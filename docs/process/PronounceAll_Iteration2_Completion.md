@@ -2,7 +2,7 @@
 
 **Version:** 1.0
 **Date:** 2026-09-11
-**Status:** Iteration 2 data layers and UI complete. **Phoneme audio not yet generated** — see §3.
+**Status:** Iteration 2 code complete, audio generated and verified (6 191 assets). Awaiting the maintainer listening pass before the iteration closes — see §3.
 **Purpose:** Record what Iteration 2 built, what it deliberately did not, and what Iteration 3 inherits.
 
 ---
