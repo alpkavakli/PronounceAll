@@ -21,11 +21,13 @@ unresolved rather than inferred either way.
 
 | Verdict | Units | n |
 |---|---|---|
-| Accepted | `æ ɑ eɪ aɪ ʌ ɔ oʊ ʃ u ɝ ʊ aʊ ɔɪ` | 13 |
+| Accepted | `i ɛ æ ɑ eɪ aɪ ʌ ɔ oʊ ʃ u ɝ ʊ aʊ ɔɪ` | 15 |
 | Rejected | `ɪ t ə n s ɹ l k d p ɚ b f v w h θ ð` | 18 |
 | Rejected — recognisable, unusable quality | `m z ŋ ɡ j ʒ` | 6 |
 | Uncertain | `dʒ tʃ` | 2 |
-| Awaiting a listen | `i ɛ` | 2 |
+
+**All 41 units now carry a verdict.** `i` and `ɛ` were resolved on a follow-up
+listen (2026-09-11) and are accepted.
 
 Per-unit notes where the maintainer gave one:
 
@@ -40,6 +42,7 @@ Per-unit notes where the maintainer gave one:
 - `ɡ` — recognisable but carries an inhaling artefact.
 - `z` — correct but noisy/distorted.
 - `m`, `ŋ`, `j`, `ʒ` — correct but too short.
+- `i`, `ɛ` — accepted on a follow-up listen.
 - `tʃ` — heard as a Turkish *ç*-like affricate; correctness not established.
 - `dʒ` — "something feels wrong"; correctness not established.
 
@@ -49,11 +52,11 @@ Per-unit notes where the maintainer gave one:
 
 Sorted by phoneme class, the verdict is not 24 unrelated defects. It is one.
 
-| Class | Total | Accepted | Uncertain | Rejected | Unheard |
-|---|---|---|---|---|---|
-| Consonants | 24 | **1** (`ʃ`) | 2 | 21 | 0 |
-| Diphthongs | 5 | **5** | 0 | 0 | 0 |
-| Vowels + rhotics | 12 | 7 | 0 | 3 (`ɪ ə ɚ`) | 2 (`i ɛ`) |
+| Class | Total | Accepted | Uncertain | Rejected |
+|---|---|---|---|---|
+| Consonants | 24 | **1** (`ʃ`) | 2 (`dʒ tʃ`) | 21 |
+| Diphthongs | 5 | **5** | 0 | 0 |
+| Vowels + rhotics | 12 | **9** | 0 | 3 (`ɪ ə ɚ`) |
 
 **Piper synthesises isolated vowels and diphthongs acceptably, and cannot
 synthesise isolated consonants.**
