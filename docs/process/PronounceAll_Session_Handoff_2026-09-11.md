@@ -3,14 +3,31 @@
 **Purpose:** Resume work in a fresh chat without re-deriving the state of the
 repository. Paste this file in first.
 
-**Status at handoff:** working tree clean, everything committed, gate green.
-Head is `e71800e`.
+**Status at handoff:** working tree clean, everything committed.
+Head is `394481d`.
+
+> **UPDATE, later on 2026-09-11 — SECTION 0 IS RESOLVED.**
+>
+> The audio source decision was made (option 1, Piper for all 41), the
+> generation input was approved by the maintainer, and **all audio is now
+> generated**: 41 canonical phoneme assets and 6150 whole-word assets, 6191
+> ready and verified in total. `npm run audio:verify` PASSES.
+>
+> The FR-IPA-05 fallback chain, the Web Speech tier 3, the "Audio unavailable"
+> state and the FR-IPA-06 preload behaviour are all implemented.
+>
+> **The only thing left before Iteration 2 can close is a maintainer LISTENING
+> PASS over the generated audio.** That is QA on content, not another design
+> decision. See section 10.
+>
+> Section 0 below is kept as the record of how the decision was reached. Do not
+> act on it as if it were still open.
 
 ---
 
-## 0. The one decision that is blocking
+## 0. The decision that was blocking (RESOLVED 2026-09-11)
 
-**Iteration 2 cannot close until you choose a phoneme audio source.**
+**~~Iteration 2 cannot close until you choose a phoneme audio source.~~**
 
 All 41 `audio_assets` rows exist and are `pending`. No audio file exists. They
 are real, licensed rows with deterministic keys — nothing fabricated a digest, a
@@ -74,7 +91,7 @@ Full detail: `docs/process/PronounceAll_Iteration2_Completion.md` §3.
 |---|---|
 | 0 — Foundation | done, committed |
 | 1 — Word pages | done, approved, committed |
-| 2 — IPA system + audio | data layers, tokenizer, clickable IPA, learning pages **done**; **audio not done** (§0) |
+| 2 — IPA system + audio | **code complete.** Data layers, tokenizer, clickable IPA, learning pages, phoneme audio, whole-word audio, the FR-IPA-05 chain and FR-IPA-06 preload are all done. Closing needs only the maintainer listening pass (§10) |
 | 3 — Save/tag | not started. **Do not begin without asking.** |
 
 Phase 0 (documentation) is closed. Architecture is frozen. The default task is
@@ -83,6 +100,11 @@ to implement the existing specification faithfully.
 ### Commits this session
 
 ```
+394481d feat: whole-word audio and the FR-IPA-05 fallback chain (FR-CONTENT-03)
+da79278 feat: generate the 41 canonical phoneme audio assets with Piper
+ec808d1 docs: add the proposed frontend design baseline (NOT authoritative yet)
+afaa7af fix: make audio generation re-runnable, and unbreak learnIPA once audio exists
+b4b6060 docs: session handoff, and add the missing fetch:headwords script
 e71800e feat: the phoneme learning pages (FR-IPA-07, FR-IPA-10)
 d37ce61 feat: put the search box on the word and unknown-word pages
 9eff7e4 feat: word search, and expand the dictionary to 6150 headwords
@@ -124,9 +146,16 @@ npm run dev            # http://localhost:3000
 | `phonemes` | 41 |
 | `phoneme_example_words` | 41 |
 | `pronunciation_phonemes` | 39 896 |
-| `audio_assets` | 41, **all pending** |
+| `audio_assets` | 6 191, **all ready** (41 phoneme + 6 150 whole-word) |
 
-Migrations `V1`–`V5` applied. Next is `V6__`.
+Migrations `V1`–`V5` applied. Next is `V6__`. No migration was needed for the
+audio work.
+
+Generated audio lives in `data/audio/`, which is **gitignored**. A fresh clone
+has no audio until `npm run audio:generate` and `npm run audio:generate:words`
+are run. Note that Piper's VITS sampling is stochastic, so regenerating produces
+DIFFERENT bytes and therefore different content-addressed keys — the profile
+pins the generator's identity, not the output's.
 
 ---
 
@@ -267,20 +296,31 @@ inflected "form-of" entries with no independent definition (`went`, `said`), and
 
 ```bash
 npm run lint             # architecture + SQL rules; the build enforces C4
-npm run lint:licence     # NFR-LEGAL-03, 93 files
+npm run lint:licence     # NFR-LEGAL-03, 100 files
 npm run inventory:check  # D4 drift
-npm run audio:verify     # FR-CONTENT-02/04 — fails until audio is generated
-npm test                 # 158 unit + 149 integration
+npm run audio:preflight  # voice/model/speaker drift, before generating anything
+npm run audio:verify     # FR-CONTENT-02/04 integrity and canonical coverage
+npm test                 # 177 unit + 158 integration (integration runs serially)
 npm run test:e2e         # run per project, --workers=1 locally
 npm run size             # NFR-PERF-07
 npm audit --audit-level=high --omit=dev
 ```
 
-Last full run (2026-09-11, after the audio-mechanism work): lint clean, licence
-93 files, inventory matches, **158 unit**, **149 integration**, chromium **55**,
-webkit **55**, firefox **55**, no-javascript **35** passed / 11 skipped, size
-**6.79 kB** against 150 kB, audit clean. `npm run audio:verify` FAILS by design:
-0 of 41 canonical units have ready audio.
+Last full run (2026-09-11, after all audio was generated): lint clean, licence
+100 files, inventory matches, **177 unit**, **158 integration**, chromium **59**,
+webkit **59**, no-javascript **34 passed / 25 skipped**, size **7.32 kB** against
+150 kB, audit clean, `audio:verify` **PASS** — 41/41 canonical units, 6 191
+assets checked, zero missing files, zero digest mismatches.
+
+**Integration tests now run with `--runInBand`.** They share one database: some
+suites insert fixture rows, others assert corpus-wide invariants, and a few
+mutate a real row and restore it. In parallel those overlap and the failure
+lands on whichever suite read mid-flight. See the comment in `jest.config.js`.
+
+**Firefox, this session:** it passed 55/55 twice early on, then degraded to the
+documented teardown flake. Every one of the 36 failures was the same
+`browserContext.close` protocol error and there were **zero assertion failures**.
+Unchanged standing instruction: do not work around it; Linux CI is authoritative.
 
 **Correction to the previous entry.** It recorded chromium **54** / webkit **54**
 / no-javascript **34** and called the gate green. Those were the PASSING counts;
@@ -295,49 +335,29 @@ evidence that a clean e2e run existed at `e71800e`.
 
 ## 8. Suggested next steps, in order
 
-1. ~~**Decide the phoneme audio source**~~ — **DECIDED 2026-09-11: option 1,
-   Piper for all 41.** See §0.
-2. **Decide the phoneme generation input. THIS IS THE OPEN BLOCKER.** V1 fixes
-   the engine (Piper), the voice (`en_US-libritts-high`) and the licensing, and
-   E1 routes a phoneme lacking a human recording into the TTS batch — but NO
-   authoritative source says what is fed to Piper to obtain an isolated
-   articulation of a single unit. Checked and found silent: `V1`, `E1`, `E2`,
-   `D4`, `FR-CONTENT-02/03/04`, and SDD v1.1 §3/§4.2/§8. Piper is a general TTS
-   engine; feeding it the literal character `ɝ` is not a specification. Two
-   further gaps sit in the same place: V1 says "on a chosen speaker id" and no
-   speaker id is recorded anywhere in the repository or config, and Piper's
-   documented CLI/Python surface does not expose a speaker selector, so the
-   multi-speaker `en_US-libritts-high` needs its selection method confirmed.
-   Piper is also not installed — no binary, no compose service, no voice model.
-   This is teaching content and wants the same sign-off D4's example words got.
-   Do not invent a strategy here.
-3. **Build the producer** once (2) is decided — the Piper batch under C6.
-   `src/services/audio-asset.service.js` already has claim/produce/verify, and
-   the mechanism is now tested (`tests/integration/audio-asset-generation.test.js`);
-   only the injected `produce` function is missing.
-4. **Generate the 41 assets.** Every phoneme's asset reaches `ready`, and the
-   popover replay control and the learning-page audio appear on their own —
-   verified by `tests/integration/audio-surfacing.test.js`, which flips one unit
-   to ready against a fixture and asserts both directions.
-5. **Whole-word audio and the FR-IPA-05 fallback chain**, honouring SDD §4.12:
-   a secondary pronunciation gets a control only when an asset matches THAT
-   pronunciation; primary audio is never reused for it; Web Speech is never
-   presented as pronunciation-specific secondary audio. Nothing of tiers 1–3 is
-   built yet: `grep` finds no `rel="preload" as="audio"` (FR-IPA-06), no
-   `speechSynthesis` (FR-IPA-05 tier 3), and no "Audio unavailable" indicator.
-   Note that FR-IPA-05 reads "every word page **shall** present a whole-word
-   audio control", and its tier 3 is client-side, so that requirement is
-   satisfiable WITHOUT Piper — but building it would give every word page a
-   speaking control today, which is a visible product change and wants a
-   maintainer decision, not a silent implementation.
-6. **Run `npm run audio:verify`** once assets exist — the FR-CONTENT-04
-   integrity check plus the FR-CONTENT-02 canonical-coverage assertion. It
-   currently fails honestly at 0 of 41.
-7. **Close Iteration 2** and write its completion report.
+Steps 1 to 6 of the previous list are **done**: the audio source was decided, the
+generation input was approved, the producer was built, all 6 191 assets were
+generated and verified, and the FR-IPA-05 chain and FR-IPA-06 preload were
+implemented. What remains:
 
-Optional, unblocked, small: `FR-IPA-09`'s web-delivered font. The system half of
-the stack is in place; the remaining half is a real decision about family,
-licence, subsetting, and page weight.
+1. **The maintainer listening pass (§10).** The only thing between here and
+   closing Iteration 2. It is content QA, not a design decision.
+2. **Decide what happens to a rejected clip.** There is no supported way to
+   replace one today (§10). Build that path only if the listening pass needs it.
+3. **Close Iteration 2** and write its completion report.
+
+Still open, and unchanged by this session:
+
+- **FIND-09 / FIND-10 / FIND-11** documentation debt (§5).
+- **The frontend design baseline** is PROPOSED and not authoritative (§5). Review,
+  approve, freeze, and only then route it in `DOC_INDEX.md`.
+- `FR-IPA-09`'s web-delivered font: optional, unblocked, small. The system half
+  of the stack is in place; the rest is a real decision about family, licence,
+  subsetting, and page weight.
+- **Wiktionary human recordings (FR-IPA-05 tier 1)** were never ingested — no
+  `wiktionary_human` asset exists. Every word currently plays Piper TTS. Tier 1
+  is a content-pipeline addition, not a code change: when those assets land the
+  word batch simply finds less to do.
 
 **Do not begin Iteration 3 without asking.**
 
@@ -357,3 +377,36 @@ licence, subsetting, and page weight.
    than skipping it silently.
 8. Never fabricate content to make a constraint pass — no placeholder audio, no
    invented pronunciations, no coerced IPA.
+
+---
+
+## 10. The listening pass — the one thing left for Iteration 2
+
+The audio is generated, verified and wired up. What no automated check can
+assert is whether a clip is the RIGHT sound. The output checks are deliberately
+mechanical — decodable, correct format, non-empty, non-silent — and none of them
+claims pedagogical correctness.
+
+**How to listen.** `npm run dev`, then open `http://localhost:3000/en-us/learnIPA`.
+All 41 units render with a play control, in frequency order. Word audio is on
+any word page, e.g. `/en-us/cupcake`.
+
+**Start with `/ɑ/`.** Its stored clip is 0.081 s, the same length as the shortest
+plosive and about a fifth of the vowel mean (0.379 s). Five fresh runs of the
+same input gave 0.197–0.522 s, so this is an unlucky draw at the short tail of
+Piper's stochastic duration predictor rather than a mapping error.
+
+Durations by category, for orientation:
+
+| Category | Mean | Shortest | Longest |
+|---|---|---|---|
+| consonant | 0.214 s | `f` 0.070 | `dʒ` 0.395 |
+| vowel | 0.379 s | **`ɑ` 0.081** | `i` 0.522 |
+| central rhotic | 0.401 s | `ɚ` 0.244 | `ɝ` 0.557 |
+| diphthong | 0.504 s | `oʊ` 0.395 | `aɪ` 0.604 |
+
+**There is currently no supported way to replace a single bad clip.** `ready` is
+immutable under V4 and `claimForGeneration` refuses a `ready` row, so
+regenerating one means deliberately resetting that row first. If the listening
+pass rejects clips, that operator path is the next thing to build — it was not
+invented speculatively.

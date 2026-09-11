@@ -114,7 +114,23 @@ The seed is idempotent: a second run reports 179 unchanged, 0 changes.
 
 ---
 
-## 3. NOT DONE — phoneme audio is not generated
+## 3. Phoneme audio — DONE as of 2026-09-11
+
+> **RESOLVED.** Everything in this section described the state before the audio
+> was generated. It is kept as the record of how the decision was reached.
+>
+> All 41 canonical units now have a ready, verified asset, generated with Piper
+> through the owner-approved raw-phoneme-injection profile
+> (`data/seed/en-us.piper-profile.json`). 6 150 whole-word assets were generated
+> too, so `audio_assets` holds 6 191 ready rows and `npm run audio:verify`
+> passes at 41/41 canonical coverage with zero integrity problems.
+>
+> `FR-CONTENT-02`, `FR-CONTENT-03`, `FR-IPA-04`, `FR-IPA-05` and `FR-IPA-06` are
+> now implemented. What remains before Iteration 2 closes is the maintainer
+> LISTENING PASS over the generated audio — content QA, not a design decision.
+> See §10 of the session handoff.
+
+### The original record
 
 **All 41 `audio_assets` rows are `pending`. No audio file exists.**
 
