@@ -24,13 +24,9 @@ import process from 'node:process';
 
 import * as storage from '../src/lib/audio-storage.js';
 import { closePool } from '../src/lib/mysql.js';
-import {
-  ASSET_KIND,
-  assetKeyFor,
-  findByAssetKey,
-  statusSummary,
-  verifyIntegrity,
-} from '../src/services/audio-asset.service.js';
+import { listPhonemeAudio } from '../src/repositories/phonemes.repository.js';
+import { statusSummary, verifyIntegrity } from '../src/services/audio-asset.service.js';
+import { resolveActiveVariant } from '../src/services/catalogue.service.js';
 import { loadInventory } from '../src/services/ipa-tokenization.service.js';
 
 const out = (line) => process.stdout.write(`${line}\n`);
@@ -46,8 +42,13 @@ function provenanceProblems(asset) {
   if (!asset.attributionText) {
     problems.push('no attribution text');
   }
-  if (asset.sourceKind === 'wiktionary_human' && !asset.sourceReference) {
-    problems.push('human recording with no upstream source reference');
+  if (asset.sourceKind?.endsWith('_human')) {
+    if (!asset.sourceReference) {
+      problems.push('human recording with no upstream source reference');
+    }
+    if (!asset.author) {
+      problems.push('human recording with no author, so it cannot be attributed');
+    }
   }
   return problems;
 }
@@ -83,34 +84,46 @@ async function main() {
   }
 
   // ---- Canonical phoneme coverage (FR-CONTENT-02, D4) ---------------------
+  // Follow what each phoneme ACTUALLY serves. Since the hybrid audio policy a
+  // unit may serve a Piper clip or a Commons human recording, so deriving a key
+  // from an assumed source would report a promoted unit as missing.
   out('\nCanonical phoneme coverage (FR-CONTENT-02)');
+  const variant = await resolveActiveVariant(variantCode);
   const inventory = await loadInventory(variantCode);
+  const served = await listPhonemeAudio(variant.variantId);
+  const bySymbol = new Map(served.map((row) => [row.ipaSymbol, row]));
+
   const notReady = [];
   const provenance = [];
+  const bySource = {};
 
   for (const unit of inventory.units) {
-    const assetKey = assetKeyFor({
-      kind: ASSET_KIND.PHONEME,
-      variantCode,
-      target: unit.ipaSymbol,
-      sourceKind: 'tts_piper',
-    });
-    const asset = await findByAssetKey(assetKey);
+    const row = bySymbol.get(unit.ipaSymbol);
 
-    if (!asset) {
-      notReady.push({ symbol: unit.ipaSymbol, state: 'no asset row registered' });
+    if (!row) {
+      notReady.push({ symbol: unit.ipaSymbol, state: 'no phoneme row' });
       continue;
     }
-    if (asset.generationStatus !== 'ready') {
-      notReady.push({ symbol: unit.ipaSymbol, state: asset.generationStatus });
+    if (!row.audioAssetId) {
+      notReady.push({ symbol: unit.ipaSymbol, state: 'no audio asset referenced' });
+      continue;
     }
-    for (const problem of provenanceProblems(asset)) {
+    if (row.generationStatus !== 'ready') {
+      notReady.push({ symbol: unit.ipaSymbol, state: row.generationStatus });
+    }
+
+    bySource[row.sourceKind] = (bySource[row.sourceKind] ?? 0) + 1;
+
+    for (const problem of provenanceProblems(row)) {
       provenance.push({ symbol: unit.ipaSymbol, problem });
     }
   }
 
   const ready = inventory.units.length - notReady.length;
-  out(`  ${ready} of ${inventory.units.length} canonical units have ready audio`);
+  out(`  ${ready} of ${inventory.units.length} canonical units serve ready audio`);
+  for (const [kind, count] of Object.entries(bySource)) {
+    out(`    ${kind.padEnd(16)} ${count}`);
+  }
 
   if (notReady.length > 0) {
     out(`  ${notReady.length} NOT ready:`);
@@ -125,7 +138,7 @@ async function main() {
       out(`    - /${row.symbol}/ ${row.problem}`);
     }
   } else {
-    out('  every registered unit records a licence and attribution');
+    out('  every unit records a licence, attribution and author where required');
   }
 
   // ---- Verdict ------------------------------------------------------------

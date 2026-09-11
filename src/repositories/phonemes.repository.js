@@ -295,3 +295,86 @@ export async function listAllPhonemeDetails(executor = defaultExecutor()) {
     audioLicence: row.licence_identifier,
   }));
 }
+
+/**
+ * Point one canonical unit at a different audio asset.
+ *
+ * The promotion step of the hybrid audio policy: a replacement is fetched,
+ * validated and stored well before this runs, and only a maintainer's listening
+ * verdict causes the pointer to move. Both assets survive — the superseded one
+ * stays on disk and in `audio_assets`, so a promotion is auditable and
+ * reversible by pointing the row back.
+ *
+ * Returns the PREVIOUS asset id, or null when the unit does not exist, so a
+ * caller cannot report a promotion that did not happen.
+ *
+ * @param {number} variantId
+ * @param {string} ipaSymbol
+ * @param {number} audioAssetId
+ * @param {import('./transaction.js').Executor} [executor]
+ * @returns {Promise<number|null>}
+ */
+export async function repointPhonemeAudio(
+  variantId,
+  ipaSymbol,
+  audioAssetId,
+  executor = defaultExecutor(),
+) {
+  const [existing] = await executor.execute(
+    'SELECT phoneme_id, audio_asset_id FROM phonemes WHERE variant_id = ? AND ipa_symbol = ?',
+    [variantId, ipaSymbol],
+  );
+  if (existing.length === 0) {
+    return null;
+  }
+
+  await executor.execute(
+    'UPDATE phonemes SET audio_asset_id = ? WHERE phoneme_id = ?',
+    [audioAssetId, existing[0].phoneme_id],
+  );
+  return existing[0].audio_asset_id;
+}
+
+/**
+ * Every canonical unit with the audio asset it ACTUALLY serves.
+ *
+ * The verification path must follow `phonemes.audio_asset_id` rather than
+ * rebuild a deterministic key, because since the hybrid audio policy a unit's
+ * asset may be Piper-generated or a Commons human recording, and a key derived
+ * from an assumed source would report a perfectly good promoted unit as
+ * missing.
+ *
+ * @param {number} variantId
+ * @param {import('./transaction.js').Executor} [executor]
+ * @returns {Promise<Array<object>>}
+ */
+export async function listPhonemeAudio(variantId, executor = defaultExecutor()) {
+  const [rows] = await executor.execute(
+    `SELECT p.ipa_symbol, p.frequency_rank, p.audio_asset_id,
+            a.asset_key, a.storage_key, a.sha256, a.mime_type, a.byte_length,
+            a.generation_status, a.source_kind, a.source_reference, a.author,
+            a.licence_identifier, a.licence_url, a.attribution_text
+       FROM phonemes p
+       LEFT JOIN audio_assets a ON a.audio_asset_id = p.audio_asset_id
+      WHERE p.variant_id = ?
+      ORDER BY p.frequency_rank`,
+    [variantId],
+  );
+
+  return rows.map((row) => ({
+    ipaSymbol: row.ipa_symbol,
+    frequencyRank: row.frequency_rank,
+    audioAssetId: row.audio_asset_id,
+    assetKey: row.asset_key,
+    storageKey: row.storage_key,
+    sha256: row.sha256,
+    mimeType: row.mime_type,
+    byteLength: row.byte_length,
+    generationStatus: row.generation_status,
+    sourceKind: row.source_kind,
+    sourceReference: row.source_reference,
+    author: row.author,
+    licenceIdentifier: row.licence_identifier,
+    attributionText: row.attribution_text,
+  }));
+}

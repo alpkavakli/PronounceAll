@@ -116,6 +116,36 @@ describe('assetKeyFor (C6 deterministic keys)', () => {
     expect(us).not.toBe(gb);
   });
 
+  test('a Commons human recording carries no synthesiser identity', () => {
+    // The key would otherwise claim a Piper voice and generator version
+    // produced a recording made by a person.
+    const key = assetKeyFor({
+      kind: ASSET_KIND.PHONEME,
+      variantCode: 'en-us',
+      target: 't',
+      sourceKind: 'commons_human',
+    });
+
+    expect(key).toBe('phoneme:en-us:t:commons_human');
+    expect(key).not.toContain(PIPER_VOICE);
+    expect(key).not.toContain(GENERATOR_VERSION);
+  });
+
+  test('the two human sources are distinct assets for the same unit', () => {
+    const commons = assetKeyFor({ kind: ASSET_KIND.PHONEME, variantCode: 'en-us', target: 't', sourceKind: 'commons_human' });
+    const wiktionary = assetKeyFor({ kind: ASSET_KIND.PHONEME, variantCode: 'en-us', target: 't', sourceKind: 'wiktionary_human' });
+
+    expect(commons).not.toBe(wiktionary);
+  });
+
+  test('a discriminated candidate target is its own asset', () => {
+    const production = assetKeyFor({ kind: ASSET_KIND.PHONEME, variantCode: 'en-us', target: 'w', sourceKind: 'tts_piper' });
+    const candidate = assetKeyFor({ kind: ASSET_KIND.PHONEME, variantCode: 'en-us', target: 'w#3', sourceKind: 'tts_piper' });
+
+    expect(candidate).not.toBe(production);
+    expect(candidate).toContain('w#3');
+  });
+
   test('an unknown asset kind is refused', () => {
     expect(() =>
       assetKeyFor({ kind: 'sentence', variantCode: 'en-us', target: 'p', sourceKind: 'tts_piper' }),

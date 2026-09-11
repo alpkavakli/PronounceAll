@@ -1,0 +1,41 @@
+-- PronounceAll — Copyright (C) 2026 Alp Kavaklı
+-- SPDX-License-Identifier: AGPL-3.0-or-later
+-- See LICENSE-NOTICE.md at the repository root.
+--
+-- Represent Wikimedia Commons recordings honestly (FR-CONTENT-04, E4, V1).
+--
+-- WHY THIS EXISTS
+-- ---------------
+-- The maintainer listening pass of 2026-09-11 established that Piper
+-- synthesises isolated vowels and diphthongs acceptably but cannot synthesise
+-- isolated consonants: 1 of 24 consonants passed, against 5 of 5 diphthongs and
+-- 9 of 12 vowels and rhotics. Human isolated-articulation recordings from
+-- Wikimedia Commons therefore become an approved production source for the
+-- units Piper cannot make, while the accepted Piper assets are kept.
+--
+-- `source_kind` had no value that describes such a recording. The alternatives
+-- were both worse than a migration:
+--
+--   * recording them as `wiktionary_human` would be untrue. A Commons isolated
+--     articulation is not a Wiktionary word recording, and `source_kind` is what
+--     the attribution and integrity checks read to decide how an asset must be
+--     credited (FR-CONTENT-05);
+--   * recording them as a `tts_*` kind would be a straightforward lie about a
+--     human recording.
+--
+-- So the enum gains one value. Nothing else changes: the same provenance and
+-- licensing columns carry the author, source reference, licence and attribution
+-- text, and no second audio architecture or asset table is introduced.
+--
+-- SAFETY
+-- ------
+-- Adding a value to the END of an enum's value list does not renumber the
+-- existing values, so no stored row changes meaning and no data migration is
+-- required. Every existing row is `tts_piper` and remains so.
+--
+-- The column keeps NOT NULL: an asset whose provenance is unknown must never be
+-- scheduled or distributed.
+
+ALTER TABLE audio_assets
+  MODIFY COLUMN source_kind
+    ENUM('wiktionary_human', 'commons_human', 'tts_piper', 'tts_cloud') NOT NULL;

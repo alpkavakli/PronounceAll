@@ -1,0 +1,36 @@
+{
+  "variant": "en-us",
+  "source": "Owner decision, 2026-09-11: audio source policy v1.1 (hybrid)",
+  "note": "Candidate Wikimedia Commons file names for units the maintainer listening pass rejected. The names are the standard IPA articulatory descriptions for each symbol and are used ONLY to locate candidates; a file being found here asserts nothing about whether it is the correct sound. Every candidate requires a maintainer listening verdict before promotion. Units the listening pass ACCEPTED are deliberately absent: accepted Piper assets are not replaced for uniform provenance.",
+  "listingConvention": "Commons is inconsistent between 'palato-alveolar' and 'postalveolar' for the same articulation, so several units list more than one name. The order is the order of preference.",
+  "units": [
+    { "ipaSymbol": "p", "verdict": "rejected", "candidates": ["Voiceless bilabial plosive.ogg"] },
+    { "ipaSymbol": "b", "verdict": "rejected", "candidates": ["Voiced bilabial plosive.ogg"] },
+    { "ipaSymbol": "t", "verdict": "rejected", "candidates": ["Voiceless alveolar plosive.ogg"] },
+    { "ipaSymbol": "d", "verdict": "rejected", "candidates": ["Voiced alveolar plosive.ogg"] },
+    { "ipaSymbol": "k", "verdict": "rejected", "candidates": ["Voiceless velar plosive.ogg"] },
+    { "ipaSymbol": "ɡ", "verdict": "rejected-quality", "candidates": ["Voiced velar plosive.ogg"] },
+    { "ipaSymbol": "tʃ", "verdict": "uncertain", "candidates": ["Voiceless palato-alveolar affricate.ogg", "Voiceless postalveolar affricate.ogg"] },
+    { "ipaSymbol": "dʒ", "verdict": "uncertain", "candidates": ["Voiced palato-alveolar affricate.ogg", "Voiced postalveolar affricate.ogg"] },
+    { "ipaSymbol": "f", "verdict": "rejected", "candidates": ["Voiceless labiodental fricative.ogg"] },
+    { "ipaSymbol": "v", "verdict": "rejected", "candidates": ["Voiced labiodental fricative.ogg"] },
+    { "ipaSymbol": "θ", "verdict": "rejected", "candidates": ["Voiceless dental fricative.ogg"] },
+    { "ipaSymbol": "ð", "verdict": "rejected", "candidates": ["Voiced dental fricative.ogg"] },
+    { "ipaSymbol": "s", "verdict": "rejected", "candidates": ["Voiceless alveolar fricative.ogg", "Voiceless alveolar sibilant.ogg"] },
+    { "ipaSymbol": "z", "verdict": "rejected-quality", "candidates": ["Voiced alveolar fricative.ogg", "Voiced alveolar sibilant.ogg"] },
+    { "ipaSymbol": "ʒ", "verdict": "rejected-quality", "candidates": ["Voiced postalveolar fricative.ogg", "Voiced palato-alveolar fricative.ogg"] },
+    { "ipaSymbol": "h", "verdict": "rejected", "candidates": ["Voiceless glottal fricative.ogg"] },
+    { "ipaSymbol": "m", "verdict": "rejected-quality", "candidates": ["Bilabial nasal.ogg"] },
+    { "ipaSymbol": "n", "verdict": "rejected", "candidates": ["Alveolar nasal.ogg"] },
+    { "ipaSymbol": "ŋ", "verdict": "rejected-quality", "candidates": ["Velar nasal.ogg"] },
+    { "ipaSymbol": "l", "verdict": "rejected", "candidates": ["Alveolar lateral approximant.ogg"] },
+    { "ipaSymbol": "ɹ", "verdict": "rejected", "candidates": ["Alveolar approximant.ogg"] },
+    { "ipaSymbol": "j", "verdict": "rejected-quality", "candidates": ["Palatal approximant.ogg"] },
+    { "ipaSymbol": "ɪ", "verdict": "rejected", "candidates": ["Near-close near-front unrounded vowel.ogg"] },
+    { "ipaSymbol": "ə", "verdict": "rejected", "candidates": ["Mid-central vowel.ogg"] }
+  ],
+  "noCommonsSource": [
+    { "ipaSymbol": "w", "verdict": "rejected", "reason": "No isolated-articulation recording found under the obvious names in the 2026-09-11 survey. Routed to a Piper candidate batch for maintainer selection instead." },
+    { "ipaSymbol": "ɚ", "verdict": "rejected", "reason": "As above. R-coloured schwa has no standard isolated-articulation recording on Commons." }
+  ]
+}

@@ -70,9 +70,20 @@ export function assetKeyFor({ kind, variantCode, target, sourceKind }) {
     throw new Error(`Unknown audio asset kind: ${kind}`);
   }
   const base = `${kind}:${variantCode}:${target}:${sourceKind}`;
-  return sourceKind === 'wiktionary_human'
-    ? base
-    : `${base}:${PIPER_VOICE}:${GENERATOR_VERSION}`;
+  // Only SYNTHESISED audio carries a generator identity. A human recording is
+  // identified by its upstream file, and appending a Piper voice and generator
+  // version to it would assert something untrue about how it was produced.
+  return isSynthesised(sourceKind) ? `${base}:${PIPER_VOICE}:${GENERATOR_VERSION}` : base;
+}
+
+/** @param {string} sourceKind @returns {boolean} */
+export function isSynthesised(sourceKind) {
+  return sourceKind.startsWith('tts_');
+}
+
+/** @param {string} sourceKind @returns {boolean} */
+export function isHumanRecording(sourceKind) {
+  return sourceKind.endsWith('_human');
 }
 
 /**
@@ -90,9 +101,18 @@ export async function registerAsset(asset, executor) {
         'before an asset may be scheduled or distributed.',
     );
   }
-  if (asset.sourceKind === 'wiktionary_human' && !asset.sourceReference) {
+  // Every human recording, from whichever upstream, must say where it came
+  // from: FR-CONTENT-05 credits it by that reference, and a CC BY-SA recording
+  // whose origin is unrecorded cannot be attributed at all.
+  if (isHumanRecording(asset.sourceKind) && !asset.sourceReference) {
     throw new Error(
       `Refusing to register ${asset.assetKey}: a human recording must record its upstream source.`,
+    );
+  }
+  if (isHumanRecording(asset.sourceKind) && !asset.author) {
+    throw new Error(
+      `Refusing to register ${asset.assetKey}: a human recording must record its author. ` +
+        'CC BY-SA requires attribution, and an unattributable recording must not be distributed.',
     );
   }
   return upsertPending(asset, executor);

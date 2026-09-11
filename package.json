@@ -37,6 +37,10 @@
     "audio:generate": "node scripts/generate-phoneme-audio.js",
     "audio:generate:words": "node scripts/generate-word-audio.js",
     "audio:regenerate:phoneme": "node scripts/regenerate-phoneme-audio.js",
+    "audio:candidates": "node scripts/generate-phoneme-candidates.js",
+    "audio:commons": "node scripts/fetch-commons-candidates.js",
+    "audio:review": "node scripts/build-audio-review.js",
+    "audio:promote": "node scripts/promote-audio-candidates.js",
     "audio:verify": "node scripts/verify-audio-assets.js",
     "capture:word-page": "node scripts/capture-word-page.js",
     "size": "npm run capture:word-page && size-limit"
