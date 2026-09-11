@@ -41,6 +41,7 @@ import process from 'node:process';
 import * as storage from '../src/lib/audio-storage.js';
 import {
   attributionFor,
+  authorCreditFor,
   download,
   findFirstAvailable,
   unsuitabilityReasons,
@@ -107,7 +108,7 @@ async function main() {
     const duration = described.durationSeconds ? `${described.durationSeconds.toFixed(2)}s` : '—';
     out(
       `  /${unit.ipaSymbol}/  ${described.fileName}  ${duration}  ${described.licenceName}  ` +
-        `by ${described.author} [${described.authorSource}]`,
+        `${described.authorBasis}: ${authorCreditFor(described)}`,
     );
   }
 
@@ -137,7 +138,7 @@ async function main() {
         assetKey,
         sourceKind: SOURCE_KIND,
         sourceReference: described.pageUrl,
-        author: described.author,
+        author: authorCreditFor(described),
         licenceIdentifier: described.licenceIdentifier,
         licenceUrl: described.licenceUrl,
         attributionText: attributionFor(described),

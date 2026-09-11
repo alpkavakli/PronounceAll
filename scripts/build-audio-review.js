@@ -53,6 +53,20 @@ function escape(value) {
     .replace(/"/g, '&quot;');
 }
 
+/**
+ * Which of the three attribution bases a stored credit represents.
+ *
+ * Kept distinct on the page because a Commons ASSUMPTION about authorship is
+ * not the same as a stated author, and colouring them alike would re-introduce
+ * the very conflation this credit format exists to prevent.
+ */
+function authorClass(author) {
+  if (!author || author.startsWith('Unattributed')) {
+    return 'unattr';
+  }
+  return author.includes('assumed') ? 'assumed' : 'attr';
+}
+
 function player(baseUrl, storageKey) {
   return storageKey
     ? `<audio controls preload="none" src="${escape(baseUrl)}/audio/${escape(storageKey)}"></audio>`
@@ -129,7 +143,7 @@ async function main() {
           ${player(baseUrl, row.storageKey)}
         </td>
         <td class="meta">
-          <div><strong>${escape(row.author)}</strong></div>
+          <div class="${authorClass(row.author)}">${escape(row.author)}</div>
           <div>${escape(row.licence)}</div>
           <div><a href="${escape(row.sourceReference)}" target="_blank" rel="noopener noreferrer">source page</a></div>
         </td>
@@ -181,6 +195,9 @@ async function main() {
   .lbl { font-size: .75rem; color: #5a6b82; margin-bottom: .2rem; }
   .meta { font-size: .8rem; color: #5a6b82; }
   .none { color: #a33; font-size: .85rem; }
+  .attr { font-weight: 600; color: #1c5c37; }
+  .unattr { color: #7a5b1d; }
+  .assumed { color: #6b4ea8; }
   audio { height: 32px; max-width: 240px; }
   section { margin-top: 2rem; padding-top: 1rem; border-top: 2px solid #e2e6ee; }
   .cands { display: flex; flex-wrap: wrap; gap: 1rem; margin-top: .6rem; }
@@ -202,6 +219,11 @@ the clip in the “now” column. Listen, then promote only what you approve:<br
 must be running. Generated ${escape(new Date().toISOString().slice(0, 16).replace('T', ' '))}.</p>
 
 <h2>Commons replacements (${commons.length})</h2>
+<p class="note"><span class="attr">Green</span> = Commons states a named author.
+<span class="assumed">Purple</span> = Commons <em>assumes</em> an author but the source did not state one.
+<span class="unattr">Amber</span> = no author is stated at all; the credit names the uploader AS an
+uploader only, and attribution falls back to the work, source and URI, which is how CC BY-SA handles
+a work with no stated author. <strong>An uploader is not an author.</strong></p>
 <table>
   <thead><tr><th>Unit</th><th>Current clip</th><th>Proposed clip</th><th>Author / licence</th></tr></thead>
   <tbody>${commonsRows}</tbody>

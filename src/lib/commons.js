@@ -13,13 +13,29 @@
  * recording is the right sound — that is the maintainer's listening pass, and
  * nothing here may promote a file into production on its own.
  *
- * Attribution is the hard part and is treated as such. CC BY-SA requires
- * crediting the author, and many of these files predate machine-readable
- * metadata: the `Artist` field is empty on most of the IPA articulation
- * recordings. Rather than inventing a credit or dropping one, the client falls
- * back to the file's ORIGINAL UPLOADER from its own upload history, which is
- * what Commons practice uses in that situation, and records which of the two
- * sources the credit came from so the provenance is auditable.
+ * Attribution is the hard part and is treated as such.
+ *
+ * AN UPLOADER IS NOT AN AUTHOR. Commons tells us who uploaded a file; it tells
+ * us who created it only when someone recorded that, and on most of these IPA
+ * articulation recordings nobody did — the `Artist` field is empty, or says in
+ * so many words that no author was provided. Writing the uploader's name into
+ * an `author` column, or into an attribution line reading "by X", asserts
+ * something the source does not support.
+ *
+ * So this client classifies what Commons actually says into one of four bases
+ * and never flattens them together:
+ *
+ *   stated             — `Artist` names a creator (often with Credit "Own work")
+ *   assumed-by-commons — `Artist` says "No machine-readable author provided.
+ *                        <name> assumed (based on copyright claims)"
+ *   uploader-only      — `Artist` describes an uploader, e.g. "The original
+ *                        uploader was <name> at English Wikipedia"
+ *   unattributed       — nothing at all; only the upload history has a name
+ *
+ * The credit stored for each says which of those it is, so nothing downstream
+ * can mistake an upload record for authorship. CC BY-SA is satisfied in the
+ * last two cases the way it is designed to be: by crediting the work, the
+ * source and its URI rather than inventing a person.
  */
 
 /** Identify the project to the API, as Wikimedia's etiquette requires. */
@@ -147,15 +163,12 @@ export async function describeFile(fileName) {
   const artist = plain(extended.Artist?.value);
   const credit = plain(extended.Credit?.value);
 
-  // Commons strips the author of many old files to the literal string below.
-  // Treat that as absent rather than as a credit.
-  const machineReadableAuthor =
-    artist && !/^no machine-readable author/i.test(artist) ? artist : '';
+  const classified = classifyAuthorship(artist);
 
-  let author = machineReadableAuthor;
-  let authorSource = 'extmetadata:Artist';
-
-  if (!author) {
+  // The uploader is fetched only to describe the file's history, never to
+  // stand in for an author.
+  let uploader = '';
+  if (classified.basis !== 'stated') {
     const history = await api({
       action: 'query',
       titles: title,
@@ -164,11 +177,7 @@ export async function describeFile(fileName) {
       iilimit: 'max',
     });
     const revisions = Object.values(history.query.pages)[0].imageinfo ?? [];
-    const original = revisions.at(-1);
-    if (original?.user) {
-      author = original.user;
-      authorSource = 'upload history (original uploader)';
-    }
+    uploader = revisions.at(-1)?.user ?? '';
   }
 
   const licenceName = plain(extended.LicenseShortName?.value);
@@ -186,11 +195,75 @@ export async function describeFile(fileName) {
     licenceName,
     licenceIdentifier: ACCEPTABLE_LICENCES[licenceName] ?? null,
     licenceUrl: plain(extended.LicenseUrl?.value),
-    author,
-    authorSource: author ? authorSource : 'none found',
+    // What Commons states, classified. `authorBasis` is the guard against an
+    // upload record being read as authorship.
+    artist,
+    authorBasis: classified.basis,
+    authorName: classified.name,
+    uploader,
     credit,
     attributionRequired: plain(extended.AttributionRequired?.value) === 'true',
   };
+}
+
+/**
+ * Decide what Commons' `Artist` field actually claims.
+ *
+ * @param {string} artist
+ * @returns {{basis: 'stated'|'assumed-by-commons'|'uploader-only'|'unattributed', name: string}}
+ */
+export function classifyAuthorship(artist) {
+  if (!artist) {
+    return { basis: 'unattributed', name: '' };
+  }
+
+  const assumed = artist.match(
+    /^no machine-readable author provided\.?\s*(.+?)\s+assumed\s*\(based on copyright claims\)\.?$/i,
+  );
+  if (assumed) {
+    return { basis: 'assumed-by-commons', name: assumed[1].trim() };
+  }
+  if (/^no machine-readable author/i.test(artist)) {
+    return { basis: 'unattributed', name: '' };
+  }
+
+  const uploaderOnly = /^the original uploader was\s+(.+)$/i.exec(artist);
+  if (uploaderOnly) {
+    // Trim the trailing " at <project>." in two simple passes rather than one
+    // pattern with a nested optional quantifier, which backtracks badly.
+    const name = uploaderOnly[1]
+      .replace(/\s+at\s.*$/i, '')
+      .replace(/\.\s*$/, '')
+      .trim();
+    return { basis: 'uploader-only', name };
+  }
+
+  return { basis: 'stated', name: artist };
+}
+
+/**
+ * The credit stored in `audio_assets.author`.
+ *
+ * It is a STATEMENT ABOUT AUTHORSHIP, not a bare name, because a bare name in
+ * that column would read as "this person made the recording" in every case —
+ * which is true for only some of them.
+ *
+ * @param {object} described
+ * @returns {string}
+ */
+export function authorCreditFor(described) {
+  switch (described.authorBasis) {
+    case 'stated':
+      return described.authorName;
+    case 'assumed-by-commons':
+      return `${described.authorName} (assumed by Wikimedia Commons; not stated by the source)`;
+    case 'uploader-only':
+      return `Unattributed; original uploader ${described.authorName} (uploader, not stated as author)`;
+    default:
+      return described.uploader
+        ? `Unattributed; uploaded to Wikimedia Commons by ${described.uploader} (uploader, not stated as author)`
+        : 'Unattributed';
+  }
 }
 
 /**
@@ -229,8 +302,12 @@ export function unsuitabilityReasons(described) {
   if (!described.licenceIdentifier) {
     problems.push(`licence "${described.licenceName || 'unknown'}" is not on the accepted list`);
   }
-  if (!described.author) {
-    problems.push('no author could be established, so CC BY-SA attribution is impossible');
+  // An unattributed file is still usable — CC BY-SA anticipates a work with no
+  // stated author, and the credit says so plainly. What is NOT acceptable is
+  // having nothing at all to point at: no author, no uploader and no source
+  // page leaves no way to credit the work honestly.
+  if (described.authorBasis === 'unattributed' && !described.uploader && !described.pageUrl) {
+    problems.push('no author, uploader or source page, so the work cannot be credited at all');
   }
   if (!described.fileUrl) {
     problems.push('no downloadable file URL');
@@ -287,7 +364,30 @@ export async function download(described) {
  * @returns {string}
  */
 export function attributionFor(described) {
-  return `“${described.fileName.replace(/\.[a-z0-9]+$/i, '')}” by ${described.author}, via Wikimedia Commons, ${described.licenceName}.`;
+  const work = described.fileName.replace(/\.[a-z0-9]+$/i, '');
+  const licence = described.licenceName;
+
+  switch (described.authorBasis) {
+    case 'stated':
+      return `“${work}” by ${described.authorName}, via Wikimedia Commons, ${licence}.`;
+    case 'assumed-by-commons':
+      return (
+        `“${work}”, via Wikimedia Commons, ${licence}. No author was stated by the source; ` +
+        `Commons records ${described.authorName} as the assumed author. See ${described.pageUrl}`
+      );
+    case 'uploader-only':
+      return (
+        `“${work}”, via Wikimedia Commons, ${licence}. No author was stated by the source; ` +
+        `it was originally uploaded by ${described.authorName}. See ${described.pageUrl}`
+      );
+    default:
+      // CC BY-SA is satisfied here the way it is designed to be when the work
+      // supplies no author: by crediting the work, the source and its URI.
+      return (
+        `“${work}”, via Wikimedia Commons, ${licence}. No author is stated by the source. ` +
+        `See ${described.pageUrl}`
+      );
+  }
 }
 
 /** Exposed so a caller can report which identity was used against the API. */
