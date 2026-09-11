@@ -181,9 +181,24 @@ describe('SDD §6.3 — the learning pages are not cacheable', () => {
 });
 
 describe('controls that cannot work are absent', () => {
-  test('no audio element while every phoneme asset is pending', async () => {
+  // This asserted "no audio element while every phoneme asset is pending",
+  // which was true only until the Piper batch ran. The durable rule is the one
+  // below: a control exists for exactly the units whose asset is ready, and for
+  // no others. It holds both before and after generation.
+  test('an audio element appears for exactly the ready assets', async () => {
+    const [rows] = await getPool().query(
+      `SELECT COUNT(*) AS ready
+         FROM phonemes p
+         JOIN audio_assets a ON a.audio_asset_id = p.audio_asset_id
+         JOIN language_variants v ON v.variant_id = p.variant_id
+        WHERE v.code = ? AND a.generation_status = 'ready'`,
+      ['en-us'],
+    );
+
     const response = await request(app).get('/en-us/learnIPA');
-    expect(response.text).not.toContain('<audio');
+    const rendered = response.text.match(/<audio/g)?.length ?? 0;
+
+    expect(rendered).toBe(Number(rows[0].ready));
   });
 
   test('no save control — that is Iteration 3', async () => {

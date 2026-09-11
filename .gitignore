@@ -25,6 +25,14 @@ test-results/
 logs/
 *.log
 
+# Offline content tooling (V1). Piper runs as a separate batch tool at content
+# build time and is NOT a runtime dependency, so its virtualenv and the
+# ~131 MB voice model stay out of the application repository. Both are
+# reproducible: `docs/process` records the install commands, and
+# `data/seed/en-us.piper-profile.json` pins the package version plus the model
+# and config SHA-256 digests that the generation preflight enforces.
+/tools/piper/
+
 # OS / editor
 .DS_Store
 Thumbs.db

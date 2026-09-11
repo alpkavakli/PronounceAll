@@ -53,6 +53,16 @@ test.describe('FR-IPA-02 — clickable phoneme elements', () => {
 });
 
 test.describe('FR-IPA-03 — the phoneme popover', () => {
+  // The popover is a JavaScript enhancement: FR-WORD-08 requires the page to
+  // READ without JavaScript and allows the interactive features to degrade,
+  // which the `FR-WORD-08` describe below covers directly. Without this guard
+  // these tests also ran under the `no-javascript` project, where the popover
+  // cannot open by design, and failed there permanently.
+  test.skip(
+    ({ javaScriptEnabled }) => !javaScriptEnabled,
+    'The popover requires JavaScript; the no-JS baseline is asserted by FR-WORD-08.',
+  );
+
   test('opens on click and shows the symbol and its example word', async ({ page }) => {
     await page.goto(WORD);
     await page.locator('.phoneme').first().click();
@@ -94,13 +104,25 @@ test.describe('FR-IPA-03 — the phoneme popover', () => {
     await expect(page.locator('#phoneme-popover')).toBeHidden();
   });
 
-  test('hides the replay control when no audio asset is ready', async ({ page }) => {
-    // A control that cannot play is worse than none. Until the phoneme audio is
-    // generated, every asset is `pending` and no replay button is offered.
+  test('offers the replay control exactly when the phoneme has audio', async ({ page }) => {
+    // A control that cannot play is worse than none, so the button tracks the
+    // asset rather than the requirement: it is shown for a phoneme carrying a
+    // ready asset and hidden for one without. This replaces an earlier
+    // assertion that it is ALWAYS hidden, which held only while every asset was
+    // still `pending`, before the Piper batch ran.
     await page.goto(WORD);
-    await page.locator('.phoneme').first().click();
+    const phoneme = page.locator('.phoneme').first();
+    const hasAudio = (await phoneme.getAttribute('data-audio')) !== null;
 
-    await expect(page.locator('.phoneme-popover__replay')).toBeHidden();
+    await phoneme.click();
+    const replay = page.locator('.phoneme-popover__replay');
+
+    if (hasAudio) {
+      await expect(replay).toBeVisible();
+      await expect(replay).toHaveAccessibleName(/play/i);
+    } else {
+      await expect(replay).toBeHidden();
+    }
   });
 
   test('announces itself as a dialog opener', async ({ page }) => {
@@ -141,13 +163,20 @@ test.describe('FR-WORD-08 — the transcription reads without JavaScript', () =>
 });
 
 test.describe('NFR-A11Y — accessibility of the enhanced page', () => {
-  test('the word page reports zero axe-core violations with phonemes clickable', async ({ page }) => {
+  test('the word page reports zero axe-core violations with phonemes clickable', async ({ page, javaScriptEnabled }) => {
+    // axe-core is injected JavaScript and cannot run with scripting disabled.
+    // Read the FIXTURE, not `project.use`: the JS-enabled projects leave it
+    // unset, so inspecting the project config would skip everywhere.
+    test.skip(!javaScriptEnabled, 'axe-core requires JavaScript.');
     await page.goto(WORD);
     const results = await new AxeBuilder({ page }).analyze();
     expect(results.violations).toEqual([]);
   });
 
-  test('the open popover reports zero axe-core violations', async ({ page }) => {
+  test('the open popover reports zero axe-core violations', async ({ page, javaScriptEnabled }) => {
+    // Same reason as the FR-IPA-03 block: there is no open popover to audit
+    // when the enhancement never runs.
+    test.skip(!javaScriptEnabled, 'The popover requires JavaScript.');
     await page.goto(WORD);
     await page.locator('.phoneme').first().click();
     await expect(page.locator('#phoneme-popover')).toBeVisible();

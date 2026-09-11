@@ -35,6 +35,9 @@ export default [
       'test-results/**',
       'docs/**',
       'src/views/**',
+      // Offline Piper tooling (V1): a Python virtualenv and a voice model, not
+      // project source. Its vendored JavaScript is not ours to lint.
+      'tools/piper/**',
     ],
   },
 

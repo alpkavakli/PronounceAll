@@ -102,6 +102,16 @@ test.describe('FR-WORD-07 — responsive', () => {
 });
 
 test.describe('NFR-A11Y-02 — accessibility', () => {
+  // axe-core is itself JavaScript injected into the page, so it cannot run in
+  // the `no-javascript` project: `frame.evaluate` simply hangs until the test
+  // times out. NFR-A11Y-02 is asserted by the JS-enabled projects, which audit
+  // the page a real assistive-technology user gets. Without this guard these
+  // two tests failed permanently under `no-javascript`.
+  test.skip(
+    ({ javaScriptEnabled }) => !javaScriptEnabled,
+    'axe-core requires JavaScript; the JS-enabled projects carry NFR-A11Y-02.',
+  );
+
   test('the per-variant page reports zero axe-core violations', async ({ page }) => {
     await page.goto(PER_VARIANT);
     const results = await new AxeBuilder({ page }).analyze();

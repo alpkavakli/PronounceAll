@@ -33,6 +33,8 @@
     "seed:phonemes": "node scripts/seed-phonemes.js",
     "seed:phonemes:dry-run": "node scripts/seed-phonemes.js --dry-run",
     "inventory:check": "node scripts/extract-phoneme-inventory.js --check",
+    "audio:preflight": "node scripts/generate-phoneme-audio.js --dry-run",
+    "audio:generate": "node scripts/generate-phoneme-audio.js",
     "audio:verify": "node scripts/verify-audio-assets.js",
     "capture:word-page": "node scripts/capture-word-page.js",
     "size": "npm run capture:word-page && size-limit"

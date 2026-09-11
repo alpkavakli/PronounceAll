@@ -1,0 +1,324 @@
+{
+  "variant": "en-us",
+  "profileVersion": "en-us-piper-v1",
+  "source": "Owner decision, 2026-09-11: approved audio generation profile en-US v1",
+  "canonicalSource": "data/seed/en-us.phonemes.json (derived from D4)",
+  "note": "Synthesis inputs ONLY. These are model-specific instructions to Piper and are never learner-facing, never a normalisation rule, and never part of a teaching unit identity. D4 and the canonical 41-unit inventory are unchanged.",
+  "engine": {
+    "name": "piper",
+    "package": "piper-tts",
+    "packageVersion": "1.8.0",
+    "inputMechanism": "raw-phoneme-injection",
+    "inputSyntax": "[[ ... ]]"
+  },
+  "voice": {
+    "name": "en_US-libritts-high",
+    "speakerName": "p3922",
+    "speakerId": 0,
+    "modelFile": "en_US-libritts-high.onnx",
+    "configFile": "en_US-libritts-high.onnx.json",
+    "modelSha256": "9127a559e11603f10b366d1a20ac7426826081dbc521de4c2420c57728d73f0f",
+    "configSha256": "2efdc6d7f954588b8180132cbd9b8001933fdd00932c92bc92fd0d2028a9eb3d",
+    "sampleRate": 22050,
+    "numSpeakers": 904
+  },
+  "generatorVersion": "v1",
+  "output": {
+    "mimeType": "audio/wav",
+    "sampleRate": 22050,
+    "channels": 1,
+    "sampleWidthBytes": 2
+  },
+  "synthesis": {
+    "note": "Model defaults. Nothing is overridden, so a Piper default change is a generator change and must bump generatorVersion."
+  },
+  "units": [
+    {
+      "canonicalOrder": 1,
+      "ipaSymbol": "p",
+      "category": "consonant",
+      "piperRawPhonemes": "p",
+      "piperInput": "[[p]]"
+    },
+    {
+      "canonicalOrder": 2,
+      "ipaSymbol": "b",
+      "category": "consonant",
+      "piperRawPhonemes": "b",
+      "piperInput": "[[b]]"
+    },
+    {
+      "canonicalOrder": 3,
+      "ipaSymbol": "t",
+      "category": "consonant",
+      "piperRawPhonemes": "t",
+      "piperInput": "[[t]]"
+    },
+    {
+      "canonicalOrder": 4,
+      "ipaSymbol": "d",
+      "category": "consonant",
+      "piperRawPhonemes": "d",
+      "piperInput": "[[d]]"
+    },
+    {
+      "canonicalOrder": 5,
+      "ipaSymbol": "k",
+      "category": "consonant",
+      "piperRawPhonemes": "k",
+      "piperInput": "[[k]]"
+    },
+    {
+      "canonicalOrder": 6,
+      "ipaSymbol": "ɡ",
+      "category": "consonant",
+      "piperRawPhonemes": "ɡ",
+      "piperInput": "[[ɡ]]"
+    },
+    {
+      "canonicalOrder": 7,
+      "ipaSymbol": "tʃ",
+      "category": "consonant",
+      "piperRawPhonemes": "tʃ",
+      "piperInput": "[[tʃ]]"
+    },
+    {
+      "canonicalOrder": 8,
+      "ipaSymbol": "dʒ",
+      "category": "consonant",
+      "piperRawPhonemes": "dʒ",
+      "piperInput": "[[dʒ]]"
+    },
+    {
+      "canonicalOrder": 9,
+      "ipaSymbol": "f",
+      "category": "consonant",
+      "piperRawPhonemes": "f",
+      "piperInput": "[[f]]"
+    },
+    {
+      "canonicalOrder": 10,
+      "ipaSymbol": "v",
+      "category": "consonant",
+      "piperRawPhonemes": "v",
+      "piperInput": "[[v]]"
+    },
+    {
+      "canonicalOrder": 11,
+      "ipaSymbol": "θ",
+      "category": "consonant",
+      "piperRawPhonemes": "θ",
+      "piperInput": "[[θ]]"
+    },
+    {
+      "canonicalOrder": 12,
+      "ipaSymbol": "ð",
+      "category": "consonant",
+      "piperRawPhonemes": "ð",
+      "piperInput": "[[ð]]"
+    },
+    {
+      "canonicalOrder": 13,
+      "ipaSymbol": "s",
+      "category": "consonant",
+      "piperRawPhonemes": "s",
+      "piperInput": "[[s]]"
+    },
+    {
+      "canonicalOrder": 14,
+      "ipaSymbol": "z",
+      "category": "consonant",
+      "piperRawPhonemes": "z",
+      "piperInput": "[[z]]"
+    },
+    {
+      "canonicalOrder": 15,
+      "ipaSymbol": "ʃ",
+      "category": "consonant",
+      "piperRawPhonemes": "ʃ",
+      "piperInput": "[[ʃ]]"
+    },
+    {
+      "canonicalOrder": 16,
+      "ipaSymbol": "ʒ",
+      "category": "consonant",
+      "piperRawPhonemes": "ʒ",
+      "piperInput": "[[ʒ]]"
+    },
+    {
+      "canonicalOrder": 17,
+      "ipaSymbol": "h",
+      "category": "consonant",
+      "piperRawPhonemes": "h",
+      "piperInput": "[[h]]"
+    },
+    {
+      "canonicalOrder": 18,
+      "ipaSymbol": "m",
+      "category": "consonant",
+      "piperRawPhonemes": "m",
+      "piperInput": "[[m]]"
+    },
+    {
+      "canonicalOrder": 19,
+      "ipaSymbol": "n",
+      "category": "consonant",
+      "piperRawPhonemes": "n",
+      "piperInput": "[[n]]"
+    },
+    {
+      "canonicalOrder": 20,
+      "ipaSymbol": "ŋ",
+      "category": "consonant",
+      "piperRawPhonemes": "ŋ",
+      "piperInput": "[[ŋ]]"
+    },
+    {
+      "canonicalOrder": 21,
+      "ipaSymbol": "l",
+      "category": "consonant",
+      "piperRawPhonemes": "l",
+      "piperInput": "[[l]]"
+    },
+    {
+      "canonicalOrder": 22,
+      "ipaSymbol": "ɹ",
+      "category": "consonant",
+      "piperRawPhonemes": "ɹ",
+      "piperInput": "[[ɹ]]"
+    },
+    {
+      "canonicalOrder": 23,
+      "ipaSymbol": "w",
+      "category": "consonant",
+      "piperRawPhonemes": "w",
+      "piperInput": "[[w]]"
+    },
+    {
+      "canonicalOrder": 24,
+      "ipaSymbol": "j",
+      "category": "consonant",
+      "piperRawPhonemes": "j",
+      "piperInput": "[[j]]"
+    },
+    {
+      "canonicalOrder": 25,
+      "ipaSymbol": "i",
+      "category": "vowel",
+      "piperRawPhonemes": "ˈi",
+      "piperInput": "[[ˈi]]"
+    },
+    {
+      "canonicalOrder": 26,
+      "ipaSymbol": "ɪ",
+      "category": "vowel",
+      "piperRawPhonemes": "ˈɪ",
+      "piperInput": "[[ˈɪ]]"
+    },
+    {
+      "canonicalOrder": 27,
+      "ipaSymbol": "ɛ",
+      "category": "vowel",
+      "piperRawPhonemes": "ˈɛ",
+      "piperInput": "[[ˈɛ]]"
+    },
+    {
+      "canonicalOrder": 28,
+      "ipaSymbol": "æ",
+      "category": "vowel",
+      "piperRawPhonemes": "ˈæ",
+      "piperInput": "[[ˈæ]]"
+    },
+    {
+      "canonicalOrder": 29,
+      "ipaSymbol": "ʌ",
+      "category": "vowel",
+      "piperRawPhonemes": "ˈʌ",
+      "piperInput": "[[ˈʌ]]"
+    },
+    {
+      "canonicalOrder": 30,
+      "ipaSymbol": "ə",
+      "category": "vowel",
+      "piperRawPhonemes": "ə",
+      "piperInput": "[[ə]]"
+    },
+    {
+      "canonicalOrder": 31,
+      "ipaSymbol": "ɑ",
+      "category": "vowel",
+      "piperRawPhonemes": "ˈɑ",
+      "piperInput": "[[ˈɑ]]"
+    },
+    {
+      "canonicalOrder": 32,
+      "ipaSymbol": "ɔ",
+      "category": "vowel",
+      "piperRawPhonemes": "ˈɔ",
+      "piperInput": "[[ˈɔ]]"
+    },
+    {
+      "canonicalOrder": 33,
+      "ipaSymbol": "ʊ",
+      "category": "vowel",
+      "piperRawPhonemes": "ˈʊ",
+      "piperInput": "[[ˈʊ]]"
+    },
+    {
+      "canonicalOrder": 34,
+      "ipaSymbol": "u",
+      "category": "vowel",
+      "piperRawPhonemes": "ˈu",
+      "piperInput": "[[ˈu]]"
+    },
+    {
+      "canonicalOrder": 35,
+      "ipaSymbol": "ɝ",
+      "category": "central rhotic",
+      "piperRawPhonemes": "ˈɜ˞",
+      "piperInput": "[[ˈɜ˞]]"
+    },
+    {
+      "canonicalOrder": 36,
+      "ipaSymbol": "ɚ",
+      "category": "central rhotic",
+      "piperRawPhonemes": "ɚ",
+      "piperInput": "[[ɚ]]"
+    },
+    {
+      "canonicalOrder": 37,
+      "ipaSymbol": "eɪ",
+      "category": "diphthong",
+      "piperRawPhonemes": "ˈeɪ",
+      "piperInput": "[[ˈeɪ]]"
+    },
+    {
+      "canonicalOrder": 38,
+      "ipaSymbol": "aɪ",
+      "category": "diphthong",
+      "piperRawPhonemes": "ˈaɪ",
+      "piperInput": "[[ˈaɪ]]"
+    },
+    {
+      "canonicalOrder": 39,
+      "ipaSymbol": "ɔɪ",
+      "category": "diphthong",
+      "piperRawPhonemes": "ˈɔɪ",
+      "piperInput": "[[ˈɔɪ]]"
+    },
+    {
+      "canonicalOrder": 40,
+      "ipaSymbol": "aʊ",
+      "category": "diphthong",
+      "piperRawPhonemes": "ˈaʊ",
+      "piperInput": "[[ˈaʊ]]"
+    },
+    {
+      "canonicalOrder": 41,
+      "ipaSymbol": "oʊ",
+      "category": "diphthong",
+      "piperRawPhonemes": "ˈoʊ",
+      "piperInput": "[[ˈoʊ]]"
+    }
+  ]
+}
