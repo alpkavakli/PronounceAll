@@ -1,7 +1,7 @@
 # PronounceAll Frontend Design Baseline v1
 
-**Status:** Proposed owner baseline — freeze after maintainer approval  
-**Date:** 2026-09-11  
+**Status:** Approved and frozen (maintainer, 2026-09-16). Authoritative for frontend visual language and UI structure; it never overrides an SRS requirement or SDD architecture decision.  
+**Date:** 2026-09-11 (frozen 2026-09-16)  
 **Scope:** PronounceAll v1 frontend visual language, interaction patterns, and implementation guardrails  
 **Audience:** Maintainer, Claude Code, contributors  
 

@@ -3,14 +3,106 @@
  * See LICENSE-NOTICE.md at the repository root.
  *
  * Hand-written CSS, Flexbox as the default layout primitive (SDD v1.1 §7.7).
- * Foundation styling only; the design system arrives with Iteration 1. */
+ *
+ * Section order follows the Frontend Design Baseline v1 §23: tokens, reset/base,
+ * typography, shell, forms/buttons, word page, IPA/popover, learnIPA, search and
+ * error states, utilities, responsive. Values come from the frozen scales in §4
+ * and §5 — do not introduce one-off colours, spacing, or radii. */
+
+/* ---------------------------------------------------------------------------
+   1. Tokens (baseline §4, §5)
+   -------------------------------------------------------------------------- */
 
 :root {
-  --colour-ink: #16191d;
-  --colour-muted: #5b6470;
-  --colour-page: #fdfdfc;
-  --colour-rule: #dfe3e8;
-  --measure: 38rem;
+  /* Canvas and surfaces */
+  --color-canvas: #f7f4ed;
+  --color-surface: #fffdf8;
+  --color-ink: #181713;
+  --color-text: #2c2a26;
+  --color-muted: #5b5850;
+  --color-rule: #d9d4c8;
+  --color-rule-soft: #e9e4da;
+
+  /* Brand/action. Burnt orange marks genuine interactivity only (§4.1). */
+  --color-accent: #a34700;
+  --color-accent-hover: #8f3f0f;
+  --color-accent-soft: #f1dfcf;
+
+  /* Semantic. Dark teal is reserved for focus (§4.1). */
+  --color-success: #236a4b;
+  --color-danger: #9c2f2f;
+  --color-focus: #1f5b55;
+
+  /* 4px spacing scale (§4.3) */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+
+  /* Radius (§4.4). 999px is for true pill/circular semantics only. */
+  --radius-sm: 4px;
+  --radius-md: 7px;
+  --radius-lg: 10px;
+  --radius-round: 999px;
+
+  /* Shell widths (§5.1) */
+  --page-max: 1040px;
+  --reading-max: 720px;
+  --narrow-max: 640px;
+
+  /* Legacy aliases. The rules below predate the token layer; mapping them here
+     adopts the baseline palette without restyling every component in this pass.
+     New rules must use the tokens above. */
+  --colour-ink: var(--color-ink);
+  --colour-muted: var(--color-muted);
+  --colour-page: var(--color-canvas);
+  --colour-rule: var(--color-rule);
+  --measure: var(--reading-max);
+}
+
+/* ---------------------------------------------------------------------------
+   2. Fonts (baseline §4.2)
+   -------------------------------------------------------------------------- */
+
+/* Self-hosted WOFF2, never a third-party CDN (§4.2 "Font delivery"). Both
+   families are SIL Open Font License 1.1; the licence texts sit beside the
+   files in /fonts. `swap` keeps text readable while a face loads, which matters
+   most for Charis at 305 kB. Neither face is subsetted, so every canonical IPA
+   symbol is present by construction (FR-IPA-09). */
+@font-face {
+  font-family: "IBM Plex Sans";
+  src: url("/fonts/ibm-plex-sans-400.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "IBM Plex Sans";
+  src: url("/fonts/ibm-plex-sans-500.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "IBM Plex Sans";
+  src: url("/fonts/ibm-plex-sans-600.woff2") format("woff2");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Charis SIL";
+  src: url("/fonts/charis-sil-400.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
 }
 
 *,
@@ -22,16 +114,21 @@
 body {
   margin: 0;
   padding: 0;
-  background: var(--colour-page);
-  color: var(--colour-ink);
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  background: var(--color-canvas);
+  color: var(--color-text);
+  font-family: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  /* Body 16-17px / 1.55 (§4.2 type roles). */
+  font-size: 1.0625rem;
   line-height: 1.55;
 }
 
+/* Desktop whitespace comes from a bounded reading width, not from padding
+   (§5.1). Horizontal padding steps 16 -> 24 -> 32px across the two breakpoints
+   the baseline allows; see the responsive section. */
 .page {
-  max-width: var(--measure);
+  max-width: var(--reading-max);
   margin: 0 auto;
-  padding: 3rem 1.25rem;
+  padding: var(--space-7) var(--space-4);
 }
 
 h1 {
@@ -66,11 +163,11 @@ h1 {
 }
 
 .site-footer {
-  max-width: var(--measure);
+  max-width: var(--reading-max);
   margin: 0 auto;
-  padding: 1.5rem 1.25rem 3rem;
-  border-top: 1px solid var(--colour-rule);
-  color: var(--colour-muted);
+  padding: var(--space-5) var(--space-4) var(--space-7);
+  border-top: 1px solid var(--color-rule);
+  color: var(--color-muted);
   font-size: 0.875rem;
 }
 
@@ -210,7 +307,7 @@ a {
   margin: 0 0 1.5rem;
   padding: 0.75rem 1rem;
   border-left: 3px solid var(--colour-ink);
-  background: #f2f4f6;
+  background: var(--color-rule-soft);
 }
 
 .suggestion-list {
@@ -244,23 +341,23 @@ a {
   min-height: 44px;
   min-width: 44px;
   padding: 0.625rem 1.25rem;
-  border: 1px solid var(--colour-ink);
-  border-radius: 0.25rem;
-  background: var(--colour-ink);
-  color: var(--colour-page);
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius-sm);
+  background: var(--color-accent);
+  color: var(--color-surface);
   font: inherit;
   font-weight: 600;
   cursor: pointer;
 }
 
 .button:hover {
-  background: #000;
+  background: var(--color-accent-hover);
 }
 
 /* Focus must be visible for keyboard operation (NFR-A11Y-08). */
 a:focus-visible,
 .button:focus-visible {
-  outline: 3px solid #1a5fb4;
+  outline: 3px solid var(--color-focus);
   outline-offset: 2px;
 }
 
@@ -287,7 +384,7 @@ a:focus-visible,
   color: inherit;
   background: none;
   border: 0;
-  border-radius: 0.25rem;
+  border-radius: var(--radius-sm);
   padding: 0.35rem 0.15rem;
   /* The 44 px touch target is met by the padded box while the glyphs stay
      visually adjacent, so the IPA still reads as one continuous string. */
@@ -299,11 +396,11 @@ a:focus-visible,
 
 .phoneme:hover,
 .phoneme:focus-visible {
-  background-color: #e8eef7;
+  background-color: var(--color-accent-soft);
 }
 
 .phoneme:focus-visible {
-  outline: 2px solid #2f5d9e;
+  outline: 2px solid var(--color-focus);
   outline-offset: 1px;
 }
 
@@ -319,10 +416,10 @@ a:focus-visible,
   min-width: 10rem;
   max-width: min(20rem, calc(100vw - 1rem));
   padding: 0.75rem 1rem;
-  background: #fff;
-  border: 1px solid #c8d2e0;
-  border-radius: 0.5rem;
-  box-shadow: 0 4px 16px rgb(15 30 55 / 18%);
+  background: var(--color-surface);
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 8px 24px rgb(24 23 19 / 12%);
 }
 
 .phoneme-popover__symbol {
@@ -333,7 +430,7 @@ a:focus-visible,
 
 .phoneme-popover__example {
   margin: 0.25rem 0 0;
-  color: #445;
+  color: var(--color-muted);
 }
 
 .phoneme-popover__replay {
@@ -341,10 +438,10 @@ a:focus-visible,
   min-height: 44px;
   padding: 0.4rem 0.9rem;
   font: inherit;
-  color: #16324f;
-  background: #e8eef7;
-  border: 1px solid #c8d2e0;
-  border-radius: 0.35rem;
+  color: var(--color-accent-hover);
+  background: var(--color-accent-soft);
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius-md);
   cursor: pointer;
 }
 
@@ -362,17 +459,17 @@ a:focus-visible,
   min-height: 44px;
   padding: 0.4rem 0.9rem;
   font: inherit;
-  color: #16324f;
-  background: #e8eef7;
-  border: 1px solid #c8d2e0;
-  border-radius: 0.35rem;
+  color: var(--color-accent-hover);
+  background: var(--color-accent-soft);
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius-md);
   cursor: pointer;
 }
 
 /* The end of the fallback chain is reported, never silent (FR-IPA-05). */
 .pronunciation__audio-status {
   margin-left: 0.6rem;
-  color: #8a2b2b;
+  color: var(--color-danger);
 }
 
 /* ---------------------------------------------------------------------------
@@ -407,14 +504,14 @@ a:focus-visible,
   padding: 0.5rem 0.75rem;
   font: inherit;
   color: inherit;
-  background: #fff;
-  border: 1px solid #c8d2e0;
-  border-radius: 0.35rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius-md);
 }
 
 .search__input:focus-visible,
 .search__submit:focus-visible {
-  outline: 2px solid #2f5d9e;
+  outline: 2px solid var(--color-focus);
   outline-offset: 1px;
 }
 
@@ -423,19 +520,19 @@ a:focus-visible,
   padding: 0.5rem 1.25rem;
   font: inherit;
   font-weight: 600;
-  color: #fff;
-  background: #2f5d9e;
-  border: 1px solid #2f5d9e;
-  border-radius: 0.35rem;
+  color: var(--color-surface);
+  background: var(--color-accent);
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius-md);
   cursor: pointer;
 }
 
 .search__submit:hover {
-  background: #26497d;
+  background: var(--color-accent-hover);
 }
 
 .search__hint {
-  color: #445;
+  color: var(--color-muted);
 }
 
 .search__back {
@@ -462,14 +559,14 @@ a:focus-visible,
   align-items: baseline;
   gap: 0.5rem 0.9rem;
   padding: 0.6rem 0.25rem;
-  border-bottom: 1px solid #e6ebf2;
+  border-bottom: 1px solid var(--color-rule-soft);
 }
 
 .phoneme-row__rank {
   flex: 0 0 2.25rem;
   /* 5.33:1 against the page background. The earlier #8894a6 measured 3.02:1 and
      failed WCAG AA, which axe caught (NFR-A11Y-02). */
-  color: #5f6b7a;
+  color: var(--color-muted);
   font-variant-numeric: tabular-nums;
   font-size: 0.85rem;
 }
@@ -483,22 +580,22 @@ a:focus-visible,
 .phoneme-row__example {
   flex: 1 1 12rem;
   min-width: 0;
-  color: #445;
+  color: var(--color-muted);
 }
 
 .phoneme-row__example-ipa {
   /* 5.33:1. The earlier #6a7788 measured 4.48:1 — just under the 4.5:1 floor,
      which is exactly the kind of near-miss only a checker catches. */
-  color: #5f6b7a;
+  color: var(--color-muted);
 }
 
 .phoneme-row__variant {
   flex: 0 0 auto;
   padding: 0.1rem 0.45rem;
   font-size: 0.75rem;
-  color: #445;
-  background: #eef2f7;
-  border-radius: 0.25rem;
+  color: var(--color-muted);
+  background: var(--color-rule-soft);
+  border-radius: var(--radius-sm);
 }
 
 .phoneme-row__audio {
@@ -519,11 +616,11 @@ a:focus-visible,
    Linux distributions, so the stack degrades through progressively more common
    fonts rather than falling straight to the default.
 
-   PARTIAL against FR-IPA-09, which asks the stack to START with a
-   web-delivered IPA-aware font. Self-hosting one is a real decision — which
-   family, its licence, subsetting, and the cost against the NFR-PERF-07 page
-   budget — and it is not made here. This is the system half of that stack, and
-   it is a *Should* rather than a *Must*.
+   FR-IPA-09 is now satisfied in full. The Frontend Design Baseline v1 §4.2 made
+   the decision this comment previously deferred: Charis SIL, self-hosted as
+   unsubsetted WOFF2 under the OFL, declared in the fonts section above. It
+   leads the stack; the system families behind it remain the fallback while the
+   face loads and for anyone who blocks web fonts.
    -------------------------------------------------------------------------- */
 
 .ipa,
@@ -536,4 +633,28 @@ a:focus-visible,
     "Charis SIL", "Doulos SIL", "Gentium Plus", "Noto Sans",
     "Segoe UI", "Lucida Sans Unicode", "DejaVu Sans", "Arial Unicode MS",
     sans-serif;
+}
+
+/* ---------------------------------------------------------------------------
+   Responsive shell padding (baseline §5.1)
+   ---------------------------------------------------------------------------
+   Two breakpoints, not one per device: 640px and 960px are what the current
+   product needs. Only the horizontal gutter changes; the reading width already
+   bounds the line length above it.
+   -------------------------------------------------------------------------- */
+
+@media (min-width: 640px) {
+  .page,
+  .site-footer {
+    padding-right: var(--space-5);
+    padding-left: var(--space-5);
+  }
+}
+
+@media (min-width: 960px) {
+  .page,
+  .site-footer {
+    padding-right: var(--space-6);
+    padding-left: var(--space-6);
+  }
 }
