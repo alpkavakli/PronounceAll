@@ -19,7 +19,8 @@
       * the play-audio button of FR-IPA-07/FR-IPA-10 renders only where a READY
         asset backs it. Every phoneme asset is currently `pending`, so no button
         appears yet;
-      * the save/tag control of §4.3 is Iteration 3 and is absent.
+      * the save/tag control of §4.3 links to the uncached confirmation page
+        and is upgraded by the script after hydration (FR-SAVE-01, FR-SAVE-07).
 
     The ranked inventory, the symbols, and the FR-IPA-08 sound-matched examples
     are all here and correct. %>
@@ -29,7 +30,7 @@
   <%- include('partials/head', { title: title }) %>
 </head>
 <body>
-  <main class="page learn-ipa">
+  <main class="page learn-ipa" data-viewer-variant="<%= scope === 'variant' ? variant.code : (phonemes[0] ? phonemes[0].variantCode : 'en-us') %>">
     <h1><%= scope === 'variant' ? `The sounds of ${variant.displayName}` : 'The sounds of every language' %></h1>
 
     <p class="lede">
@@ -79,6 +80,11 @@
                 Your browser cannot play this recording.
               </audio>
             <% } %>
+
+            <%# FR-IPA-07/10, FR-SAVE-01: the same save control as the popover. %>
+            <a class="save-control phoneme-row__save" data-save-control data-target-kind="phoneme"
+               data-target-id="<%= phoneme.phonemeId %>" data-target-label="/<%= phoneme.ipaSymbol %>/"
+               href="/save/confirm?kind=phoneme&amp;id=<%= phoneme.phonemeId %>&amp;return=<%= encodeURIComponent(pagePath) %>">Save</a>
           </li>
         <% }); %>
       </ol>
@@ -97,5 +103,6 @@
 
   <%- include('partials/footer') %>
   <script type="module" src="/js/bootstrap.js"></script>
+  <script type="module" src="/js/save-control.js"></script>
 </body>
 </html>

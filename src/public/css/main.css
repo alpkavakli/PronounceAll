@@ -679,3 +679,112 @@ a:focus-visible,
     padding-left: var(--space-6);
   }
 }
+
+/* Save/tag control (FR-SAVE-01, Frontend Design Baseline §14). One component for
+   words and phonemes: a link to the confirmation page without JavaScript, a
+   button after hydration. State is text and aria-pressed, never colour alone. */
+.save-control {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 0.35rem 0.85rem;
+  font: inherit;
+  font-size: 0.9375rem;
+  color: var(--color-accent-hover);
+  text-decoration: none;
+  background: transparent;
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+}
+
+.save-control:hover {
+  background: var(--color-accent-soft);
+}
+
+.save-control:focus-visible,
+.save-menu__option:focus-visible,
+.save-confirm__submit:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.save-control[aria-pressed='true'] {
+  color: var(--color-surface);
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+}
+
+.save-control:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.save-menu {
+  position: absolute;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  min-width: 9rem;
+  padding: var(--space-1);
+  background: var(--color-surface);
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius-md);
+  box-shadow: 0 6px 18px rgb(24 23 19 / 12%);
+}
+
+.save-menu__option {
+  min-height: 40px;
+  padding: 0.35rem 0.75rem;
+  font: inherit;
+  text-align: left;
+  color: var(--color-ink);
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.save-menu__option:hover {
+  background: var(--color-accent-soft);
+}
+
+.save-menu__option[aria-pressed='true'] {
+  font-weight: 600;
+}
+
+.save-menu__option[aria-pressed='true']::before {
+  content: '✓ ';
+}
+
+.save-menu__remove {
+  margin-top: var(--space-1);
+  border-top: 1px solid var(--color-rule-soft);
+}
+
+.phoneme-popover__save {
+  margin-top: 0.6rem;
+}
+
+.phoneme-popover__save:empty {
+  display: none;
+}
+
+.save-confirm__form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  align-items: center;
+  margin-top: var(--space-5);
+}
+
+.save-confirm__submit {
+  min-height: 44px;
+  padding: 0.5rem 1.25rem;
+  font: inherit;
+  color: var(--color-surface);
+  background: var(--color-accent);
+  border: 0;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+}

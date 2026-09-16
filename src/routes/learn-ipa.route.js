@@ -86,6 +86,7 @@ export function learnIpaRouter() {
         // happens to exist today (V4).
         audioPublicPrefix: config.audio.publicPrefix,
         title: 'Learn IPA',
+        pagePath: `/${SEGMENT}`,
       });
     } catch (error) {
       next(error);
@@ -113,6 +114,7 @@ export function learnIpaRouter() {
         phonemes,
         audioPublicPrefix: config.audio.publicPrefix,
         title: `Learn IPA — ${variant.displayName}`,
+        pagePath: `/${variant.code}/${SEGMENT}`,
       });
     } catch (error) {
       next(error);

@@ -13,6 +13,7 @@
  * arguments or through the composition root.
  */
 
+import { randomBytes } from 'node:crypto';
 import path from 'node:path';
 
 import { z } from 'zod';
@@ -66,6 +67,14 @@ const schema = z.object({
   // builds the adapter seam and the credentials follow with the production-edge
   // work. An unconfigured seam purges nothing and says so; it never pretends.
   CLOUDFLARE_ZONE_ID: z.string().default(''),
+
+  /**
+   * HMAC key for the stateless CSRF token (FR-AUTH-20, SDD v1.1 §6.6). Required
+   * and at least 32 characters in staging and production. Locally an unset
+   * value is replaced by a per-process random key, so tokens simply stop
+   * verifying after a restart.
+   */
+  CSRF_SECRET: z.string().default(''),
   CLOUDFLARE_CACHE_PURGE_TOKEN: z.string().default(''),
 });
 
@@ -86,6 +95,9 @@ const REQUIRED_IN_STRICT_ENVIRONMENTS = [
   // verify anything, and the gate would exist in name only.
   'TURNSTILE_SITE_KEY',
   'TURNSTILE_SECRET_KEY',
+  // SDD §6.6: a fixed secret shared by every process, or tokens issued by one
+  // process would not verify on another.
+  'CSRF_SECRET',
 ];
 
 /**
@@ -122,6 +134,10 @@ export function loadConfig(env) {
   }
 
   const isProductionLike = STRICT_ENVIRONMENTS.has(value.NODE_ENV);
+
+  if (isProductionLike && value.CSRF_SECRET.length < 32) {
+    throw new Error('CSRF_SECRET must be at least 32 characters (SDD v1.1 §6.6).');
+  }
 
   // NFR-SEC-11: in-memory counters are permitted for local development ONLY.
   // A staging or production boot configured for them fails here rather than
@@ -183,6 +199,11 @@ export function loadConfig(env) {
       siteKey: value.TURNSTILE_SITE_KEY,
       secretKey: value.TURNSTILE_SECRET_KEY,
       isConfigured: value.TURNSTILE_SITE_KEY !== '' && value.TURNSTILE_SECRET_KEY !== '',
+    }),
+
+    /** CSRF token key (SDD v1.1 §6.6). */
+    csrf: Object.freeze({
+      secret: value.CSRF_SECRET || randomBytes(32).toString('base64url'),
     }),
 
     /** Cloudflare cache purge on re-seed (SDD v1.1 §6.3). */

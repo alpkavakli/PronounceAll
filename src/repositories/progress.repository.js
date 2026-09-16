@@ -61,6 +61,9 @@ const SQL = Object.freeze({
                   updated_at    = IF(incoming.last_event_id > user_word_states.last_event_id, incoming.updated_at, user_word_states.updated_at),
                   last_event_id = GREATEST(user_word_states.last_event_id, incoming.last_event_id)`,
     exists: 'SELECT 1 FROM words WHERE word_id = ?',
+    label: `SELECT w.display_headword AS label, v.code AS variant_code
+              FROM words w JOIN language_variants v ON v.variant_id = w.variant_id
+             WHERE w.word_id = ?`,
   },
   phoneme: {
     lock: {
@@ -80,6 +83,9 @@ const SQL = Object.freeze({
                   updated_at    = IF(incoming.last_event_id > user_phoneme_states.last_event_id, incoming.updated_at, user_phoneme_states.updated_at),
                   last_event_id = GREATEST(user_phoneme_states.last_event_id, incoming.last_event_id)`,
     exists: 'SELECT 1 FROM phonemes WHERE phoneme_id = ?',
+    label: `SELECT p.ipa_symbol AS label, v.code AS variant_code
+              FROM phonemes p JOIN language_variants v ON v.variant_id = p.variant_id
+             WHERE p.phoneme_id = ?`,
   },
   learnedCount: {
     user: `SELECT COUNT(*) AS learned FROM user_phoneme_states s JOIN phonemes p ON p.phoneme_id = s.phoneme_id
@@ -254,4 +260,18 @@ export async function countLearnedPhonemes(owner, variantId, executor = defaultE
 export async function targetExists(targetKind, targetId, executor = defaultExecutor()) {
   const [rows] = await executor.execute(SQL[targetKind].exists, [targetId]);
   return rows.length > 0;
+}
+
+/**
+ * How to name a target to a person: a word's display headword or a phoneme's
+ * symbol, with its variant code.
+ *
+ * @param {'word'|'phoneme'} targetKind
+ * @param {number} targetId
+ * @param {import('./transaction.js').Executor} [executor]
+ * @returns {Promise<{ label: string, variantCode: string } | null>}
+ */
+export async function findTargetLabel(targetKind, targetId, executor = defaultExecutor()) {
+  const [rows] = await executor.execute(SQL[targetKind].label, [targetId]);
+  return rows.length > 0 ? { label: rows[0].label, variantCode: rows[0].variant_code } : null;
 }

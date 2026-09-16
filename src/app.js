@@ -45,6 +45,9 @@ import { homeRouter } from './routes/home.route.js';
 import { learnIpaRouter } from './routes/learn-ipa.route.js';
 import { searchRouter } from './routes/search.route.js';
 import { viewerStateRouter } from './routes/viewer-state.route.js';
+import { saveRouter } from './routes/save.route.js';
+import { createSaveStateService } from './services/save-state.service.js';
+import { createInMemoryIdempotencyStore, createRedisIdempotencyStore } from './lib/idempotency-store.js';
 import { wordRouter } from './routes/word.route.js';
 import { checkHealth } from './services/health.service.js';
 
@@ -82,6 +85,12 @@ export function createApp() {
     config.rateLimitStore === 'redis'
       ? createRedisRateLimitStore()
       : createInMemoryRateLimitStore();
+
+  // FR-SAVE-08 reservations share the NFR-SEC-11 store selection: Redis in
+  // staging and production, in-memory only where the counters are too.
+  const idempotencyStore =
+    config.rateLimitStore === 'redis' ? createRedisIdempotencyStore() : createInMemoryIdempotencyStore();
+  const saveStateService = createSaveStateService({ idempotencyStore });
 
   const verifyTurnstile = config.turnstile.isConfigured
     ? createTurnstileVerifier(config.turnstile.secretKey)
@@ -145,6 +154,14 @@ export function createApp() {
   // The B2 hydration read. Before the word router, whose `/:variant` pattern
   // would otherwise match `/viewer-state`.
   app.use(viewerStateRouter());
+  // Before the word router, whose patterns would otherwise match `/save`.
+  app.use(
+    saveRouter({
+      // Appendix C: save/tag POSTs, 60 per minute keyed on `pa_uid`.
+      saveRateLimit: rateLimitMiddleware({ store: rateLimitStore, bucket: 'save-tag', ...RATE_LIMITS.SAVE_TAG }),
+      saveStateService,
+    }),
+  );
   // MUST precede the word router. `/:variant/learnIPA` matches
   // `GET /:variant/:word` exactly, so registered the other way round the
   // learning page would be looked up as a word and 404. FR-IPA-07 fixes that

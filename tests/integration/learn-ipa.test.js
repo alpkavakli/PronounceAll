@@ -201,8 +201,12 @@ describe('controls that cannot work are absent', () => {
     expect(rendered).toBe(Number(rows[0].ready));
   });
 
-  test('no save control — that is Iteration 3', async () => {
+  test('each row carries one phoneme save control (FR-IPA-07, FR-SAVE-01)', async () => {
     const response = await request(app).get('/en-us/learnIPA');
-    expect(response.text).not.toMatch(/name="state"|class="save/);
+    const rows = (response.text.match(/class="phoneme-row"/g) ?? []).length;
+    const controls = response.text.match(/data-save-control data-target-kind="phoneme"/g) ?? [];
+    expect(rows).toBeGreaterThan(0);
+    expect(controls).toHaveLength(rows);
+    expect(response.text).toContain('href="/save/confirm?kind=phoneme&amp;id=');
   });
 });

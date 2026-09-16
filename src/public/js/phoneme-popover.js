@@ -20,6 +20,8 @@
  * hidden dialogs per pronunciation would cost markup for nothing.
  */
 
+import { createSaveControl, knownState } from './save-control.js';
+
 const POPOVER_ID = 'phoneme-popover';
 
 /** @type {HTMLElement | null} */
@@ -59,7 +61,11 @@ function ensurePopover() {
     }
   });
 
-  popover.append(symbol, example, replay);
+  // FR-SAVE-01: the phoneme's save control, rebuilt for each phoneme opened.
+  const save = document.createElement('div');
+  save.className = 'phoneme-popover__save';
+
+  popover.append(symbol, example, replay, save);
   document.body.append(popover);
   return popover;
 }
@@ -105,6 +111,15 @@ function open(button) {
   const replay = element.querySelector('.phoneme-popover__replay');
   replay.hidden = !audio;
 
+  // Only once hydration has reported this phoneme's state: a control shown
+  // before then would claim `unsaved` without knowing it.
+  const save = element.querySelector('.phoneme-popover__save');
+  save.replaceChildren();
+  const phonemeId = button.dataset.phonemeId;
+  if (phonemeId && knownState('phoneme', phonemeId) !== undefined) {
+    save.append(createSaveControl({ kind: 'phoneme', id: phonemeId, label: `/${symbol}/` }));
+  }
+
   const box = button.getBoundingClientRect();
   element.hidden = false;
   // Positioned after unhiding, so the measured height is the real one.
@@ -143,7 +158,8 @@ function onDocumentClick(event) {
     }
     return;
   }
-  if (!event.target.closest?.(`#${POPOVER_ID}`)) {
+  // The tag menu lives outside the popover; choosing a tag must not close it.
+  if (!event.target.closest?.(`#${POPOVER_ID}, .save-menu`)) {
     close();
   }
 }

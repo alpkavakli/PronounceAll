@@ -26,6 +26,8 @@ import { AppError } from '../errors/index.js';
 export const RATE_LIMITS = Object.freeze({
   /** `POST /request-word`: 10 per hour, keyed by the `pa_uid` UUID. */
   WORD_REQUEST: Object.freeze({ limit: 10, windowSeconds: 3600 }),
+  /** Save/tag POSTs: 60 per minute, keyed by the `pa_uid` UUID (FR-SAVE-09 listens share it). */
+  SAVE_TAG: Object.freeze({ limit: 60, windowSeconds: 60 }),
 });
 
 /**

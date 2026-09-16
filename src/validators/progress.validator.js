@@ -78,10 +78,65 @@ const saveSchema = z.discriminatedUnion('action', [
  * @returns {{ action: 'save'|'unsave'|'tag', targetKind: 'word'|'phoneme', targetId: number, tag: null|'learning'|'learned', idempotencyKey: string }}
  */
 export function parseSaveRequest(body) {
-  const parsed = saveSchema.safeParse(body);
+  // The form also carries `_csrf` and `returnTo`, consumed by the middleware and
+  // the route; the save schema sees only the save fields.
+  const { _csrf, returnTo, ...fields } = body && typeof body === 'object' ? body : {};
+  const parsed = saveSchema.safeParse(fields);
   if (!parsed.success) {
     throw AppError.validation('That change could not be read.', { cause: parsed.error });
   }
   const { tag, ...rest } = parsed.data;
   return { ...rest, tag: tag === undefined || tag === 'none' ? null : tag };
+}
+
+/**
+ * A backslash (which browsers read as a slash) or an ASCII control character.
+ *
+ * @param {string} value
+ * @returns {boolean}
+ */
+function hasUnsafeCharacter(value) {
+  for (const character of value) {
+    const code = character.charCodeAt(0);
+    if (character === String.fromCharCode(92) || code < 32 || code === 127) return true;
+  }
+  return false;
+}
+
+/**
+ * A same-site relative return path, or `/` (FR-SAVE-07, SDD v1.1 §6.6).
+ *
+ * Accepts only a path with a single leading `/`: never a scheme, an authority
+ * (`//host`), a backslash that browsers treat as a slash, or a control
+ * character. Anything else returns to the home page, so the confirmation flow
+ * cannot become an open redirect.
+ *
+ * @param {unknown} raw
+ * @returns {string}
+ */
+export function safeReturnPath(raw) {
+  if (typeof raw !== 'string' || raw.length === 0 || raw.length > 512) return '/';
+  if (!raw.startsWith('/') || raw.startsWith('//') || hasUnsafeCharacter(raw)) return '/';
+  const base = 'http://return.invalid';
+  const resolved = new URL(raw, base);
+  if (resolved.origin !== base) return '/';
+  return `${resolved.pathname}${resolved.search}`;
+}
+
+const confirmSchema = z.object({
+  kind: z.enum(['word', 'phoneme']),
+  id: z.coerce.number().int().positive(),
+  return: z.string().max(512).optional(),
+});
+
+/**
+ * @param {unknown} query
+ * @returns {{ targetKind: 'word'|'phoneme', targetId: number, returnTo: string }}
+ */
+export function parseConfirmQuery(query) {
+  const parsed = confirmSchema.safeParse(query);
+  if (!parsed.success) {
+    throw AppError.validation('That request could not be read.', { cause: parsed.error });
+  }
+  return { targetKind: parsed.data.kind, targetId: parsed.data.id, returnTo: safeReturnPath(parsed.data.return) };
 }

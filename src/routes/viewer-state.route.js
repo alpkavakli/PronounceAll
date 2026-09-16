@@ -17,6 +17,8 @@
 
 import { Router } from 'express';
 
+import { config } from '../config/index.js';
+import { issueCsrfToken } from '../services/csrf.service.js';
 import { jsonErrorSurface, markHydration } from '../middleware/index.js';
 import { parseViewerStateQuery } from '../validators/progress.validator.js';
 import { getViewerState } from '../services/viewer-state.service.js';
@@ -34,7 +36,10 @@ export function viewerStateRouter() {
       const { variantCode, wordIds, phonemeIds } = parseViewerStateQuery(req.query);
       const variant = await requireActiveVariant(variantCode);
       const state = await getViewerState({ anonymousId: req.anonymousId, variant, wordIds, phonemeIds });
-      res.json(state);
+      // SDD §6.6: the CSRF token is issued here, on the uncached per-viewer
+      // response, bound to the identity this response carries — minted now if
+      // the request had none, and set as `pa_uid` by the identity middleware.
+      res.json({ ...state, csrfToken: issueCsrfToken(config.csrf.secret, req.ensureAnonymousId()) });
     } catch (error) {
       next(error);
     }

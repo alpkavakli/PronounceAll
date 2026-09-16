@@ -18,6 +18,7 @@ const PRODUCTION_ENV = {
   // production-like boot requires both keys (Iteration 1).
   TURNSTILE_SITE_KEY: 'supplied-at-deploy-time',
   TURNSTILE_SECRET_KEY: 'supplied-at-deploy-time',
+  CSRF_SECRET: 'supplied-at-deploy-time-and-at-least-32-chars',
 };
 
 describe('loadConfig (SDD v1.1 §6.4, NFR-SEC-06)', () => {

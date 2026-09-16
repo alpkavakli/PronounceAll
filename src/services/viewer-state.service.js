@@ -18,6 +18,7 @@ import {
   anonymousProfileExists,
   countLearnedPhonemes,
   findBoundUserId,
+  findTargetLabel,
   findTargetStates,
 } from '../repositories/progress.repository.js';
 import { countPhonemes } from '../repositories/phonemes.repository.js';
@@ -69,4 +70,16 @@ export async function getViewerState({ anonymousId, variant, wordIds, phonemeIds
     learned,
     total,
   };
+}
+
+/**
+ * Name a save target for a person: a word's headword or a phoneme's symbol,
+ * with its variant code.
+ *
+ * @param {'word'|'phoneme'} targetKind
+ * @param {number} targetId
+ * @returns {Promise<{ label: string, variantCode: string } | null>}
+ */
+export function describeTarget(targetKind, targetId) {
+  return findTargetLabel(targetKind, targetId);
 }

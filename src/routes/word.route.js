@@ -151,6 +151,8 @@ export function wordRouter({ wordRequestRateLimit, verifyTurnstile }) {
         title: pageTitle(page.word.displayHeadword, variant.displayName),
         metaDescription: metaDescription(page.word.meaning),
         canonicalUrl: `${config.baseUrl}/${variant.code}/${encodeURIComponent(slug)}`,
+        // The no-JavaScript save confirmation returns here (FR-SAVE-07).
+        pagePath: `/${variant.code}/${encodeURIComponent(slug)}`,
         // V4: audio is served by Nginx from the content-addressed store in
         // production, and by the dev static mount locally. The view composes
         // the URL rather than the service, so no layer below HTTP knows a URL

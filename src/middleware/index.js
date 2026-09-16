@@ -3,6 +3,7 @@
  * See LICENSE-NOTICE.md at the repository root. */
 
 export { anonymousIdentityMiddleware } from './anonymous-identity.js';
+export { requireCsrf } from './csrf.js';
 export {
   ERROR_SURFACE,
   errorHandler,

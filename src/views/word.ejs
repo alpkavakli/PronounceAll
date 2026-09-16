@@ -11,7 +11,8 @@
          per-response CSP nonce, so it takes the nonce-free `script-src 'self'`
          policy (amended NFR-SEC-03) and every asset is external.
       2. Nothing per-viewer. Save/tag state and the FR-WORD-06 progress banner
-         belong to the hydration layer (B2) and arrive in later iterations.
+         belong to the hydration layer (B2): the save control here is a
+         viewer-neutral link that the script upgrades after hydration.
       3. Everything below reads with JavaScript disabled (FR-WORD-08).
 
     ITERATION 2 completes FR-WORD-03. The IPA is built from the stored
@@ -34,7 +35,7 @@
   <% }); %>
 </head>
 <body>
-  <main class="page word-page">
+  <main class="page word-page" data-viewer-variant="<%= variant.code %>">
     <%# FIND-10: look up the next word without going back to the home page.
 
         Safe on the cacheable shell: a plain GET form is static markup, identical
@@ -46,6 +47,12 @@
       <header class="word__header">
         <h1 class="word__headword"><%= word.displayHeadword %></h1>
         <p class="word__variant"><%= variant.displayName %></p>
+        <%# FR-SAVE-01/07: viewer-neutral on the cached shell. Without JavaScript
+            it links to the uncached confirmation page; the script upgrades it
+            to the save button once hydration reports the viewer's state. %>
+        <a class="save-control" data-save-control data-target-kind="word"
+           data-target-id="<%= word.wordId %>" data-target-label="<%= word.displayHeadword %>"
+           href="/save/confirm?kind=word&amp;id=<%= word.wordId %>&amp;return=<%= encodeURIComponent(pagePath) %>">Save</a>
       </header>
 
       <%# FR-WORD-03: every pronunciation from `word_pronunciations`, in
@@ -186,6 +193,7 @@
   <%# FR-IPA-02/03: the popover is a progressive enhancement over markup that
       already reads without it. External module, so the nonce-free shell CSP
       (`script-src 'self'`) admits it. %>
+  <script type="module" src="/js/save-control.js"></script>
   <script type="module" src="/js/phoneme-popover.js"></script>
   <%# FR-IPA-05 tier 3. Only reveals a control where the browser can actually
       speak; every word with a server-side asset already played without it. %>
