@@ -245,6 +245,35 @@ export async function findOccurrencesForWord(wordId, executor = defaultExecutor(
  * @param {object} [executor]
  * @returns {Promise<number>}
  */
+/**
+ * Every clickable occurrence for a variant, in reading order.
+ *
+ * The syllabification pass needs the whole corpus's unit sequences at once;
+ * calling `findOccurrencesForWord` 6 150 times would be the same data in 6 150
+ * round trips.
+ *
+ * @param {number} variantId
+ * @param {import('./transaction.js').Executor} [executor]
+ * @returns {Promise<Array<{pronunciationId: number, position: number, ipaSymbol: string}>>}
+ */
+export async function listOccurrencesForVariant(variantId, executor = defaultExecutor()) {
+  const [rows] = await executor.execute(
+    `SELECT pp.pronunciation_id, pp.position, ph.ipa_symbol
+       FROM pronunciation_phonemes pp
+       JOIN phonemes ph ON ph.phoneme_id = pp.phoneme_id
+       JOIN word_pronunciations wp ON wp.pronunciation_id = pp.pronunciation_id
+       JOIN words w ON w.word_id = wp.word_id
+      WHERE w.variant_id = ?
+      ORDER BY pp.pronunciation_id, pp.position`,
+    [variantId],
+  );
+  return rows.map((row) => ({
+    pronunciationId: row.pronunciation_id,
+    position: row.position,
+    ipaSymbol: row.ipa_symbol,
+  }));
+}
+
 export async function countPhonemes(variantId, executor = defaultExecutor()) {
   const [rows] = await executor.execute(
     'SELECT COUNT(*) AS total FROM phonemes WHERE variant_id = ?',

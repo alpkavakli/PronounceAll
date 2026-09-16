@@ -321,6 +321,28 @@ export async function updatePronunciationTranscription(
 }
 
 /**
+ * Write the syllable and stress breakdown FR-WORD-03 displays.
+ *
+ * Unlike the transcription this is not part of the row's natural key, so it
+ * carries none of that update's collision risk.
+ *
+ * @param {number} pronunciationId
+ * @param {string} syllableBreakdown
+ * @param {import('./transaction.js').Executor} [executor]
+ * @returns {Promise<void>}
+ */
+export async function updatePronunciationSyllableBreakdown(
+  pronunciationId,
+  syllableBreakdown,
+  executor = defaultExecutor(),
+) {
+  await executor.execute(
+    'UPDATE word_pronunciations SET syllable_breakdown = ? WHERE pronunciation_id = ?',
+    [syllableBreakdown, pronunciationId],
+  );
+}
+
+/**
  * Remove one pronunciation by id.
  *
  * Used by the D4 §5.7 reconciliation to drop a runtime row the canonical
