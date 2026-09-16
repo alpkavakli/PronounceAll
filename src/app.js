@@ -44,6 +44,7 @@ import { healthRouter } from './routes/health.route.js';
 import { homeRouter } from './routes/home.route.js';
 import { learnIpaRouter } from './routes/learn-ipa.route.js';
 import { searchRouter } from './routes/search.route.js';
+import { viewerStateRouter } from './routes/viewer-state.route.js';
 import { wordRouter } from './routes/word.route.js';
 import { checkHealth } from './services/health.service.js';
 
@@ -141,6 +142,9 @@ export function createApp() {
   // FIND-10, implemented ahead of the SRS. Top-level rather than
   // `/:variant/search`, which would be indistinguishable from a word lookup.
   app.use(searchRouter());
+  // The B2 hydration read. Before the word router, whose `/:variant` pattern
+  // would otherwise match `/viewer-state`.
+  app.use(viewerStateRouter());
   // MUST precede the word router. `/:variant/learnIPA` matches
   // `GET /:variant/:word` exactly, so registered the other way round the
   // learning page would be looked up as a word and 404. FR-IPA-07 fixes that
