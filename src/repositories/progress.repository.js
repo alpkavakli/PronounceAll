@@ -275,3 +275,157 @@ export async function findTargetLabel(targetKind, targetId, executor = defaultEx
   const [rows] = await executor.execute(SQL[targetKind].label, [targetId]);
   return rows.length > 0 ? { label: rows[0].label, variantCode: rows[0].variant_code } : null;
 }
+
+/*
+ * Reconciliation reads and the repair write (FR-SAVE-04, B3; SDD v1.1 §4.5).
+ *
+ * The derived tables are rebuilt from the log for one RESOLVED owner at a time:
+ * an anonymous identity bound to an account (B1) belongs to that account, so
+ * its events count toward the user's state, exactly as the live write resolves
+ * the owner. Non-state events are excluded by the same list as FR-SAVE-04.
+ * Nothing here updates or deletes an event.
+ */
+
+const NON_STATE_EVENTS = "('audio_listen_word', 'audio_listen_phoneme', 'practice_attempt', 'word_encounter')";
+
+const RECONCILE_SQL = Object.freeze({
+  owners:
+    'SELECT DISTINCT COALESCE(e.user_id, b.user_id) AS owner_user, ' +
+    'IF(COALESCE(e.user_id, b.user_id) IS NULL, e.anonymous_id, NULL) AS owner_anonymous ' +
+    'FROM user_activity_events e LEFT JOIN current_identity_bindings b ON b.anonymous_id = e.anonymous_id ' +
+    'WHERE e.event_type NOT IN ' + NON_STATE_EVENTS + ' ' +
+    'UNION SELECT DISTINCT user_id, anonymous_id FROM user_word_states ' +
+    'UNION SELECT DISTINCT user_id, anonymous_id FROM user_phoneme_states',
+  events: {
+    user:
+      'SELECT e.event_id, e.target_kind, e.target_id, e.event_type, e.event_value ' +
+      'FROM user_activity_events e LEFT JOIN current_identity_bindings b ON b.anonymous_id = e.anonymous_id ' +
+      'WHERE (e.user_id = ? OR b.user_id = ?) AND e.event_type NOT IN ' + NON_STATE_EVENTS + ' ' +
+      'ORDER BY e.target_kind, e.target_id, e.occurred_at, e.event_id',
+    anonymous:
+      'SELECT e.event_id, e.target_kind, e.target_id, e.event_type, e.event_value ' +
+      'FROM user_activity_events e LEFT JOIN current_identity_bindings b ON b.anonymous_id = e.anonymous_id ' +
+      'WHERE e.anonymous_id = ? AND b.user_id IS NULL AND e.event_type NOT IN ' + NON_STATE_EVENTS + ' ' +
+      'ORDER BY e.target_kind, e.target_id, e.occurred_at, e.event_id',
+  },
+  states: {
+    user:
+      "SELECT 'word' AS target_kind, word_id AS target_id, state, last_event_id FROM user_word_states WHERE user_id = ? " +
+      "UNION ALL SELECT 'phoneme', phoneme_id, state, last_event_id FROM user_phoneme_states WHERE user_id = ?",
+    anonymous:
+      "SELECT 'word' AS target_kind, word_id AS target_id, state, last_event_id FROM user_word_states WHERE anonymous_id = ? " +
+      "UNION ALL SELECT 'phoneme', phoneme_id, state, last_event_id FROM user_phoneme_states WHERE anonymous_id = ?",
+  },
+  lockStates: {
+    user: [
+      'SELECT state_id FROM user_word_states WHERE user_id = ? FOR UPDATE',
+      'SELECT state_id FROM user_phoneme_states WHERE user_id = ? FOR UPDATE',
+    ],
+    anonymous: [
+      'SELECT state_id FROM user_word_states WHERE anonymous_id = ? FOR UPDATE',
+      'SELECT state_id FROM user_phoneme_states WHERE anonymous_id = ? FOR UPDATE',
+    ],
+  },
+  repair: {
+    word:
+      'INSERT INTO user_word_states (user_id, anonymous_id, word_id, state, last_event_id, updated_at) ' +
+      'VALUES (?, ?, ?, ?, ?, ?) AS incoming ON DUPLICATE KEY UPDATE state = incoming.state, ' +
+      'last_event_id = incoming.last_event_id, updated_at = incoming.updated_at',
+    phoneme:
+      'INSERT INTO user_phoneme_states (user_id, anonymous_id, phoneme_id, state, last_event_id, updated_at) ' +
+      'VALUES (?, ?, ?, ?, ?, ?) AS incoming ON DUPLICATE KEY UPDATE state = incoming.state, ' +
+      'last_event_id = incoming.last_event_id, updated_at = incoming.updated_at',
+  },
+});
+
+/**
+ * Every resolved owner that has state events or a derived row.
+ *
+ * @param {import('./transaction.js').Executor} [executor]
+ * @returns {Promise<Owner[]>}
+ */
+export async function listReconciliationOwners(executor = defaultExecutor()) {
+  const [rows] = await executor.query(RECONCILE_SQL.owners);
+  return rows.map((row) =>
+    row.owner_user !== null ? { userId: Number(row.owner_user) } : { anonymousId: row.owner_anonymous },
+  );
+}
+
+/**
+ * The owner's state events in `(target, occurred_at, event_id)` order (C5).
+ * Inside a repair transaction this follows {@link lockOwnerStates}, so a live
+ * write to the same owner waits on the state rows and cannot interleave.
+ *
+ * @param {Owner} owner
+ * @param {import('./transaction.js').Executor} [executor]
+ * @returns {Promise<Array<{ eventId: number, targetKind: string, targetId: number, eventType: string, eventValue: string|null }>>}
+ */
+export async function listOwnerStateEvents(owner, executor = defaultExecutor()) {
+  const who = ownerOf(owner);
+  const params = who.kind === 'user' ? [who.value, who.value] : [who.value];
+  const [rows] = await executor.execute(RECONCILE_SQL.events[who.kind], params);
+  return rows.map((row) => ({
+    eventId: Number(row.event_id),
+    targetKind: row.target_kind,
+    targetId: Number(row.target_id),
+    eventType: row.event_type,
+    eventValue: row.event_value,
+  }));
+}
+
+/**
+ * The owner's live derived rows.
+ *
+ * @param {Owner} owner
+ * @param {import('./transaction.js').Executor} [executor]
+ * @returns {Promise<Array<{ targetKind: string, targetId: number, state: string, lastEventId: number }>>}
+ */
+export async function listOwnerStates(owner, executor = defaultExecutor()) {
+  const who = ownerOf(owner);
+  const [rows] = await executor.execute(RECONCILE_SQL.states[who.kind], [who.value, who.value]);
+  return rows.map((row) => ({
+    targetKind: row.target_kind,
+    targetId: Number(row.target_id),
+    state: row.state,
+    lastEventId: Number(row.last_event_id),
+  }));
+}
+
+/**
+ * Lock the owner's derived rows for a repair: the C6 per-actor claim. A live
+ * save locks the same rows first, so the two serialise.
+ *
+ * @param {Owner} owner
+ * @param {import('./transaction.js').Executor} executor a transaction connection
+ * @returns {Promise<void>}
+ */
+export async function lockOwnerStates(owner, executor) {
+  const who = ownerOf(owner);
+  for (const statement of RECONCILE_SQL.lockStates[who.kind]) {
+    await executor.execute(statement, [who.value]);
+  }
+}
+
+/**
+ * Set a derived row to exactly what the log derives. Unlike the live
+ * projection this does not only move forward: it is the correction.
+ *
+ * @param {object} repair
+ * @param {Owner} repair.owner
+ * @param {'word'|'phoneme'} repair.targetKind
+ * @param {number} repair.targetId
+ * @param {string} repair.state
+ * @param {number} repair.lastEventId
+ * @param {Date} repair.updatedAt
+ * @param {import('./transaction.js').Executor} executor
+ * @returns {Promise<void>}
+ */
+export async function repairTargetState({ owner, targetKind, targetId, state, lastEventId, updatedAt }, executor) {
+  await executor.execute(RECONCILE_SQL.repair[targetKind], [
+    ...ownerColumns(owner),
+    targetId,
+    state,
+    lastEventId,
+    updatedAt,
+  ]);
+}

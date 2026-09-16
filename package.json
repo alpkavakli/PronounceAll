@@ -34,6 +34,8 @@
     "seed:phonemes:dry-run": "node scripts/seed-phonemes.js --dry-run",
     "seed:syllables": "node scripts/syllabify-pronunciations.js --apply",
     "seed:syllables:dry-run": "node scripts/syllabify-pronunciations.js",
+    "reconcile:state": "node scripts/reconcile-save-state.js",
+    "reconcile:state:apply": "node scripts/reconcile-save-state.js --apply",
     "inventory:check": "node scripts/extract-phoneme-inventory.js --check",
     "audio:preflight": "node scripts/generate-phoneme-audio.js --dry-run",
     "audio:generate": "node scripts/generate-phoneme-audio.js",
