@@ -50,7 +50,7 @@
 
 **Rationale.** The save button demands read your writes consistency: a user who taps `learned` and reloads must see `learned`. A synchronous upsert gives that and keeps practice queue construction and the B2 hydration endpoint plain indexed reads. `FR-SAVE-04` already mandates that a reconciliation script exists and that a dry run recompute matches the live tables, so scheduling it satisfies the drift clause without new requirements.
 
-**Implementation note.** Qualifying events upsert the derived row; `audio_listen_*` and `practice_attempt` are excluded per `FR-SAVE-04`. Idempotency of the 30 second window (`FR-SAVE-08`) is enforced at the write. The upsert keys on the resolved identity through `identity_bindings` (B1), and a merge recomputes across both identities, which is what the amended `FR-AUTH-18` requires post merge.
+**Implementation note.** Qualifying events upsert the derived row; `audio_listen_*`, `practice_attempt` and `word_encounter` (added by SRS 1.0.4, 2026-09-17) are excluded per `FR-SAVE-04`. Idempotency of the 30 second window (`FR-SAVE-08`) is enforced at the write. The upsert keys on the resolved identity through `identity_bindings` (B1), and a merge recomputes across both identities, which is what the amended `FR-AUTH-18` requires post merge.
 
 ---
 

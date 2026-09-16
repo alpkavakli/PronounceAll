@@ -2,9 +2,10 @@
 
 **Status:** Owner-approved planning input, revised 2026-09-17 after an audit against
 the SRS, SDD v1.1, D4, the Frontend Design Baseline and the locked iteration order.
-**Not implementation authority.** Nothing here may be built until the amendments in
-§6 are approved into the SRS, SDD and Frontend Design Baseline. Where this document
-and an authoritative document differ, the authoritative document wins until amended.
+**Not implementation authority.** The §6 amendments were approved and applied on
+2026-09-17 (SRS 1.0.4, SDD v1.1 amendment, Frontend Design Baseline amendment); build
+from those documents. This document remains the record of the product direction and
+of why the scope is split as it is.
 
 **The frozen roadmap is unchanged:** Iteration 3 = save/tag, Iteration 4 =
 authentication, Iteration 5 = practice/SM-2 (Handoff Document, iteration order). This
@@ -61,8 +62,9 @@ Rules:
 - the transcription stays one continuous readable artifact (Baseline §8.1);
 - state is applied from the hydration response keyed by `data-phoneme-id`; the
   browser never parses IPA (D4 §3.10), and the cached shell stays viewer-neutral (B2);
-- where state is not known — no JavaScript, or before hydration — the neutral style
-  shows. An anonymous visitor with a `pa_uid` **does** have state.
+- where state is not known — no JavaScript, or before hydration — the default IPA
+  style shows, asserting neither learned nor not yet learned. An anonymous visitor
+  with a `pa_uid` **does** have state.
 
 ### 2.3 Personalised `/learnIPA` and the progress banner
 
@@ -90,21 +92,32 @@ Iteration 3 **records** successful dictionary encounters; it does not review the
 - It is learning history, not advertising or tracking analytics.
 - It does not change derived save state and does not create a review schedule.
 
-Open decisions, to settle in the amendments (§6.1):
+Decisions (approved 2026-09-17; specified in FR-SAVE-10):
 
 1. **Who is recorded.** FR-AUTH-03 creates an `anonymous_profiles` row only on a
    deliberate progress write. Recording every JavaScript visitor's encounters would
-   create a profile and a lookup history for every visitor. *Recommended:* record
-   encounters only for actors who already have progress (an existing profile, or a
-   registered user), so FR-AUTH-03 is unchanged and no casual visitor acquires stored
-   history.
-2. **Write path.** The hydration read stays read-only (SDD §3.4). *Recommended:* a
+   create a profile and a lookup history for every visitor. **Decided:** record
+   encounters only for a registered user or an anonymous actor that already has a
+   progress profile. FR-AUTH-03 is unchanged, no casual visitor acquires stored
+   history, and earlier browsing is never reconstructed.
+2. **Write path.** The hydration read stays read-only (SDD §3.4). **Decided:** a
    separate CSRF-protected `POST` sent by the page script after hydration, using the
    FR-SAVE-08 idempotency key. A no-JavaScript view is not recorded.
-3. **Frequency.** *Recommended:* at most one encounter event per actor, word and UTC
-   day, so repeated views do not grow the log without adding information.
+3. **Frequency.** **Decided:** at most one encounter event per actor, word and UTC
+   day; a repeat writes nothing and never updates or deletes the earlier event.
 
-### 2.6 Not in Iteration 3
+### 2.6 Implementation order and the privacy gate
+
+1. Unified word and phoneme save/tag, anonymous state, events and derived state,
+   hydration.
+2. Learned-phoneme presentation, personalised `/learnIPA`, progress banner.
+3. Playback speed; "Broad en-US IPA" label and help.
+4. Word encounter events — **last**. The encounter write is not enabled in production
+   until its privacy obligations are met (Appendix E and NFR-PRIV-02 as amended, the
+   Privacy Policy disclosure, a Threat Model entry). This gate does not delay slices
+   1–3.
+
+### 2.7 Not in Iteration 3
 
 The automatic review scheduler; the personal vocabulary/history page; recall modes.
 These are Iteration 5 (§3).
@@ -178,7 +191,11 @@ Not v1.0 unless the Charter is later amended:
 
 ---
 
-## 6. Amendments required before Iteration 3 implementation
+## 6. Amendments required before Iteration 3 implementation — APPLIED 2026-09-17
+
+Applied as listed, with two maintainer corrections: the "Broad en-US IPA" label is an
+SRS acceptance criterion of FR-WORD-03, not only a Baseline item; and learner state has
+three presentations (learned, not yet learned, and a default when state is unknown).
 
 ### 6.1 SRS
 

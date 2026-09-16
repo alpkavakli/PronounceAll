@@ -1,6 +1,6 @@
 # PronounceAll — Software Requirements Specification
 
-**Version:** 1.0.3
+**Version:** 1.0.4
 **Status:** Approved (pending maintainer sign-off)
 **Owner:** Alp K. (solo developer)
 **Domain:** pronounceall.com
@@ -20,6 +20,7 @@
 | 1.0.1 | SDD Round 1 reconciliation amendments applied; no v1.0 product scope change. |
 | 1.0.2 | FR-PRACTICE-01 clarified for zero-due sessions and upcoming-review preview. |
 | 1.0.3 | FIND-07 resolved: FR-IPA-01 replaced by the canonical pedagogical inventory model; count constraints removed from FR-IPA-01, FR-IPA-09, Appendix B, and §1–2 scope text. |
+| 1.0.4 | Iteration 3 product amendments (maintainer, 2026-09-17): "Broad en-US IPA" labelling (FR-WORD-03); learned-phoneme presentation (FR-IPA-02); learned progress on the IPA pages (FR-IPA-07, FR-IPA-10); playback speed (new FR-IPA-11); word encounter events (FR-SAVE-03, FR-SAVE-04, new FR-SAVE-10, Appendix E, Appendix F, NFR-PRIV-02). No change to the iteration order or to v1.0 exclusions. |
 ---
 
 ## Table of contents
@@ -313,6 +314,7 @@ The system shall render, for every word present in the dictionary for the reques
 - The IPA transcription's phoneme elements each expose a stable data attribute (`data-phoneme-id`) keyed to a row in `phonemes`.
 - A word with more than one pronunciation (for example a heteronym such as `lead`) renders each pronunciation from `word_pronunciations` in `display_order`, with exactly one marked `is_primary`; seed validation rejects any word that lacks a single primary pronunciation.
 - The syllable/stress breakdown identifies primary stress and, where applicable, secondary stress using the standard IPA markers `ˈ` and `ˌ`.
+- The pronunciation area identifies the transcription convention; for the `en-us` variant it reads "Broad en-US IPA". Accessible help text explains that PronounceAll uses a consistent learner-oriented phonemic transcription and that other dictionaries may use different IPA conventions for the same pronunciation. The help text is reachable by keyboard and by assistive technology, does not depend on hover alone, and is present with JavaScript disabled. Its presentation is governed by the Frontend Design Baseline.
 - Meaning(s) are attributed to the upstream dictionary source in a visible footer on the word page.
 
 #### FR-WORD-04 — Unknown-word page with fuzzy suggestions. *Priority: Must.*
@@ -415,6 +417,7 @@ On every word page the IPA transcription shall be rendered as a sequence of clic
 - The `/en-us/cupcake` page contains exactly one clickable element per phoneme in the word's transcription.
 - Each element has a role, an accessible name (`aria-label` = "phoneme /k/", etc.), and is reachable via the tab sequence.
 - Clicking a phoneme fires the audio (see FR-IPA-04) and opens the popover (see FR-IPA-03).
+- Learned presentation (added in 1.0.4). For a viewer whose derived state for a phoneme (`user_phoneme_states`, FR-SAVE-04) is `learned`, every element for that phoneme renders in the learned presentation; the states `unsaved`, `saved` and `learning` render in the neutral not-yet-learned presentation. There is no other learned state: the presentation is a projection of the FR-SAVE state. Where the viewer's state is not known (JavaScript disabled, or before hydration) every element renders in the default presentation, which asserts neither learned nor not yet learned. The learned presentation is not conveyed by colour alone: the element's accessible name states it (e.g. "phoneme /θ/, learned"). The neutral presentation never uses an error colour. Stress marks, syllable separators and slashes never carry the learned presentation. The cached shell (SDD B2) is identical for every viewer; state is applied from the hydration response keyed by `data-phoneme-id`, and the browser performs no IPA parsing.
 
 #### FR-IPA-03 — Phoneme popover content. *Priority: Must.*
 
@@ -470,6 +473,7 @@ The system shall serve, at `GET /:variant/learnIPA`, a page listing every phonem
 - The order of rows on `/en-us/learnIPA` equals the order returned by `SELECT … FROM phonemes WHERE variant = 'en-us' ORDER BY frequency_rank ASC`. The same query parameterised by `:variant` shall determine the ordering for any future variant.
 - The page includes all phonemes for the URL's variant; the count equals the value displayed in the progress banner (FR-WORD-06) when viewed on a word page of the same variant.
 - Each save control operates on the phoneme target and reflects the current save state for the viewer (if any).
+- Learned progress (added in 1.0.4). The page shows the viewer's learned count for the variant in the form `M / N`, where M and N are the counts defined in FR-WORD-06, and each row renders the FR-IPA-02 presentation for its state. Where JavaScript is available the list can be filtered to all, learned, or not-yet-learned phonemes; with JavaScript disabled the full list, its audio and its save controls remain usable.
 
 #### FR-IPA-08 — Example-word matching by sound, not spelling. *Priority: Must.*
 
@@ -501,6 +505,19 @@ The system shall serve, at `GET /learnIPA`, a page listing every phoneme across 
 - The page is reachable from a footer link present on every page in v1.0.
 - The page lazy-loads phoneme audio on demand (per FR-IPA-06); no `<link rel="preload" as="audio">` is emitted for phoneme files.
 - Each save control operates on the phoneme target and reflects the current save state for the viewer (if any).
+- Learned progress (added in 1.0.4). The page shows the viewer's learned count for each variant in the form `M / N` (in v1.0 identical to `/en-us/learnIPA`), where M and N are the counts defined in FR-WORD-06, and each row renders the FR-IPA-02 presentation for its state. Where JavaScript is available the list can be filtered to all, learned, or not-yet-learned phonemes; with JavaScript disabled the full list, its audio and its save controls remain usable.
+
+#### FR-IPA-11 — Playback speed. *Priority: Should.*
+
+Every whole-word audio control (all FR-IPA-05 tiers) and every phoneme audio control (the FR-IPA-03 popover and the FR-IPA-07 and FR-IPA-10 rows) shall offer exactly two playback speeds: `1×`, the default, and `0.75×`. The speed is applied in the browser — the media element's playback rate, or the speech-synthesis rate for FR-IPA-05 tier 3 — with pitch preserved where the browser supports it. No server-side state records the choice; a browser may remember it locally as a per-viewer convenience.
+
+**Rationale:** Slower playback is a low-cost aid for hearing unfamiliar sounds, and two fixed values keep the control simple.
+
+**Acceptance criteria:**
+- The speed control has an accessible name and exposes which speed is selected.
+- After selecting `0.75×`, the next whole-word or phoneme playback runs at a rate of 0.75; after selecting `1×`, at 1.
+- Selecting a speed sends no request to the server.
+- With JavaScript disabled, the native audio fallback of FR-IPA-05 still plays at normal speed.
 
 ### 4.3 Save & tag system — `FR-SAVE-*`
 
@@ -528,7 +545,7 @@ The save control shall implement the following state machine: from `unsaved`, a 
 
 #### FR-SAVE-03 — Append-only event log. *Priority: Must.*
 
-Every state-changing action on a save target and every audio-listen and practice-attempt shall write a row to `user_activity_events` containing, at minimum: event ID (`event_id`, a `BIGINT AUTO_INCREMENT`), actor reference (exactly one of `anonymous_id` or `user_id` populated), target kind (`word` or `phoneme`), target ID, event type (`save`, `unsave`, `tag_change`, `audio_listen_word`, `audio_listen_phoneme`, `practice_attempt`), event value (nullable — the tag for `tag_change`, null for an untagged reset, the SM-2 rating for `practice_attempt`), and an occurrence timestamp (`occurred_at`, `DATETIME(3)` in UTC). Rows in `user_activity_events`, and `LINK` rows in the append-only `identity_bindings` history table, shall never be updated or deleted by application code except during account hard-deletion (see FR-SET-08).
+Every state-changing action on a save target, every audio-listen, every practice-attempt, and every recorded word encounter (FR-SAVE-10) shall write a row to `user_activity_events` containing, at minimum: event ID (`event_id`, a `BIGINT AUTO_INCREMENT`), actor reference (exactly one of `anonymous_id` or `user_id` populated), target kind (`word` or `phoneme`), target ID, event type (`save`, `unsave`, `tag_change`, `audio_listen_word`, `audio_listen_phoneme`, `practice_attempt`, `word_encounter`), event value (nullable — the tag for `tag_change`, null for an untagged reset, the SM-2 rating for `practice_attempt`, null for `word_encounter`), and an occurrence timestamp (`occurred_at`, `DATETIME(3)` in UTC). Rows in `user_activity_events`, and `LINK` rows in the append-only `identity_bindings` history table, shall never be updated or deleted by application code except during account hard-deletion (see FR-SET-08).
 
 **Rationale:** Append-only is the foundation of the merge-on-login rule and of the deterministic derivation of `user_word_states`, `user_phoneme_states`, and `sm2_states`.
 
@@ -539,7 +556,7 @@ Every state-changing action on a save target and every audio-listen and practice
 
 #### FR-SAVE-04 — Derived state consistency. *Priority: Must.*
 
-`user_word_states` and `user_phoneme_states` shall reflect, for each (actor, target) pair, the most recent qualifying event, excluding `audio_listen_word`, `audio_listen_phoneme`, and `practice_attempt`. The derivation rule is deterministic: qualifying events are ordered by `(occurred_at, event_id)`, and the latest such event's type/value dictates the state; earlier events are superseded but preserved in the log.
+`user_word_states` and `user_phoneme_states` shall reflect, for each (actor, target) pair, the most recent qualifying event, excluding `audio_listen_word`, `audio_listen_phoneme`, `practice_attempt`, and `word_encounter`. The derivation rule is deterministic: qualifying events are ordered by `(occurred_at, event_id)`, and the latest such event's type/value dictates the state; earlier events are superseded but preserved in the log.
 
 **Acceptance criteria:**
 - For an actor whose event history for one word is `save → tag_change(learning) → tag_change(learned) → tag_change(learning)`, the derived state is `learning`.
@@ -596,6 +613,26 @@ Playing whole-word audio shall write an `audio_listen_word` event, and playing p
 **Acceptance criteria:**
 - Clicking a phoneme on `/en-us/cupcake` produces one `audio_listen_phoneme` event per click, rate-limited under §10.3 (save/tag bucket).
 - Derived save state does not change as a consequence of an `audio_listen_word` or `audio_listen_phoneme` event.
+
+#### FR-SAVE-10 — Word encounter events. *Priority: Should.*
+
+When a viewer opens the page of a canonical word, the system shall record a `word_encounter` event for that word, subject to all of the following:
+
+- **Who.** Only for a registered user, or for an anonymous actor that already has an `anonymous_profiles` row created by a deliberate progress write under FR-AUTH-03. A viewer with no progress profile is not recorded, and no profile is created by an encounter; FR-AUTH-03 is unchanged. Encounters before the profile existed are never reconstructed.
+- **What.** Target kind `word`, the canonical `word_id`, a null event value, and `occurred_at`. No search query text, failed or raw search text, referrer, or other free text is stored.
+- **How.** A separate state-changing `POST` sent by the page script after hydration, carrying a CSRF token and an idempotency key per FR-SAVE-08. The cached shell and the hydration read never write. A page viewed with JavaScript disabled is not recorded.
+- **How often.** At most one `word_encounter` event per actor, word and UTC day. A request for a word already encountered that day writes nothing and returns success; the earlier event is never updated or deleted.
+- **Effect.** An encounter does not change derived save state (FR-SAVE-04) and creates no practice schedule. Turning encounters into review is Iteration 5 scope and is not specified here.
+
+**Rationale:** PronounceAll's learning loop remembers the vocabulary a learner looks up so that later iterations can bring it back. Limiting collection to learners who have already started using progress features, and to the canonical word alone, keeps the data minimal (NFR-PRIV-01).
+
+**Release gate:** the encounter write shall not be enabled in production until the privacy obligations for this data are met: Appendix E and NFR-PRIV-02 as amended, the Privacy Policy disclosure (FR-CONSENT-05), and a Threat Model entry for the encounter endpoint.
+
+**Acceptance criteria:**
+- An actor with no progress profile opens a word page; no `word_encounter` row and no `anonymous_profiles` row is written.
+- An actor with a progress profile opens the same word page twice on one UTC day; exactly one `word_encounter` row exists for that actor and word, and no row is updated or deleted.
+- The request without a valid CSRF token is rejected and writes nothing.
+- No stored column of the event contains the search string that led to the page.
 
 ### 4.4 Practice sessions — `FR-PRACTICE-*`
 
@@ -1416,8 +1453,8 @@ Retention periods shall be:
 
 | Data class | Retention | Rationale |
 |-----------|-----------|-----------|
-| Event log rows owned by a registered user | Until the user deletes the account | It is the user's own progress data |
-| Event log rows owned by an *unbound* anonymous UUID | **Pruned when the UUID has been dormant for 2 years** (matches the cookie's max sliding lifetime) | GDPR Art. 5(1)(e) storage limitation |
+| Event log rows owned by a registered user (including `word_encounter` history, FR-SAVE-10) | Until the user deletes the account | It is the user's own progress data |
+| Event log rows owned by an *unbound* anonymous UUID (including `word_encounter` history) | **Pruned when the UUID has been dormant for 2 years** (matches the cookie's max sliding lifetime) | GDPR Art. 5(1)(e) storage limitation |
 | Anonymous-to-account bindings (`identity_bindings`) and the events of a *bound* anonymous UUID | Follow the account lifecycle; deleted on account hard-delete, never dormancy-pruned | The identity belongs to an active account, so storage limitation is governed by the account, not by anonymous dormancy |
 | Session rows (`pa_sid`) | Idle 30 min / absolute 12 h (per FR-AUTH-12), pruned nightly | Per Foundational Decisions §2 |
 | Email-verification tokens | 24 h (per FR-AUTH-09), pruned nightly after expiry | Security |
@@ -1705,6 +1742,7 @@ Columns:
 | FR-IPA-08 | 1 | F: The word page (sound-not-spelling) | Unit (seed lint) + manual | — |
 | FR-IPA-09 | 1 | — (robustness) | Playwright screenshot | — |
 | FR-IPA-10 | 1 | — (Option B URL split, post-Handoff) | Supertest + Playwright | — |
+| FR-IPA-11 | — | Product Direction §2.4 (2026-09-17) | Playwright | — |
 
 ### 6.3 Save & tag system
 
@@ -1719,6 +1757,7 @@ Columns:
 | FR-SAVE-07 | — | FD §5 | Playwright (noScript) | — |
 | FR-SAVE-08 | — | FD §2 (CSRF) | Supertest | TM pending (CSRF) |
 | FR-SAVE-09 | — | F: Post-v1.0 analytics hook | Unit, DB assertion | — |
+| FR-SAVE-10 | — | Product Direction §2.5 (2026-09-17) | Supertest, DB assertion | TM pending (encounter endpoint) |
 
 ### 6.4 Practice sessions
 
@@ -1947,7 +1986,7 @@ Normative source: NFR-PRIV-01. Each field has a justifying FR and a retention ru
 | `google_sub` | `user_accounts` | Google OAuth subject | FR-AUTH-04, FR-AUTH-16 | Until hard-delete |
 | `profile_picture_url` (cached or direct from Google) | `user_accounts` | Display | FR-AUTH-16 | Until hard-delete |
 | `anonymous_id` | `anonymous_profiles` | Pseudonymous identifier | FR-AUTH-01, FR-AUTH-03 | 2-year dormancy |
-| Event log rows | `user_activity_events` | Progress data | FR-SAVE-03 | Until hard-delete or dormancy prune |
+| Event log rows | `user_activity_events` | Progress data, including word encounter history: which canonical words a learner with a progress profile opened, and when (no search text) | FR-SAVE-03, FR-SAVE-10 | Until hard-delete or dormancy prune |
 | Anonymous-to-account bindings | `identity_bindings` | Pseudonymous linkage (anonymous identity to account) | FR-AUTH-18 | Until account hard-delete; follows the account lifecycle, not dormancy-pruned |
 | Consent records | `consent_records` | Legal demonstrability | FR-CONSENT-03, FR-CONSENT-04 | Until hard-delete |
 | Session rows | `sessions` (or Redis) | Authenticator | FR-AUTH-12 | Idle/absolute timeouts |
@@ -1982,6 +2021,7 @@ The canonical source of endpoints is the API Specification (OpenAPI 3.1 YAML). T
 - `POST /settings/*` — account mgmt, cookie prefs, ad toggle, language (FR-SET-02, FR-SET-03, FR-SET-04, FR-SET-05).
 - `POST /settings/delete` (two-step) — account deletion (FR-SET-07).
 - `POST /practice/attempt` — self-assessment (FR-PRACTICE-03).
+- `POST /encounter` — word encounter event (FR-SAVE-10); save/tag rate-limit bucket.
 
 **External callbacks:**
 - `GET /auth/google/callback` — OAuth callback (FR-AUTH-04, FR-AUTH-16).

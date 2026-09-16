@@ -1,6 +1,7 @@
 # PronounceAll Frontend Design Baseline v1
 
-**Status:** Approved and frozen (maintainer, 2026-09-16). Authoritative for frontend visual language and UI structure; it never overrides an SRS requirement or SDD architecture decision.  
+**Status:** Approved and frozen (maintainer, 2026-09-16). Authoritative for frontend visual language and UI structure; it never overrides an SRS requirement or SDD architecture decision.
+**Amended:** 2026-09-17 for Iteration 3 (SRS 1.0.4) — learned-phoneme states (§4.1, §8.1, §8.3, §9), playback speed (§10), `/learnIPA` progress (§11), the "Broad en-US IPA" label and pronunciation source note (§7.4), and save/tag promoted from future design (§14).  
 **Date:** 2026-09-11 (frozen 2026-09-16)  
 **Scope:** PronounceAll v1 frontend visual language, interaction patterns, and implementation guardrails  
 **Audience:** Maintainer, Claude Code, contributors  
@@ -353,6 +354,10 @@ These values are the proposed baseline. Once owner-approved, new components shou
   --color-success: #236A4B;
   --color-danger: #9C2F2F;
   --color-focus: #1F5B55;
+
+  /* Learner state (amended 2026-09-17) */
+  --color-learned: var(--color-success);   /* learned phoneme */
+  --color-not-learned: var(--color-muted); /* not yet learned; never an error colour */
 }
 ```
 
@@ -363,6 +368,7 @@ These values are the proposed baseline. Once owner-approved, new components shou
 - Burnt orange is for meaningful interactivity: primary actions, active phoneme state, play controls, important links.
 - Dark teal is reserved for focus/accessibility and may be used sparingly for success/learning-confirmed states only when semantics justify it.
 - A color must not be used as the only indicator of state.
+- Learner state uses only `--color-learned` and `--color-not-learned`. `--color-danger` never marks a phoneme a learner has not learned yet: that is progress, not an error.
 - Most of the page should remain ink + paper + rule colors.
 
 Why this direction:
@@ -642,6 +648,18 @@ The accent rule can use `--color-accent`.
 
 Do not necessarily display both the raw transcription and a second identical tokenized transcription if this duplicates information. The clickable transcription itself should be the main artifact.
 
+### Convention label (amended 2026-09-17, FR-WORD-03)
+
+The pronunciation block carries a quiet label naming the convention — **Broad en-US IPA** — in the same small uppercase style as the block's other labels, once per word page rather than once per pronunciation.
+
+Its help text is a disclosure the label controls (a native `<details>`/`<summary>` is the no-JavaScript baseline), not a hover-only tooltip:
+
+> PronounceAll uses a consistent learner-oriented phonemic transcription. Other dictionaries may use different IPA conventions for the same pronunciation.
+
+### Pronunciation source note
+
+A pronunciation that does not come from the word's Wiktionary entry shows one muted line beneath it — "Pronunciation source: CMU Pronouncing Dictionary", the source name linked to its reference. Wiktionary pronunciations carry no such line; the page footer already attributes them.
+
 ## 7.5 Multiple pronunciations
 
 Treat each pronunciation as a real row, not as a collection of equal cards.
@@ -727,6 +745,23 @@ Recommended concept:
 
 Exact CSS may be adjusted for glyph metrics, but the visual rule is frozen: **inline sound units, not a chain of pill buttons**.
 
+### Learner states (amended 2026-09-17, FR-IPA-02)
+
+Once hydration reports the viewer's state, each unit takes one of three presentations:
+
+| State | Text colour | Non-colour cue | Accessible name |
+|---|---|---|---|
+| default (state unknown: no JavaScript, before hydration) | `--color-ink` | none | `phoneme /θ/` |
+| learned (FR-SAVE state `learned`) | `--color-learned` | 2px solid underline in `--color-learned` | `phoneme /θ/, learned` |
+| not yet learned (`unsaved`, `saved`, `learning`) | `--color-not-learned` | none | `phoneme /θ/, not learned yet` |
+
+Rules:
+
+- the underline is the shape cue, so the learned state survives greyscale and colour-vision differences;
+- hover, focus and the open (`aria-expanded`) states keep their existing treatment and take precedence over learner state;
+- the transcription remains one continuous line: no badges, icons or spacing changes per state;
+- states are applied with classes from the hydration response by `data-phoneme-id`; the shell markup carries no state.
+
 ## 8.2 Keyboard
 
 Existing behavior should remain:
@@ -752,6 +787,8 @@ Recommended focus concept:
 Stress marks and syllable punctuation remain visually continuous with the transcription but are not styled as clickable.
 
 Do not make punctuation appear disabled; it is simply notation.
+
+Stress marks, syllable separators and slashes never take a learner-state colour or underline.
 
 ---
 
@@ -795,6 +832,8 @@ Interaction:
 
 No tooltip-only critical information. On touch devices the popover must work as a tap-open surface, not depend on hover.
 
+Learner state (amended 2026-09-17): when the viewer's state is known, the popover shows it as text beside the save control — "Learned" or "Not learned yet" — using the §8.1 colour and underline for "Learned". The save/tag control (§14) is the only place the state is changed.
+
 ---
 
 # 10. Audio controls
@@ -823,6 +862,20 @@ Rules:
 - primary hit area should aim for ~40–44px;
 - do not animate a fake waveform for decoration;
 - if a waveform is ever shown, it must correspond to actual audio data.
+
+### Playback speed (amended 2026-09-17, FR-IPA-11)
+
+A compact two-option toggle beside the whole-word play control, and inside the phoneme popover beside "Hear":
+
+```text
+▶ Play   [ 1× | 0.75× ]
+```
+
+- a button pair with `aria-pressed`, labelled for the group ("Playback speed");
+- `1×` is the default; the selection applies to the next playback and may be remembered per browser;
+- no additional speed values, no slider;
+- `/learnIPA` rows follow the page-level selection rather than repeating the toggle on every row;
+- rendered only when JavaScript is available; the native no-JavaScript fallback plays at normal speed.
 
 ---
 
@@ -872,6 +925,13 @@ Mobile:
 Do not make the user horizontally scroll the inventory.
 
 A traditional articulatory phonemic chart may be explored later as a secondary learning visualization, but it must not replace the required frequency-ranked list without an explicit product decision.
+
+### Learned progress (amended 2026-09-17, FR-IPA-07, FR-IPA-10)
+
+- beneath the page heading, the viewer's progress as quiet text — `18 / 41 learned` — without a progress ring, bar animation or percentage;
+- each row's IPA symbol takes the §8.1 learner state;
+- a three-option filter (`All` · `Learned` · `Not learned yet`) above the list, as a button group with `aria-pressed`, shown only with JavaScript; filtering hides rows without reordering them;
+- with no JavaScript, or before hydration, the full list renders in the default state with no count.
 
 ---
 
@@ -947,7 +1007,7 @@ Request this word
 
 ---
 
-# 14. Future save/tag design
+# 14. Save/tag design (Iteration 3; promoted from future design 2026-09-17)
 
 Do not create a new floating card solely to hold a bookmark icon.
 
@@ -960,6 +1020,8 @@ Recommended states:
 State must not rely only on color.
 
 On word pages, save belongs near the headword or pronunciation learning area. On `/learnIPA`, it belongs at the end of the phoneme row.
+
+The tag choice offers `Learning`, `Learned`, `None` and `Remove` (FR-SAVE-02). The phoneme popover and the `/learnIPA` row use the same control. Without JavaScript the control degrades to a form post (FR-SAVE-07).
 
 ---
 
