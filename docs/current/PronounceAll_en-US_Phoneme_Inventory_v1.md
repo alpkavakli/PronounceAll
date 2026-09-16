@@ -9,7 +9,8 @@ by the maintainer on 2026-09-11; the normalisation corrections of §5.3, §5.4 a
 `FIND-07` / `D-R3-07`. Not a new design decision, and not to be reopened.
 **2026-09-16:** §5.2 gained the `ɔʊ̯` → `oʊ` source-profile row, approved by the
 maintainer as an ordinary §5 content change (§9); the inventory and §2–§4 are
-unchanged.
+unchanged. §5.8 added the CMU Pronouncing Dictionary source profile on the
+same day and on the same basis.
 
 ---
 
@@ -287,6 +288,30 @@ report them.
 
 Post-Iteration-2 target: **100 % of rows actually loaded into
 `word_pronunciations` tokenise.**
+
+### 5.8 CMU Pronouncing Dictionary source profile (added 2026-09-16)
+
+CMUdict is a second pronunciation source, admitted **only** through a
+`cmudict` curation pin for a word whose Wiktionary entry has no usable General
+American form. It is read at one pinned upstream commit
+(`data/seed/en-us.cmudict.json`). The maintainer writes the canonical form;
+ingestion verifies it and never converts ARPABET into IPA by itself.
+
+| ARPABET | Canonical | Note |
+|---|---|---|
+| `AA AE AO AW AY EH EY IH IY OW OY UH UW` | `ɑ æ ɔ aʊ aɪ ɛ eɪ ɪ i oʊ ɔɪ ʊ u` | one unit each |
+| `AH0` / `AH1` `AH2` | `ə` / `ʌ` | §3.2 — split by the stress digit |
+| `ER0` / `ER1` `ER2` | `ɚ` / `ɝ` | §3.3 — split by the stress digit |
+| consonants | `p b t d k ɡ tʃ dʒ f v θ ð s z ʃ ʒ h m n ŋ l ɹ w j` | `R` is `ɹ` (§3.1) |
+
+A pin is accepted only if it matches the entry unit for unit and stress for
+stress: a vowel with digit `1` carries `ˈ` before its syllable, `2` carries
+`ˌ`, `0` carries no mark. **An entry with more than one primary stress is not
+resolved by any rule.** The pin must record an explicit `stressDecision`, mark
+each digit-1 vowel `ˈ` or `ˌ`, and keep exactly one `ˈ`.
+
+A row loaded this way records `source_kind = cmudict` with its own reference
+and licence (SDD v1.1 §4.2).
 
 ---
 

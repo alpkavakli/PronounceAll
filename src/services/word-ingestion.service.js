@@ -30,6 +30,7 @@ import {
 } from '../repositories/words.repository.js';
 import { withTransaction } from '../repositories/transaction.js';
 import { canonicaliseSlug } from '../validators/word-slug.validator.js';
+import { verifyCmudictForm } from './cmudict-profile.service.js';
 import { loadInventory, tokenizeTranscription } from './ipa-tokenization.service.js';
 
 /** The IPA stress markers FR-WORD-03 names. */
@@ -253,9 +254,11 @@ function syllableCount(breakdown) {
  *
  * @param {object} entry a raw entry from the fetch artifact
  * @param {object} [curation] per-word maintainer overrides
+ * @param {object} inventory the loaded canonical inventory
+ * @param {{cmudict?: object}} [sources] pinned second-source artifacts, e.g. `<variant>.cmudict.json`
  * @returns {object} a normalised entry, possibly carrying `rejections`
  */
-export function normaliseEntry(entry, curation = {}, inventory) {
+export function normaliseEntry(entry, curation = {}, inventory, sources = {}) {
   const rejections = [];
   const warnings = [];
 
@@ -271,9 +274,16 @@ export function normaliseEntry(entry, curation = {}, inventory) {
   // order. Every pinned form must actually appear upstream, so curation cannot
   // silently invent a pronunciation.
   const pinned = curation.ipa;
+  // A `cmudict` pin is also a curated selection: the word's Wiktionary forms
+  // are not auto-selected beside it, because the pin exists precisely where
+  // Wiktionary had no usable General American form (D4 §5.8).
+  const cmudictPins = Array.isArray(curation.cmudict) ? curation.cmudict : [];
+  const curated = Array.isArray(pinned) || cmudictPins.length > 0;
   let selected;
 
-  if (Array.isArray(pinned)) {
+  if (!Array.isArray(pinned) && cmudictPins.length > 0) {
+    selected = [];
+  } else if (Array.isArray(pinned)) {
     const available = new Map(
       (entry.transcriptions ?? []).map((candidate) => [normaliseIpa(candidate.ipa), candidate]),
     );
@@ -290,7 +300,7 @@ export function normaliseEntry(entry, curation = {}, inventory) {
     selected = selectAmericanTranscriptions(entry.transcriptions ?? []);
   }
 
-  if (selected.length === 0) {
+  if (selected.length === 0 && cmudictPins.length === 0) {
     rejections.push('no American transcription could be identified');
   }
 
@@ -354,6 +364,46 @@ export function normaliseEntry(entry, curation = {}, inventory) {
     deduped.push({ canonical: canonicalForm, source });
   }
 
+  // CMUdict pins, verified unit-for-unit and stress-for-stress against the
+  // pinned artifact. A form CMUdict does not say is refused rather than stored
+  // under CMUdict's name, exactly as an `ipa` pin must appear upstream.
+  for (const pin of cmudictPins) {
+    const form = normaliseIpa(typeof pin === 'string' ? pin : pin.ipa);
+    const artifact = sources.cmudict;
+    const variants = artifact?.entries?.[entry.headword] ?? [];
+    const tokenised = artifact ? tokenizeTranscription(form, inventory) : null;
+    if (!artifact) {
+      rejections.push(`cmudict pin ${form}: no pinned CMUdict artifact is loaded`);
+      continue;
+    }
+    if (!tokenised.ok || tokenised.forms.length !== 1 || tokenised.forms[0].ipa !== form) {
+      rejections.push(`cmudict pin ${form}: not a canonical transcription`);
+      continue;
+    }
+    const verdict = verifyCmudictForm({
+      form,
+      units: tokenised.forms[0].units,
+      variants: variants.map((variant) => variant.arpabet),
+      stressDecision: typeof pin === 'string' ? undefined : pin.stressDecision,
+    });
+    if (!verdict.ok) {
+      rejections.push(`cmudict pin ${form}: ${verdict.reason}`);
+      continue;
+    }
+    if (seen.has(form)) continue;
+    seen.add(form);
+    const { line } = variants.find((variant) => variant.arpabet === verdict.arpabet);
+    deduped.push({
+      canonical: form,
+      source: form,
+      provenance: {
+        sourceKind: 'cmudict',
+        sourceReference: `${artifact.fileUrl}#L${line}`,
+        licenceIdentifier: artifact.licenceIdentifier,
+      },
+    });
+  }
+
   if (deduped.length === 0 && selected.length > 0) {
     rejections.push('every available transcription failed canonical validation');
   }
@@ -364,7 +414,7 @@ export function normaliseEntry(entry, curation = {}, inventory) {
   //
   // A curated list is left in the order the maintainer wrote it, since choosing
   // the primary is exactly the decision that curation was recording.
-  const ordered = Array.isArray(pinned)
+  const ordered = curated
     ? deduped
     : [...deduped].sort((a, b) => {
         const dotted = Number(b.canonical.includes('.')) - Number(a.canonical.includes('.'));
@@ -373,7 +423,7 @@ export function normaliseEntry(entry, curation = {}, inventory) {
 
   const overrides = curation.pronunciations ?? {};
 
-  const pronunciations = ordered.map(({ canonical: ipa, source }, index) => {
+  const pronunciations = ordered.map(({ canonical: ipa, source, provenance }, index) => {
     // A curation override may be keyed on either form. The Iteration 1 curation
     // file was written against the raw upstream strings, before the D4 gate
     // canonicalised them, so a key such as `ˈt͡ʃɪldɹən` must still find its word
@@ -411,6 +461,11 @@ export function normaliseEntry(entry, curation = {}, inventory) {
       // of SDD §5.3 leads with it (E4, FR-WORD-03).
       isPrimary: index === 0,
       displayOrder: index,
+      // A Wiktionary row inherits the word-level attribution; any other source
+      // names itself (SDD §4.2).
+      sourceKind: provenance?.sourceKind ?? 'wiktionary',
+      sourceReference: provenance?.sourceReference ?? null,
+      licenceIdentifier: provenance?.licenceIdentifier ?? null,
     };
   });
 
@@ -590,7 +645,10 @@ export async function loadEntry(normalised, variantId) {
  *   nothing — the reviewable diff E1 asks the validate stage to produce
  * @returns {Promise<object>} a report
  */
-export async function ingestArtifact(artifact, { variantId, variantCode = 'en-us', curation = {}, dryRun = false }) {
+export async function ingestArtifact(
+  artifact,
+  { variantId, variantCode = 'en-us', curation = {}, cmudict = null, dryRun = false },
+) {
   if (!Number.isInteger(variantId)) {
     throw AppError.internal(new Error('ingestArtifact requires a resolved variantId'));
   }
@@ -610,7 +668,7 @@ export async function ingestArtifact(artifact, { variantId, variantCode = 'en-us
       continue;
     }
 
-    const normalised = normaliseEntry(entry, perWord, inventory);
+    const normalised = normaliseEntry(entry, perWord, inventory, { cmudict });
     const problems = validateEntry(normalised);
 
     if (problems.length > 0) {

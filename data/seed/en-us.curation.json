@@ -8,11 +8,16 @@
     "faithful copy of what Wiktionary served, and every departure from it is",
     "visible here and in version control.",
     "",
-    "Three kinds of entry:",
+    "Four kinds of entry:",
     "  ipa      - pin the American transcriptions for a word whose upstream",
     "             accent tags do not narrow it to American English. Listed in",
     "             display order; the first becomes is_primary.",
     "  skip     - exclude a headword, with the reason.",
+    "  cmudict  - a General American form taken from the CMU Pronouncing",
+    "             Dictionary, for a word whose Wiktionary entry has none.",
+    "             Each form must match the pinned en-us.cmudict.json entry",
+    "             exactly; an entry with two primary stresses needs a",
+    "             stressDecision. The row records CMUdict as its source.",
     "  pronunciations[<ipa>].syllableBreakdown - override a breakdown that the",
     "             upstream transcription left unsyllabified.",
     "",
@@ -413,6 +418,64 @@
     "worry": {
       "ipa": [
         "/ˈwɝ.i/"
+      ]
+    },
+    "leo": {
+      "cmudict": [
+        "/ˈlioʊ/"
+      ]
+    },
+    "tony": {
+      "cmudict": [
+        "/ˈtoʊni/"
+      ]
+    },
+    "holding": {
+      "cmudict": [
+        "/ˈhoʊldɪŋ/"
+      ]
+    },
+    "roman": {
+      "cmudict": [
+        "/ˈɹoʊmən/"
+      ]
+    },
+    "joanna": {
+      "cmudict": [
+        "/dʒoʊˈænə/"
+      ]
+    },
+    "diagnosis": {
+      "cmudict": [
+        "/ˌdaɪəɡˈnoʊsəs/"
+      ]
+    },
+    "hormones": {
+      "cmudict": [
+        "/ˈhɔɹˌmoʊnz/"
+      ]
+    },
+    "overboard": {
+      "cmudict": [
+        "/ˈoʊvɚˌbɔɹd/"
+      ]
+    },
+    "opponent": {
+      "cmudict": [
+        "/əˈpoʊnənt/"
+      ]
+    },
+    "toll": {
+      "cmudict": [
+        "/ˈtoʊl/"
+      ]
+    },
+    "overnight": {
+      "cmudict": [
+        {
+          "ipa": "/ˌoʊvɚˈnaɪt/",
+          "stressDecision": "CMUdict marks both OW1 and AY1 primary. The adverb and adjective carry main stress on -night in General American (Wiktionary's own entry places ˈ there), so over- takes secondary stress. Decided for this row only."
+        }
       ]
     }
   }

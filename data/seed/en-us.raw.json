@@ -137021,8 +137021,8 @@
       "variant": "en-us",
       "sourceUrl": "https://en.wiktionary.org/wiki/quote#English",
       "sourceLicence": "CC BY-SA 4.0",
-      "retrievedAt": "2026-09-10",
-      "revisionId": 92541459,
+      "retrievedAt": "2026-09-16",
+      "revisionId": 92550870,
       "definition": "A statement attributed to a person; a quotation.",
       "hyphenation": [
         "quote"
@@ -137030,7 +137030,24 @@
       "transcriptions": [
         {
           "ipa": "/kwəʊt/",
-          "accents": [],
+          "accents": [
+            "UK"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/kwoʊt/",
+          "accents": [
+            "US",
+            "CA"
+          ],
+          "section": 0
+        },
+        {
+          "ipa": "/kwəʉt/",
+          "accents": [
+            "AU"
+          ],
           "section": 0
         },
         {

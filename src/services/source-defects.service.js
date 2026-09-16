@@ -74,6 +74,11 @@ export function findSourceDefects({ pronunciations, unitsByPronunciation, headwo
   const unprovable = [];
 
   for (const pronunciation of pronunciations) {
+    // Only a Wiktionary-derived row can carry a Wiktionary normalisation
+    // defect. A curated second-source row was verified against its own
+    // pinned artifact when it was seeded.
+    if (pronunciation.sourceKind && pronunciation.sourceKind !== 'wiktionary') continue;
+
     const headword = headwordByWordId.get(pronunciation.wordId);
     const entries = entriesByHeadword.get(headword) ?? [];
 

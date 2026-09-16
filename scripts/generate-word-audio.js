@@ -108,11 +108,26 @@ async function main() {
   for (let offset = 0; offset < work.length; offset += chunkSize) {
     const chunk = work.slice(offset, offset + chunkSize);
 
+    // A word whose asset is already ready only needs relinking — a re-seed
+    // that replaced its primary pronunciation, say — so it is not synthesised
+    // again. The asset is keyed on the spelling, not the pronunciation row.
+    const needsAudio = [];
+    for (const row of chunk) {
+      const key = assetKeyFor({
+        kind: ASSET_KIND.WORD,
+        variantCode,
+        target: row.normalizedHeadword,
+        sourceKind: 'tts_piper',
+      });
+      if ((await findByAssetKey(key))?.generationStatus !== 'ready') needsAudio.push(row);
+    }
+
     // One Piper invocation for the whole chunk: the model load is the cost, and
     // paying it per word turns minutes into hours.
-    const audio = await synthesiseBatch(
-      chunk.map((row) => ({ id: row.normalizedHeadword, text: row.displayHeadword })),
-    );
+    const audio =
+      needsAudio.length > 0
+        ? await synthesiseBatch(needsAudio.map((row) => ({ id: row.normalizedHeadword, text: row.displayHeadword })))
+        : new Map();
 
     for (const row of chunk) {
       const assetKey = assetKeyFor({

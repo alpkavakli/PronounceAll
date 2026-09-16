@@ -71,6 +71,10 @@ async function main() {
   const curation =
     (await readJsonIfPresent(path.join(seedDir, `${variantCode}.curation.json`)))?.words ?? {};
 
+  // The pinned CMU Pronouncing Dictionary entries that `cmudict` curation pins
+  // are verified against (D4 §5.8). Optional: without it such a pin is rejected.
+  const cmudict = await readJsonIfPresent(path.join(seedDir, `${variantCode}.cmudict.json`));
+
   const variant = await resolveActiveVariant(variantCode);
   if (!variant) {
     throw new Error(
@@ -82,6 +86,7 @@ async function main() {
     variantId: variant.variantId,
     variantCode: variant.code,
     curation,
+    cmudict,
     dryRun,
   });
 

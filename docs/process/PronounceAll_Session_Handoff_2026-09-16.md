@@ -141,7 +141,7 @@ Original plan, kept for reference:
 
 Do not perform another general syllabification research cycle after that.
 
-### 3.2 The 37 source-normalization defects — 25 RESOLVED, 12 BLOCKED on provenance
+### 3.2 Source normalization — CLOSED PERMANENTLY (2026-09-17)
 
 **Outcome, per maintainer decision:**
 
@@ -169,6 +169,27 @@ Wiktionary; `holding` and `toll` gained only narrow US forms containing `[ɫ]`,
 which D4 §3.9 rejects; the other 9 are unchanged. 11 words therefore take a
 CMUdict pronunciation with honest CMUdict provenance. No further source
 searching. The batch closes when the defect report reaches zero.
+
+**Resolution (2026-09-17).** Minimal per-pronunciation provenance shipped:
+migration V7 adds `source_kind` (default `wiktionary`), `source_reference` and
+`licence_identifier` to `word_pronunciations`, with a CHECK that a
+non-Wiktionary row carries its own attribution (SDD v1.1 §4.2 and §4.12
+amended). CMUdict is pinned at commit `74790861f652b15e4ac49015a90074ad62a27690`
+with its file SHA-256 in `data/seed/en-us.cmudict.json`; its licence was
+verified at that commit and is NOT an exact `BSD-2-Clause` match (it adds
+"The contents of this file are deemed to be source code."), so it is recorded as
+`LicenseRef-CMUdict` with the verbatim text in
+`data/seed/licences/cmudict-LICENSE.txt`. The D4 §5.8 profile verifies each
+curated form unit-for-unit and stress-for-stress; multiple primary stresses
+need an explicit `stressDecision` (`overnight` only). `quote` resolved through a
+targeted Wiktionary refresh (`fetch-wiktionary.js --headwords`). The word page
+shows "Pronunciation source: CMU Pronouncing Dictionary" beside those rows only.
+
+Gate: defect report 0 of 7 511; one primary per word, contiguous order; all 12
+replaced primaries reattached to their existing word audio (generated 0 — the
+word-audio batch now skips synthesis for assets already ready); no other row
+changed; lint, 279 unit, 173 integration, `audio:verify`, 93 Chromium + no-JS
+e2e. IPA-quality work is closed: no further corpus validation cycles.
 
 Found and fixed on the way: a word re-seed could not remove a pronunciation
 once `pronunciation_phonemes` referenced it (RESTRICT FK); it now uses the

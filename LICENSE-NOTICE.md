@@ -38,3 +38,16 @@ original recordings — is licensed under Creative Commons
 Attribution-ShareAlike 4.0 International (CC BY-SA 4.0). Dictionary data
 ingested from upstream sources retains its upstream licensing, documented
 per source (NFR-LEGAL-04, NFR-LEGAL-05).
+
+### CMU Pronouncing Dictionary
+
+A small number of General American pronunciations are taken from the CMU
+Pronouncing Dictionary (https://github.com/cmusphinx/cmudict), at the commit
+recorded in `data/seed/en-us.cmudict.json`. Each such pronunciation is marked
+with its source in the database and on its word page.
+
+Copyright (C) 1993-2015 Carnegie Mellon University. All rights reserved. It is
+used under the CMU Pronouncing Dictionary licence, reproduced verbatim in
+`data/seed/licences/cmudict-LICENSE.txt`. That licence follows the BSD
+2-clause form but adds its own terms, so it is recorded as
+`LicenseRef-CMUdict` rather than `BSD-2-Clause`.

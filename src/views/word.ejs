@@ -148,6 +148,16 @@
                 <span class="visually-hidden">Syllables and stress: </span>
                 <span class="syllables" lang="und-fonipa"><%= pronunciation.syllableBreakdown %></span>
               </p>
+
+              <%# SDD §4.2: a pronunciation that does not come from the word's
+                  Wiktionary entry names its own source. A Wiktionary row
+                  inherits the footer attribution and gets no label. %>
+              <% if (pronunciation.sourceKind === 'cmudict') { %>
+                <p class="pronunciation__source">
+                  Pronunciation source:
+                  <a href="<%= pronunciation.sourceReference %>" rel="noopener noreferrer">CMU Pronouncing Dictionary</a>
+                </p>
+              <% } %>
             </li>
           <% }); %>
         </ul>

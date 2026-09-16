@@ -366,9 +366,14 @@ Constraint: `UNIQUE (variant_id, normalized_headword)` (E4). Meaning is stored a
 | `gloss` | `VARCHAR(128)` | nullable (heteronym disambiguation, E4) |
 | `is_primary` | `BOOLEAN` | not null |
 | `display_order` | `SMALLINT` | not null |
+| `source_kind` | `ENUM('wiktionary','cmudict')` | not null, default `wiktionary` (amended 2026-09-16) |
+| `source_reference` | `VARCHAR(512)` | nullable; required unless `wiktionary` |
+| `licence_identifier` | `VARCHAR(64)` | nullable; required unless `wiktionary` |
 | `whole_word_audio_asset_id` | `BIGINT` | FK → `audio_assets`, nullable |
 
 Many rows per word, so heteronyms such as `lead` live under one word (E4). Exactly one primary per word and a deterministic order, both validated at ingestion (E4, FR-WORD-03): enforced by `UNIQUE (word_id, display_order)` plus a generated column `is_primary_flag` participating in `UNIQUE (word_id, is_primary_flag)` where the flag is the word id when primary and null otherwise, which lets MySQL enforce at most one primary per word declaratively, with the ingestion validator asserting exactly one. Natural key: `UNIQUE (word_id, ipa_transcription)` is the stable ingestion upsert key, so a seed re-run converges rather than duplicating or re-identifying pronunciations; `is_primary` and `display_order` are populated and updated by the upsert but are not the row's content identity. The schema permits a per pronunciation whole word audio asset; the presentation rule for secondary pronunciation audio is fixed in §4.12.
+
+*Amendment 2026-09-16 — per pronunciation provenance.* A pronunciation may come from a source other than the word's Wiktionary entry. `source_kind` defaults to `wiktionary`, which is true of every Wiktionary derived row; such a row inherits `words.source_url` and `words.source_licence` and carries no duplicate metadata. Any other kind must carry its own `source_reference` and `licence_identifier`, enforced by `CHECK ck_word_pronunciations_source_attributed`. A second source enters only through curation and is verified against a committed seed artifact pinned to one upstream commit, which carries the dataset level provenance (commit, checksum, licence text and URL, retrieval date); for CMUdict that is `data/seed/en-us.cmudict.json` and D4 §5.8. The word page names a non Wiktionary source beside that pronunciation (FR-CONTENT-05). Migration `V7__pronunciation_provenance.sql`. This follows the existing per row provenance pattern of `audio_assets` rather than introducing a shared source table.
 
 **`phonemes`** (FR-IPA-01, FR-IPA-07/08, E2).
 
@@ -728,7 +733,7 @@ The three items the base draft left for decision are now closed, and are recorde
 
 **Erasure grant set: Resolved.** The five principal set in §4.9 settles the destructive privilege surface that FR-SAVE-03 deferred to the schema. Because FR-SAVE-03 explicitly deferred the exact surface to the schema design, settling it here needs no SRS amendment.
 
-**Rejected for v1.0, recorded so they are not reintroduced.** No `phonemes.is_active` column; no `word_pronunciations.source_ipa` column. Raw upstream IPA preservation lives in the ingestion artifact and logging design, not as a runtime schema column.
+**Rejected for v1.0, recorded so they are not reintroduced.** No `phonemes.is_active` column; no `word_pronunciations.source_ipa` column. Raw upstream IPA preservation lives in the ingestion artifact and logging design, not as a runtime schema column. The 2026-09-16 provenance columns of §4.2 do not change this: they record where a pronunciation came from, and a second source's raw notation (CMUdict ARPABET) stays in its seed artifact.
 
 **Routine structuring choices, recorded not flagged for decision:** the polymorphic `target_id` on the event log over separate per kind tables (§4.4); explicit ordered erasure over cascade (§4.9); the nullable circular pointer between `phonemes` and `phoneme_example_words` resolved at seed time (§4.2); and the single `event_value` column over typed split columns (§4.4). Each is within the frozen rules with its alternative noted.
 ## 5. Key flows

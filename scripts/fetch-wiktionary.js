@@ -24,6 +24,7 @@
  *
  * Usage:
  *   node scripts/fetch-wiktionary.js [--variant en-us] [--out <path>]
+ *   node scripts/fetch-wiktionary.js --headwords quote,toll   # refresh named entries only
  */
 
 import fs from 'node:fs/promises';
@@ -435,6 +436,24 @@ async function main() {
   // transcriptions at about 82 %, so the default asks for enough to clear that
   // bar with room for the D4 tokenisation losses on top.
   const limit = args.includes('--limit') ? Number(args[args.indexOf('--limit') + 1]) : 8000;
+
+  // A targeted refresh of named entries, merged into the existing artifact in
+  // place. Each entry carries its own `retrievedAt` and `revisionId`, so a
+  // refreshed entry stays truthfully dated while the rest of the artifact, and
+  // its reviewable diff, are untouched.
+  if (args.includes('--headwords')) {
+    const titles = args[args.indexOf('--headwords') + 1].split(',').map((title) => title.trim());
+    const existing = JSON.parse(await fs.readFile(outPath, 'utf8'));
+    const pages = await fetchBatch(titles);
+    for (const title of titles) {
+      const index = existing.entries.findIndex((entry) => entry.headword === title);
+      if (index === -1) throw new Error(`"${title}" is not in ${outPath}; a targeted refresh only replaces entries`);
+      existing.entries[index] = buildEntry(title, variant, pages.get(title) ?? null);
+    }
+    await fs.writeFile(outPath, `${JSON.stringify(existing, null, 2)}\n`, 'utf8');
+    process.stdout.write(`Refreshed ${titles.length} entr${titles.length === 1 ? 'y' : 'ies'} in ${outPath}\n`);
+    return;
+  }
 
   const headwordsPath = path.join(repoRoot, 'data', 'seed', `${variant}.headwords.json`);
   const rankedSource = JSON.parse(await fs.readFile(headwordsPath, 'utf8')).ranked;

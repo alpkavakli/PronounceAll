@@ -37,6 +37,9 @@ import { defaultExecutor } from './transaction.js';
  * @property {string | null} gloss
  * @property {boolean} isPrimary
  * @property {number} displayOrder
+ * @property {'wiktionary'|'cmudict'} sourceKind
+ * @property {string | null} sourceReference null for a Wiktionary row, which inherits the word's source
+ * @property {string | null} licenceIdentifier
  */
 
 /** @param {object} row @returns {WordRow} */
@@ -62,6 +65,9 @@ function toPronunciation(row) {
     gloss: row.gloss,
     isPrimary: Boolean(row.is_primary),
     displayOrder: row.display_order,
+    sourceKind: row.source_kind,
+    sourceReference: row.source_reference,
+    licenceIdentifier: row.licence_identifier,
   };
 }
 
@@ -102,6 +108,7 @@ export async function findPronunciationsByWordId(wordId, executor = defaultExecu
   const [rows] = await executor.execute(
     `SELECT p.pronunciation_id, p.ipa_transcription, p.syllable_breakdown,
             p.gloss, p.is_primary, p.display_order,
+            p.source_kind, p.source_reference, p.licence_identifier,
             a.storage_key, a.generation_status
        FROM word_pronunciations p
        LEFT JOIN audio_assets a ON a.audio_asset_id = p.whole_word_audio_asset_id
@@ -202,13 +209,17 @@ export async function upsertWord(word, executor = defaultExecutor()) {
 export async function upsertPronunciation(pronunciation, executor = defaultExecutor()) {
   await executor.execute(
     `INSERT INTO word_pronunciations (word_id, ipa_transcription, syllable_breakdown,
-                                      gloss, is_primary, display_order)
-          VALUES (?, ?, ?, ?, ?, ?)
+                                      gloss, is_primary, display_order,
+                                      source_kind, source_reference, licence_identifier)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
      ON DUPLICATE KEY UPDATE
           syllable_breakdown = VALUES(syllable_breakdown),
           gloss              = VALUES(gloss),
           is_primary         = VALUES(is_primary),
-          display_order      = VALUES(display_order)`,
+          display_order      = VALUES(display_order),
+          source_kind        = VALUES(source_kind),
+          source_reference   = VALUES(source_reference),
+          licence_identifier = VALUES(licence_identifier)`,
     [
       pronunciation.wordId,
       pronunciation.ipaTranscription,
@@ -216,6 +227,9 @@ export async function upsertPronunciation(pronunciation, executor = defaultExecu
       pronunciation.gloss ?? null,
       pronunciation.isPrimary,
       pronunciation.displayOrder,
+      pronunciation.sourceKind ?? 'wiktionary',
+      pronunciation.sourceReference ?? null,
+      pronunciation.licenceIdentifier ?? null,
     ],
   );
 }
@@ -247,11 +261,11 @@ export async function listWordsForVariant(variantId, executor = defaultExecutor(
  *
  * @param {number} variantId
  * @param {import('./transaction.js').Executor} [executor]
- * @returns {Promise<Array<{ pronunciationId: number, wordId: number, ipaTranscription: string, syllableBreakdown: string }>>}
+ * @returns {Promise<Array<{ pronunciationId: number, wordId: number, ipaTranscription: string, syllableBreakdown: string, sourceKind: string }>>}
  */
 export async function listAllPronunciations(variantId, executor = defaultExecutor()) {
   const [rows] = await executor.execute(
-    `SELECT p.pronunciation_id, p.word_id, p.ipa_transcription, p.syllable_breakdown
+    `SELECT p.pronunciation_id, p.word_id, p.ipa_transcription, p.syllable_breakdown, p.source_kind
        FROM word_pronunciations p
        JOIN words w ON w.word_id = p.word_id
       WHERE w.variant_id = ?
@@ -263,6 +277,7 @@ export async function listAllPronunciations(variantId, executor = defaultExecuto
     wordId: row.word_id,
     ipaTranscription: row.ipa_transcription,
     syllableBreakdown: row.syllable_breakdown,
+    sourceKind: row.source_kind,
   }));
 }
 
