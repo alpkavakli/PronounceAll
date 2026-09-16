@@ -1,0 +1,416 @@
+{
+  "variant": "en-us",
+  "purpose": "Curated syllable-boundary decisions for the rows where the algorithm and the independent reference disagree and no settled rule explains it. Each row is reviewed by hand; an unresolved row keeps no inferred boundary (fail closed).",
+  "generatedBy": "node scripts/validate-syllabification.js --export",
+  "references": {
+    "algorithm": "src/services/syllabification.service.js",
+    "independent": "CMUdict (BSD-style) syllabified by Kyle Gorman syllabify (MIT), stress preserved",
+    "orthographic": "Wiktionary hyphenation, as fetched into data/seed/en-us.raw.json (CC BY-SA 4.0)"
+  },
+  "reviewStatuses": {
+    "pending": "not yet reviewed; no override is applied",
+    "adopt-reference": "the reference division is confirmed and overrides the algorithm",
+    "keep-algorithm": "the algorithm is confirmed correct; no override needed",
+    "ambiguous": "references disagree or none settles it; no inferred boundary is written"
+  },
+  "rows": [
+    {
+      "headword": "amusing",
+      "pronunciationId": 7191,
+      "canonicalIpa": "əˈmjuzɪŋ",
+      "algorithmBreakdown": "ə.mju.zɪŋ",
+      "referenceBreakdown": "əm.ju.zɪŋ",
+      "wiktionaryHyphenation": null,
+      "reason": "onset-too-greedy",
+      "proposedBreakdown": null,
+      "reviewStatus": "ambiguous",
+      "note": "no checkable evidence settles this row"
+    },
+    {
+      "headword": "atmosphere",
+      "pronunciationId": 8308,
+      "canonicalIpa": "ˈætməsˌfɪɹ",
+      "algorithmBreakdown": "æt.mə.sfɪɹ",
+      "referenceBreakdown": "æt.məs.fɪɹ",
+      "wiktionaryHyphenation": [
+        "at",
+        "mos",
+        "phere"
+      ],
+      "reason": "onset-too-greedy",
+      "proposedBreakdown": null,
+      "reviewStatus": "ambiguous",
+      "note": "Wiktionary hyphenation at-mos-phere is present but does not settle where the consonant falls"
+    },
+    {
+      "headword": "basement",
+      "pronunciationId": 4812,
+      "canonicalIpa": "ˈbeɪsmənt",
+      "algorithmBreakdown": "beɪ.smənt",
+      "referenceBreakdown": "beɪs.mənt",
+      "wiktionaryHyphenation": [
+        "base",
+        "ment"
+      ],
+      "reason": "onset-too-greedy",
+      "proposedBreakdown": "beɪs.mənt",
+      "reviewStatus": "adopt-reference",
+      "note": "derivational suffix -ment, whose boundary is fixed by word structure"
+    },
+    {
+      "headword": "broadway",
+      "pronunciationId": 8587,
+      "canonicalIpa": "ˈbɹɔdweɪ",
+      "algorithmBreakdown": "bɹɔ.dweɪ",
+      "referenceBreakdown": "bɹɔd.weɪ",
+      "wiktionaryHyphenation": null,
+      "reason": "onset-too-greedy",
+      "proposedBreakdown": "bɹɔd.weɪ",
+      "reviewStatus": "adopt-reference",
+      "note": "compound: broad+way, both parts are headwords, so the seam is a syllable boundary"
+    },
+    {
+      "headword": "businessman",
+      "pronunciationId": 8749,
+      "canonicalIpa": "ˈbɪznəsmæn",
+      "algorithmBreakdown": "bɪz.nə.smæn",
+      "referenceBreakdown": "bɪz.nəs.mæn",
+      "wiktionaryHyphenation": null,
+      "reason": "onset-too-greedy",
+      "proposedBreakdown": "bɪz.nəs.mæn",
+      "reviewStatus": "adopt-reference",
+      "note": "compound: business+man, both parts are headwords, so the seam is a syllable boundary"
+    },
+    {
+      "headword": "consciousness",
+      "pronunciationId": 7815,
+      "canonicalIpa": "ˈkɑnʃəsnəs",
+      "algorithmBreakdown": "kɑn.ʃə.snəs",
+      "referenceBreakdown": "kɑn.ʃəs.nəs",
+      "wiktionaryHyphenation": null,
+      "reason": "onset-too-greedy",
+      "proposedBreakdown": "kɑn.ʃəs.nəs",
+      "reviewStatus": "adopt-reference",
+      "note": "derivational suffix -ness, whose boundary is fixed by word structure"
+    },
+    {
+      "headword": "convenience",
+      "pronunciationId": 9173,
+      "canonicalIpa": "kənˈvinjəns",
+      "algorithmBreakdown": "kən.vi.njəns",
+      "referenceBreakdown": "kən.vin.jəns",
+      "wiktionaryHyphenation": [
+        "con",
+        "ve",
+        "nience"
+      ],
+      "reason": "onset-too-greedy",
+      "proposedBreakdown": null,
+      "reviewStatus": "ambiguous",
+      "note": "Wiktionary hyphenation con-ve-nience is present but does not settle where the consonant falls"
+    },
+    {
+      "headword": "documents",
+      "pronunciationId": 7248,
+      "canonicalIpa": "ˈdɑkjəmənts",
+      "algorithmBreakdown": "dɑ.kjə.mənts",
+      "referenceBreakdown": "dɑk.jə.mənts",
+      "wiktionaryHyphenation": null,
+      "reason": "onset-too-greedy",
+      "proposedBreakdown": null,
+      "reviewStatus": "ambiguous",
+      "note": "no checkable evidence settles this row"
+    },
+    {
+      "headword": "earlier",
+      "pronunciationId": 3618,
+      "canonicalIpa": "ˈɝliɚ",
+      "algorithmBreakdown": "ɝ.liɚ",
+      "referenceBreakdown": "ɝ.li.ɚ",
+      "wiktionaryHyphenation": [
+        "ear",
+        "li",
+        "er"
+      ],
+      "reason": "syllable-count",
+      "proposedBreakdown": "ɝ.li.ɚ",
+      "reviewStatus": "adopt-reference",
+      "note": "Wiktionary hyphenation ear-li-er gives 3 syllables, matching the reference"
+    },
+    {
+      "headword": "explanation",
+      "pronunciationId": 4502,
+      "canonicalIpa": "ˌɛkspləˈneɪʃən",
+      "algorithmBreakdown": "ɛk.splə.neɪ.ʃən",
+      "referenceBreakdown": "ɛks.plə.neɪ.ʃən",
+      "wiktionaryHyphenation": null,
+      "reason": "onset-too-greedy",
+      "proposedBreakdown": null,
+      "reviewStatus": "ambiguous",
+      "note": "no checkable evidence settles this row"
+    },
+    {
+      "headword": "graveyard",
+      "pronunciationId": 9830,
+      "canonicalIpa": "ˈɡɹeɪvˌjɑɹd",
+      "algorithmBreakdown": "ɡɹeɪ.vjɑɹd",
+      "referenceBreakdown": "ɡɹeɪv.jɑɹd",
+      "wiktionaryHyphenation": null,
+      "reason": "onset-too-greedy",
+      "proposedBreakdown": "ɡɹeɪv.jɑɹd",
+      "reviewStatus": "adopt-reference",
+      "note": "compound: grave+yard, both parts are headwords, so the seam is a syllable boundary"
+    },
+    {
+      "headword": "hardware",
+      "pronunciationId": 8195,
+      "canonicalIpa": "ˈhɑɹdˌwɛɹ",
+      "algorithmBreakdown": "hɑɹ.dwɛɹ",
+      "referenceBreakdown": "hɑɹd.wɛɹ",
+      "wiktionaryHyphenation": null,
+      "reason": "onset-too-greedy",
+      "proposedBreakdown": "hɑɹd.wɛɹ",
+      "reviewStatus": "adopt-reference",
+      "note": "derivational suffix -ware, whose boundary is fixed by word structure"
+    },
+    {
+      "headword": "insecure",
+      "pronunciationId": 7297,
+      "canonicalIpa": "ɪnsəˈkjɝ",
+      "algorithmBreakdown": "ɪn.sə.kjɝ",
+      "referenceBreakdown": "ɪn.sək.jɝ",
+      "wiktionaryHyphenation": null,
+      "reason": "onset-too-greedy",
+      "proposedBreakdown": null,
+      "reviewStatus": "ambiguous",
+      "note": "no checkable evidence settles this row"
+    },
+    {
+      "headword": "murderer",
+      "pronunciationId": 5351,
+      "canonicalIpa": "ˈmɝdɚɚ",
+      "algorithmBreakdown": "mɝ.dɚɚ",
+      "referenceBreakdown": "mɝ.dɚ.ɚ",
+      "wiktionaryHyphenation": [
+        "mur",
+        "der",
+        "er"
+      ],
+      "reason": "syllable-count",
+      "proposedBreakdown": "mɝ.dɚ.ɚ",
+      "reviewStatus": "adopt-reference",
+      "note": "Wiktionary hyphenation mur-der-er gives 3 syllables, matching the reference"
+    },
+    {
+      "headword": "occupied",
+      "pronunciationId": 9003,
+      "canonicalIpa": "ˈɑkjəpaɪd",
+      "algorithmBreakdown": "ɑ.kjə.paɪd",
+      "referenceBreakdown": "ɑk.jə.paɪd",
+      "wiktionaryHyphenation": [
+        "oc",
+        "cu",
+        "pied"
+      ],
+      "reason": "onset-too-greedy",
+      "proposedBreakdown": null,
+      "reviewStatus": "ambiguous",
+      "note": "Wiktionary hyphenation oc-cu-pied is present but does not settle where the consonant falls"
+    },
+    {
+      "headword": "peaceful",
+      "pronunciationId": 7222,
+      "canonicalIpa": "ˈpisfəl",
+      "algorithmBreakdown": "pi.sfəl",
+      "referenceBreakdown": "pis.fəl",
+      "wiktionaryHyphenation": [
+        "peace",
+        "ful"
+      ],
+      "reason": "onset-too-greedy",
+      "proposedBreakdown": "pis.fəl",
+      "reviewStatus": "adopt-reference",
+      "note": "derivational suffix -ful, whose boundary is fixed by word structure"
+    },
+    {
+      "headword": "perfume",
+      "pronunciationId": 7409,
+      "canonicalIpa": "ˈpɝfjum",
+      "algorithmBreakdown": "pɝ.fjum",
+      "referenceBreakdown": "pɝf.jum",
+      "wiktionaryHyphenation": null,
+      "reason": "onset-too-greedy",
+      "proposedBreakdown": null,
+      "reviewStatus": "ambiguous",
+      "note": "no checkable evidence settles this row"
+    },
+    {
+      "headword": "policeman",
+      "pronunciationId": 8230,
+      "canonicalIpa": "pəˈlismən",
+      "algorithmBreakdown": "pə.li.smən",
+      "referenceBreakdown": "pə.lis.mən",
+      "wiktionaryHyphenation": [
+        "po",
+        "lice",
+        "man"
+      ],
+      "reason": "onset-too-greedy",
+      "proposedBreakdown": "pə.lis.mən",
+      "reviewStatus": "adopt-reference",
+      "note": "compound: police+man, both parts are headwords, so the seam is a syllable boundary"
+    },
+    {
+      "headword": "powerful",
+      "pronunciationId": 4305,
+      "canonicalIpa": "ˈpaʊɚfəl",
+      "algorithmBreakdown": "paʊɚ.fəl",
+      "referenceBreakdown": "paʊ.ɚ.fəl",
+      "wiktionaryHyphenation": [
+        "pow",
+        "er",
+        "ful"
+      ],
+      "reason": "other+syllable-count",
+      "proposedBreakdown": "paʊ.ɚ.fəl",
+      "reviewStatus": "adopt-reference",
+      "note": "Wiktionary hyphenation pow-er-ful gives 3 syllables, matching the reference"
+    },
+    {
+      "headword": "powerless",
+      "pronunciationId": 9708,
+      "canonicalIpa": "ˈpaʊɚləs",
+      "algorithmBreakdown": "paʊɚ.ləs",
+      "referenceBreakdown": "paʊ.ɚ.ləs",
+      "wiktionaryHyphenation": [
+        "pow",
+        "er",
+        "less"
+      ],
+      "reason": "other+syllable-count",
+      "proposedBreakdown": "paʊ.ɚ.ləs",
+      "reviewStatus": "adopt-reference",
+      "note": "Wiktionary hyphenation pow-er-less gives 3 syllables, matching the reference"
+    },
+    {
+      "headword": "replacement",
+      "pronunciationId": 8779,
+      "canonicalIpa": "ɹɪˈpleɪsmənt",
+      "algorithmBreakdown": "ɹɪp.leɪ.smənt",
+      "referenceBreakdown": "ɹɪ.pleɪs.mənt",
+      "wiktionaryHyphenation": null,
+      "reason": "checked-vowel+onset-too-greedy",
+      "proposedBreakdown": "ɹɪ.pleɪs.mənt",
+      "reviewStatus": "adopt-reference",
+      "note": "derivational suffix -ment, whose boundary is fixed by word structure"
+    },
+    {
+      "headword": "senior",
+      "pronunciationId": 5098,
+      "canonicalIpa": "ˈsinjɚ",
+      "algorithmBreakdown": "si.njɚ",
+      "referenceBreakdown": "sin.jɚ",
+      "wiktionaryHyphenation": [
+        "se",
+        "nior"
+      ],
+      "reason": "onset-too-greedy",
+      "proposedBreakdown": null,
+      "reviewStatus": "ambiguous",
+      "note": "Wiktionary hyphenation se-nior is present but does not settle where the consonant falls"
+    },
+    {
+      "headword": "sidewalk",
+      "pronunciationId": 9463,
+      "canonicalIpa": "ˈsaɪdwɔk",
+      "algorithmBreakdown": "saɪ.dwɔk",
+      "referenceBreakdown": "saɪd.wɔk",
+      "wiktionaryHyphenation": null,
+      "reason": "onset-too-greedy",
+      "proposedBreakdown": "saɪd.wɔk",
+      "reviewStatus": "adopt-reference",
+      "note": "compound: side+walk, both parts are headwords, so the seam is a syllable boundary"
+    },
+    {
+      "headword": "software",
+      "pronunciationId": 9330,
+      "canonicalIpa": "ˈsɔftˌwɛɹ",
+      "algorithmBreakdown": "sɔf.twɛɹ",
+      "referenceBreakdown": "sɔft.wɛɹ",
+      "wiktionaryHyphenation": [
+        "soft",
+        "ware"
+      ],
+      "reason": "onset-too-greedy",
+      "proposedBreakdown": "sɔft.wɛɹ",
+      "reviewStatus": "adopt-reference",
+      "note": "derivational suffix -ware, whose boundary is fixed by word structure"
+    },
+    {
+      "headword": "transfer",
+      "pronunciationId": 5704,
+      "canonicalIpa": "tɹænsˈfɚ",
+      "algorithmBreakdown": "tɹæn.sfɚ",
+      "referenceBreakdown": "tɹæns.fɚ",
+      "wiktionaryHyphenation": null,
+      "reason": "onset-too-greedy",
+      "proposedBreakdown": null,
+      "reviewStatus": "ambiguous",
+      "note": "no checkable evidence settles this row"
+    },
+    {
+      "headword": "transmission",
+      "pronunciationId": 9641,
+      "canonicalIpa": "tɹænsˈmɪʃən",
+      "algorithmBreakdown": "tɹæn.smɪʃ.ən",
+      "referenceBreakdown": "tɹæns.mɪ.ʃən",
+      "wiktionaryHyphenation": null,
+      "reason": "checked-vowel+onset-too-greedy",
+      "proposedBreakdown": null,
+      "reviewStatus": "ambiguous",
+      "note": "no checkable evidence settles this row"
+    },
+    {
+      "headword": "useful",
+      "pronunciationId": 6078,
+      "canonicalIpa": "ˈjusfəl",
+      "algorithmBreakdown": "ju.sfəl",
+      "referenceBreakdown": "jus.fəl",
+      "wiktionaryHyphenation": null,
+      "reason": "onset-too-greedy",
+      "proposedBreakdown": "jus.fəl",
+      "reviewStatus": "adopt-reference",
+      "note": "derivational suffix -ful, whose boundary is fixed by word structure"
+    },
+    {
+      "headword": "worldwide",
+      "pronunciationId": 8431,
+      "canonicalIpa": "ˈwɝldˌwaɪd",
+      "algorithmBreakdown": "wɝl.dwaɪd",
+      "referenceBreakdown": "wɝld.waɪd",
+      "wiktionaryHyphenation": [
+        "world",
+        "wide"
+      ],
+      "reason": "onset-too-greedy",
+      "proposedBreakdown": "wɝld.waɪd",
+      "reviewStatus": "adopt-reference",
+      "note": "compound: world+wide, both parts are headwords, so the seam is a syllable boundary"
+    },
+    {
+      "headword": "worldwide",
+      "pronunciationId": 8432,
+      "canonicalIpa": "ˌwɝldˈwaɪd",
+      "algorithmBreakdown": "wɝl.dwaɪd",
+      "referenceBreakdown": "wɝld.waɪd",
+      "wiktionaryHyphenation": [
+        "world",
+        "wide"
+      ],
+      "reason": "onset-too-greedy",
+      "proposedBreakdown": "wɝld.waɪd",
+      "reviewStatus": "adopt-reference",
+      "note": "compound: world+wide, both parts are headwords, so the seam is a syllable boundary"
+    }
+  ]
+}

@@ -222,8 +222,20 @@ function classify(units, ourStarts, referenceStarts) {
   return [...reasons].sort();
 }
 
+/**
+ * Render a unit sequence with separators at the given starts.
+ *
+ * Stress marks are not reinstated: this is the DIVISION under review, and
+ * mixing the two notations would obscure which boundary is being proposed.
+ */
+const marked = (units, starts) =>
+  units
+    .map((unit, index) => (starts.includes(index) && index > 0 ? `.${unit.ipaSymbol}` : unit.ipaSymbol))
+    .join('');
+
 async function main() {
   const limit = Number(argValue('--limit') ?? 6);
+  const exportPath = argValue('--export');
   const variant = await resolveActiveVariant('en-us');
 
   const artifact = JSON.parse(
@@ -350,9 +362,6 @@ async function main() {
     out(`  agreement on alignable rows: ${((agree.length / alignable.length) * 100).toFixed(1)}%\n`);
   }
 
-  const marked = (units, starts) =>
-    units.map((unit, index) => (starts.includes(index) && index > 0 ? `.${unit.ipaSymbol}` : unit.ipaSymbol)).join('');
-
   for (const [reason, rows] of [...byReason.entries()].sort((a, b) => b[1].length - a[1].length)) {
     out(`  ${reason}: ${rows.length}`);
     for (const row of rows.slice(0, limit)) {
@@ -362,6 +371,60 @@ async function main() {
     }
     out('');
   }
+
+  if (!exportPath) return;
+
+  // The unexplained rows only. The checked-vowel and rhotic-coda buckets are
+  // settled policy and are deliberately NOT exported: this artifact exists so
+  // the residue becomes curation rather than another round of rule design.
+  const SETTLED = new Set(['checked-vowel', 'rhotic-coda']);
+  const unexplained = disagree.filter((row) => row.reasons.some((reason) => !SETTLED.has(reason)));
+
+  const raw = JSON.parse(
+    await fs.readFile(path.join(here, '..', 'data', 'seed', `${variant.code}.raw.json`), 'utf8'),
+  );
+  const hyphenationByHeadword = new Map();
+  for (const entry of raw.entries) {
+    if ((entry.hyphenation ?? []).length > 0) hyphenationByHeadword.set(entry.headword, entry.hyphenation);
+  }
+
+  const overrides = {
+    variant: variant.code,
+    purpose:
+      'Curated syllable-boundary decisions for the rows where the algorithm and the ' +
+      'independent reference disagree and no settled rule explains it. Each row is ' +
+      'reviewed by hand; an unresolved row keeps no inferred boundary (fail closed).',
+    generatedBy: 'node scripts/validate-syllabification.js --export',
+    references: {
+      algorithm: 'src/services/syllabification.service.js',
+      independent: 'CMUdict (BSD-style) syllabified by Kyle Gorman syllabify (MIT), stress preserved',
+      orthographic: `Wiktionary hyphenation, as fetched into data/seed/${variant.code}.raw.json (CC BY-SA 4.0)`,
+    },
+    reviewStatuses: {
+      pending: 'not yet reviewed; no override is applied',
+      'adopt-reference': 'the reference division is confirmed and overrides the algorithm',
+      'keep-algorithm': 'the algorithm is confirmed correct; no override needed',
+      ambiguous: 'references disagree or none settles it; no inferred boundary is written',
+    },
+    rows: unexplained
+      .map((row) => ({
+        headword: String(row.headword),
+        pronunciationId: row.pronunciationId,
+        canonicalIpa: row.ipaTranscription,
+        algorithmBreakdown: marked(row.units, row.ours),
+        referenceBreakdown: marked(row.units, row.theirs),
+        wiktionaryHyphenation: hyphenationByHeadword.get(String(row.headword)) ?? null,
+        reason: row.reasons.join('+'),
+        proposedBreakdown: null,
+        reviewStatus: 'pending',
+        note: '',
+      }))
+      .sort((a, b) => a.headword.localeCompare(b.headword) || a.pronunciationId - b.pronunciationId),
+  };
+
+  await fs.writeFile(exportPath, `${JSON.stringify(overrides, null, 2)}\n`, 'utf8');
+  out(`\nExported ${overrides.rows.length} unexplained row(s) to ${exportPath}`);
+  out('Every row is `pending`; none applies until it is reviewed.');
 }
 
 main()
