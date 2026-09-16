@@ -404,6 +404,21 @@ a:focus-visible,
   outline-offset: 1px;
 }
 
+/* Stress marks, syllable separators, and the slashes that frame a phonemic
+   transcription are notation, not targets (baseline §8.3, D4 §3.8). They stay
+   in the same line box as the clickable units and keep the text colour: dimming
+   them would read as "disabled", which is exactly what §8.3 forbids. */
+.ipa__mark,
+.ipa__slash {
+  color: inherit;
+}
+
+.ipa__slash {
+  /* The units carry their own horizontal padding; this keeps the opening and
+     closing slash from sitting flush against the first and last glyph. */
+  padding-inline: 0.05em;
+}
+
 /* Without JavaScript the buttons never gain `aria-haspopup`, so they present as
    plain text rather than advertising an interaction that cannot happen. */
 .phoneme:not([aria-haspopup]) {

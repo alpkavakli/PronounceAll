@@ -29,6 +29,7 @@
  */
 
 import { AppError } from '../errors/index.js';
+import { PERMITTED_MARKS } from './ipa-tokenization.service.js';
 import {
   findOccurrencesForWord,
   listPhonemeDetails,
@@ -184,12 +185,16 @@ export async function getWordPage(variant, slug) {
     });
   }
 
-  const composed = pronunciations.map((pronunciation) => ({
-    ...pronunciation,
-    // Empty until the Iteration 2 seed has run for this word; the view then
-    // falls back to the static transcription text, which still reads correctly.
-    occurrences: occurrencesByPronunciation.get(pronunciation.pronunciationId) ?? [],
-  }));
+  const composed = pronunciations.map((pronunciation) => {
+    const composedOccurrences = occurrencesByPronunciation.get(pronunciation.pronunciationId) ?? [];
+    return {
+      ...pronunciation,
+      // Empty until the Iteration 2 seed has run for this word; the view then
+      // falls back to the static transcription text, which still reads correctly.
+      occurrences: composedOccurrences,
+      displaySegments: composeTranscriptionSegments(pronunciation.ipaTranscription, composedOccurrences),
+    };
+  });
 
   // FR-IPA-06: a word page preloads the phoneme audio for the phonemes it
   // actually contains — typically 3 to 10 files, which is negligible — while
@@ -214,4 +219,62 @@ export async function getWordPage(variant, slug) {
     // so the ordered read already leads with it (E4, FR-WORD-03).
     primaryPronunciation: composed.find((entry) => entry.isPrimary) ?? composed[0],
   };
+}
+
+/**
+ * Interleave the permitted non-clickable marks back into the clickable
+ * transcription (FR-IPA-01, D4 §3.8, Frontend Design Baseline §7.4/§8.3).
+ *
+ * FR-IPA-01 says a seeded transcription tokenises completely into canonical
+ * units PLUS the permitted marks with no unmatched residue, and D4 §3.8 says
+ * those marks are "preserved for display and carried alongside the phoneme
+ * sequence". `pronunciation_phonemes` deliberately stores only the clickable
+ * units, so the marks have to be put back at composition time to render
+ * `/ˈoʊ.pən/` rather than `oʊpən`.
+ *
+ * This is NOT re-tokenisation and it must never become one. It walks the stored
+ * transcription against the ALREADY decided unit sequence in order: a prefix
+ * match consumes the next occurrence, a permitted mark is emitted as text, and
+ * ANYTHING else abandons the attempt. No symbol is identified here, no
+ * inventory is consulted, and nothing is coerced — which is what keeps D4's
+ * fail-closed rule intact and keeps linguistic parsing at seed time.
+ *
+ * Returning `null` is a first-class outcome: the caller then renders the plain
+ * clickable sequence exactly as before, so a transcription this cannot align
+ * degrades to the previous output instead of losing or inventing a mark.
+ *
+ * @param {string} ipaTranscription the stored transcription, without slashes
+ * @param {Array<{ipaSymbol: string}>} occurrences ordered clickable units
+ * @returns {Array<{type: 'phoneme', occurrence: object} | {type: 'mark', text: string}> | null}
+ */
+export function composeTranscriptionSegments(ipaTranscription, occurrences) {
+  if (typeof ipaTranscription !== 'string' || ipaTranscription.length === 0) return null;
+  if (!Array.isArray(occurrences) || occurrences.length === 0) return null;
+
+  const segments = [];
+  let cursor = 0;
+  let next = 0;
+
+  while (cursor < ipaTranscription.length) {
+    const occurrence = occurrences[next];
+
+    if (occurrence && ipaTranscription.startsWith(occurrence.ipaSymbol, cursor)) {
+      segments.push({ type: 'phoneme', occurrence });
+      cursor += occurrence.ipaSymbol.length;
+      next += 1;
+      continue;
+    }
+
+    if (PERMITTED_MARKS.has(ipaTranscription[cursor])) {
+      segments.push({ type: 'mark', text: ipaTranscription[cursor] });
+      cursor += 1;
+      continue;
+    }
+
+    return null;
+  }
+
+  // Every stored unit must have been consumed. A transcription that ran out of
+  // characters with occurrences left over is a mismatch, not a partial success.
+  return next === occurrences.length ? segments : null;
 }

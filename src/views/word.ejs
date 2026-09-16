@@ -78,8 +78,17 @@
               <p class="pronunciation__ipa">
                 <span class="visually-hidden">IPA transcription: </span>
                 <% if (pronunciation.occurrences.length > 0) { %>
-                  <span class="ipa" lang="und-fonipa">
-                    <% pronunciation.occurrences.forEach(function (occurrence) { %><button
+                  <%# Stress and syllable marks sit inline with the units they
+                      belong to (D4 §3.8, baseline §8.3), so the line reads
+                      `/ˈoʊ.pən/` rather than `oʊpən`. `displaySegments` is
+                      null when the marks could not be aligned exactly; the
+                      transcription then renders as the bare unit sequence, the
+                      output this page produced before. %>
+                  <% const segments = pronunciation.displaySegments
+                       || pronunciation.occurrences.map(function (occurrence) {
+                            return { type: 'phoneme', occurrence };
+                          }); %>
+                  <span class="ipa" lang="und-fonipa"><span class="ipa__slash" aria-hidden="true">/</span><% segments.forEach(function (segment) { if (segment.type === 'mark') { %><span class="ipa__mark"><%= segment.text %></span><% } else { const occurrence = segment.occurrence; %><button
                       type="button"
                       class="phoneme"
                       data-phoneme-id="<%= occurrence.phonemeId %>"
@@ -87,10 +96,9 @@
                       <% if (occurrence.detail && occurrence.detail.exampleWord) { %>data-example-word="<%= occurrence.detail.exampleWord %>"<% } %>
                       <% if (occurrence.detail && occurrence.detail.examplePhonemicTranscription) { %>data-example-ipa="<%= occurrence.detail.examplePhonemicTranscription %>"<% } %>
                       <% if (occurrence.detail && occurrence.detail.audioStorageKey) { %>data-audio="<%= audioPublicPrefix %>/<%= occurrence.detail.audioStorageKey %>"<% } %>
-                    ><%= occurrence.ipaSymbol %></button><% }); %>
-                  </span>
+                    ><%= occurrence.ipaSymbol %></button><% } }); %><span class="ipa__slash" aria-hidden="true">/</span></span>
                 <% } else { %>
-                  <span class="ipa" lang="und-fonipa"><%= pronunciation.ipaTranscription %></span>
+                  <span class="ipa" lang="und-fonipa"><span class="ipa__slash" aria-hidden="true">/</span><%= pronunciation.ipaTranscription %><span class="ipa__slash" aria-hidden="true">/</span></span>
                 <% } %>
                 <% if (!pronunciation.isPrimary) { %>
                   <span class="pronunciation__badge">also</span>
