@@ -1,0 +1,195 @@
+# PronounceAll — Session Handoff, 2026-09-16
+
+**Status:** Resume point. Supersedes `PronounceAll_Session_Handoff_2026-09-11.md`
+for current state; that document remains accurate for Iteration 0–2 history.
+**Head:** `e530a8b`, `main`, 6 ahead of `origin/main`, working tree clean.
+**Not specification authority.** Consult `DOC_INDEX.md` first, as always.
+
+---
+
+## 0. The one decision blocking progress
+
+**Review `data/seed/en-us.syllable-overrides.json` (29 rows).**
+
+Nothing else is waiting on anything. The syllabification work is built,
+validated and frozen; it is not yet persisted, and persistence is gated on this
+review.
+
+The artifact holds the rows where our algorithm and an independent reference
+divide a word differently with no settled rule to explain it. Almost all are
+morpheme boundaries — `base+ment`, `world+wide`, `police+man` — which no
+phonological rule can see.
+
+- **18 rows** carry a proposal, each justified by evidence already in the
+  repository: Wiktionary hyphenation (syllable count), a compound seam proven by
+  both halves being headwords, or a derivational suffix.
+- **11 rows** are `ambiguous` and carry **no** proposal, so persistence will
+  write no boundary for them: `amusing`, `convenience`, `senior`, `perfume`,
+  `transfer`, `transmission`, `explanation`, `insecure`, `occupied`,
+  `atmosphere`, `documents`. Several are probably right as the algorithm has
+  them, but no checkable reference here settles it. Resolving any of these is
+  hand curation — set `proposedBreakdown` and `reviewStatus` in the artifact.
+
+Re-run the evidence pass at any time:
+
+```bash
+node scripts/review-syllable-overrides.js           # report
+node scripts/review-syllable-overrides.js --write   # rewrite statuses
+```
+
+---
+
+## 1. What this session changed
+
+| Commit | What |
+|---|---|
+| `6271a4b` | Recorded the second listening pass and the placeholder-audio decision |
+| `2a7967b` | Froze the Frontend Design Baseline; implemented tokens, self-hosted fonts, shell |
+| `c5b01ab` | Stress and syllable marks now render in the clickable transcription |
+| `2e76f47` | Syllabification algorithm and the corpus pass (dry-run only) |
+| `dbdd7c5` | CMUdict + Gorman validation; evidence-based source-defect report; regression suite |
+| `e530a8b` | The curated 29-row override artifact |
+
+---
+
+## 2. Decisions that are FROZEN — do not reopen
+
+Reopening any of these is how the previous sessions looped. Each was settled
+with evidence and is recorded.
+
+1. **D4 and the 41-unit inventory.** Unchanged. `/ɹ/` not `/r/`, `/ɑ/` not
+   `/ɑː/`, no vowel-length marks, atomic diphthongs, `ˈ ˌ .` are the only
+   permitted non-clickable marks.
+2. **Phoneme audio is placeholder.** All 41 units serve Piper clips the
+   maintainer judged wrong. They will record the real clips personally. Do NOT
+   run further audio QA, Piper draws, Commons fetches or promotions. See
+   `PronounceAll_Phoneme_Audio_Listening_Pass_2026-09-11.md` §5.
+3. **Syllabification general rules.** Maximal onset, checked-vowel policy,
+   rhotic-coda policy, source boundaries win, stress marks win, genuine hiatus
+   is divided, vowel + `/ɚ/` fails closed. Validated at 1 631 of 1 660 alignable
+   rows. A new edge case goes in the override artifact, **not** into the
+   algorithm, unless it proves a general rule is fundamentally wrong.
+4. **`ipa_transcription` is never rewritten for display.** It is half of
+   `uq_word_pronunciations_natural (word_id, ipa_transcription)`. Writing dots
+   into it makes a later `npm run seed` delete and re-insert the row, changing
+   `pronunciation_id` and orphaning `whole_word_audio_asset_id`. Inferred
+   structure belongs in `syllable_breakdown`.
+5. **No Cambridge scraping.** Cloudflare-gated, and its content has no licence
+   compatible with FR-CONTENT-05 / NFR-LEGAL-05. It is a manual benchmark only.
+6. **Frontend baseline is frozen and routed in `DOC_INDEX.md`.** Only tokens,
+   fonts and the shell are implemented; component sections (§7–§15) are not.
+
+---
+
+## 3. Next steps, in order
+
+### 3.1 Persist syllabification (after §0 review)
+
+- write inferred structure to `syllable_breakdown` only, never
+  `ipa_transcription`;
+- precedence: source-supplied breakdown → curated override → algorithmic
+  inference → nothing;
+- integrate into the deterministic seed pipeline (position: after
+  `seed:phonemes`, which produces the units it reads);
+- the word page may then place non-clickable `.` marks in the main visible IPA
+  from `syllable_breakdown` while the clickable units stay aligned to
+  `ipa_transcription`.
+
+**Acceptance gate for marking SYLLABIFICATION CLOSED:**
+
+- clean rebuild reproduces the same breakdowns;
+- second run is idempotent;
+- canonical IPA rows and `pronunciation_id`s do not change;
+- whole-word audio links remain intact;
+- regression suite passes;
+- no unexplained automatically-written boundary remains.
+
+Do not perform another general syllabification research cycle after that.
+
+### 3.2 The 37 source-normalization defects
+
+A separate, finite batch. `node scripts/report-source-defects.js` prints them
+with evidence. Two classes:
+
+- an RP form that survived the en-us profile (`both` ← `/bəʊθ/`);
+- a source that marked one diphthong with an offglide where we stored two
+  vowels (`close` ← GA `/ˈklɔʊ̯z/`, giving `/ɔ/` + `/ʊ/` instead of `/oʊ/`).
+
+The second class points at a real D4 §5 source-profile gap. Compare each row
+against the raw Wiktionary source, our canonical row, and CMUdict where
+available, then propose an explicit correction set for review. Do not
+auto-repair. Do not start a third syllabification redesign because of anything
+found here.
+
+### 3.3 Then Iteration 3 product features
+
+`docs/current/PronounceAll_Iteration3_Product_Decisions_and_IPA_Quality_Plan.md`
+is untracked in the working tree and has not been reviewed or routed in
+`DOC_INDEX.md`. It is not authority yet.
+
+---
+
+## 4. Commands that matter
+
+```bash
+# stack
+docker compose up -d mysql redis && npm run dev
+
+# content pipeline (documented order)
+npm run fetch:headwords     # network
+npm run fetch:wiktionary    # network, ~4 min
+npm run seed                # words, offline, ~30 s
+npm run seed:phonemes       # inventory + occurrences, ~1.7 min
+npm run inventory:check     # fails if the artifact drifts from D4
+npm run seed:syllables:dry-run   # report; --apply is NOT approved yet
+
+# IPA quality
+node scripts/validate-syllabification.js            # CMUdict + Gorman report
+node scripts/validate-syllabification.js --export data/seed/en-us.syllable-overrides.json
+node scripts/review-syllable-overrides.js           # evidence pass
+node scripts/report-source-defects.js               # the 37 defects
+
+# gate
+npm run lint && npm run lint:licence && npm test && npm run test:e2e && npm run size
+npm run audio:verify
+```
+
+---
+
+## 5. Environment notes
+
+- **Docker Desktop stops when the machine sleeps.** MySQL and Redis must be up
+  before any script; the dev server exits without them.
+- **`tools/` is not committed** (`.gitignore`: `/tools/piper/`,
+  `/tools/validation/`). Validation tooling is reinstalled with:
+  `curl -sL -o tools/validation/syllabify.py https://raw.githubusercontent.com/kylebgorman/syllabify/master/syllabify.py`
+  and `cmudict.dict` from `cmusphinx/cmudict`. `tools/validation/boundaries.py`
+  IS committed and bridges them. Piper lives in `tools/piper/.venv`.
+- **The audio review page** (`data/audio-review/index.html`) cannot be opened
+  from disk: the app sends `Cross-Origin-Resource-Policy: same-origin`, so a
+  `file://` page is refused every clip. Serve it same-origin instead.
+- **Firefox e2e is an intermittent local flake** — `browserContext.close`
+  teardown errors with zero assertion failures. Chromium, WebKit and the no-JS
+  project are reliable.
+
+---
+
+## 6. Gate at this head
+
+lint clean · licence headers 116 files · 242 unit · 169 integration ·
+`audio:verify` PASS (6 225 assets) · database untouched at 7 531 pronunciations,
+1 898 already carrying a source separator.
+
+E2E and size were last run green at `c5b01ab`; nothing since then touches
+rendering.
+
+---
+
+## 7. Maintainer memory
+
+Two memories are stored for this project and are loaded automatically:
+
+- the 11 phoneme clips approved by ear on 2026-09-15, pinned by digest, never to
+  be regenerated or promoted away;
+- the 2026-09-16 decision that all phoneme audio is placeholder pending the
+  maintainer's own recordings.
