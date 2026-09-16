@@ -141,7 +141,7 @@ Original plan, kept for reference:
 
 Do not perform another general syllabification research cycle after that.
 
-### 3.2 The 37 source-normalization defects — CLOSED (2026-09-16)
+### 3.2 The 37 source-normalization defects — 25 RESOLVED, 12 BLOCKED on provenance
 
 **Outcome, per maintainer decision:**
 
@@ -158,10 +158,17 @@ quote, diagnosis, hormones, overboard, opponent, toll. Raw Wiktionary holds
 only the RP form; the US form exists only in CMUdict. Curation pins must
 appear upstream (by design), and pronunciation provenance is word-level
 (`words.source_url`), so there is no honest path to store a CMUdict
-transcription. They stay as they are, their syllable boundaries held, and are
-the ONLY rows the defect report now prints. Resolving them needs a decision:
-a per-pronunciation provenance extension (schema, SDD §4.2), a Wiktionary
-re-fetch, or skipping the headwords.
+transcription. They stay as they are for now, their syllable boundaries held, and are the
+ONLY rows the defect report prints. They are learner-facing primaries, so
+leaving them is NOT the end state.
+
+**Maintainer decision (2026-09-16):** add minimal per-pronunciation
+provenance, then import the US forms. A one-shot re-fetch of the 12 pages
+found `quote` now carries `/kwoʊt/` (US, CA) upstream, so it resolves through
+Wiktionary; `holding` and `toll` gained only narrow US forms containing `[ɫ]`,
+which D4 §3.9 rejects; the other 9 are unchanged. 11 words therefore take a
+CMUdict pronunciation with honest CMUdict provenance. No further source
+searching. The batch closes when the defect report reaches zero.
 
 Found and fixed on the way: a word re-seed could not remove a pronunciation
 once `pronunciation_phonemes` referenced it (RESTRICT FK); it now uses the
