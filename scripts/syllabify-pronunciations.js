@@ -85,20 +85,6 @@ async function main() {
   }
 
   const planned = [];
-  const suspicious = [];
-
-  // Two vowels in a row where the second is /ɪ/ or /ʊ/ is almost always a
-  // diphthong that failed to tokenise as one atomic unit (D4 §3.5): `ˈklɔʊz`
-  // holds /ɔ/ + /ʊ/ where /oʊ/ belongs. A boundary between them would render
-  // `ˈklɔ.ʊz` and present a tokenisation defect as a teaching fact, so these
-  // are reported for repair rather than written.
-  const looksLikeSplitDiphthong = (units) =>
-    units.some(
-      (unit, index) =>
-        index > 0 &&
-        ['ɪ', 'ʊ'].includes(unit.ipaSymbol) &&
-        ['vowel', 'diphthong'].includes(units[index - 1].category),
-    );
   const report = { total: pronunciations.length, alreadyMarked: 0, unchanged: 0, noUnits: 0 };
 
   for (const pronunciation of pronunciations) {
@@ -109,11 +95,6 @@ async function main() {
     const units = unitsByPronunciation.get(pronunciation.pronunciationId);
     if (!units || units.length === 0) {
       report.noUnits += 1;
-      continue;
-    }
-
-    if (looksLikeSplitDiphthong(units)) {
-      suspicious.push(pronunciation);
       continue;
     }
 
@@ -140,20 +121,12 @@ async function main() {
   out(`  already carry a marker   ${report.alreadyMarked}`);
   out(`  no computable boundary   ${report.unchanged}   (monosyllables, stress-marked, unalignable)`);
   out(`  no stored units          ${report.noUnits}`);
-  out(`  split-diphthong defect   ${suspicious.length}   (reported, never written)`);
   out(`  would gain a separator   ${planned.length}\n`);
 
   for (const row of planned.slice(0, limit)) {
     out(`    ${row.ipaTranscription}  ->  ${row.next}`);
   }
   if (planned.length > limit) out(`    … and ${planned.length - limit} more`);
-
-  if (suspicious.length > 0) {
-    out(`
-  Tokenised as two vowels where a diphthong belongs (D4 §3.5):`);
-    for (const row of suspicious.slice(0, limit)) out(`    ${row.ipaTranscription}`);
-    if (suspicious.length > limit) out(`    … and ${suspicious.length - limit} more`);
-  }
 
   if (!apply) {
     out('\nReport only. Nothing was written. Re-run with --apply to write.');

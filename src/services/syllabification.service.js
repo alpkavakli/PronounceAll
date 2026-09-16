@@ -30,7 +30,7 @@
  */
 
 /** Categories in the D4 artifact that can be a syllable nucleus. */
-const NUCLEUS_CATEGORIES = new Set(['vowel', 'central rhotic', 'diphthong']);
+export const NUCLEUS_CATEGORIES = new Set(['vowel', 'central rhotic', 'diphthong']);
 
 /**
  * Onset clusters English permits word-initially, which is the standard test for
