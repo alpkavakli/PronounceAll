@@ -7,7 +7,7 @@ for current state; that document remains accurate for Iteration 0–2 history.
 
 ---
 
-## 0. The one decision blocking progress
+## 0. The one decision blocking progress — RESOLVED (see §3.1)
 
 **Review `data/seed/en-us.syllable-overrides.json` (19 rows).**
 
@@ -91,7 +91,34 @@ with evidence and is recorded.
 
 ## 3. Next steps, in order
 
-### 3.1 Persist syllabification (after §0 review)
+### 3.1 Persist syllabification — CLOSED (2026-09-16)
+
+**Status.** `npm run seed:syllables` writes `syllable_breakdown` only. The
+override artifact was applied as it stands (13 proposals, 6 ambiguous rows
+left unmarked). Precedence, in `planSyllableBreakdown`: source separator →
+maintainer curation file → hold on proven source defects (`close` as
+`/ɔ/`+`/ʊ/` would otherwise read as two syllables) → reviewed override →
+inference → nothing. Result: 2 140 breakdowns written; 1 898 source, 16
+curated, 32 defect rows held, 6 unreviewed overrides left alone.
+
+Pipeline order is fixed: `seed` → `seed:phonemes` → `seed:syllables`. `seed`
+rewrites the column, so the syllable step must follow every `seed`.
+
+Gate evidence: a second run writes 0; `seed` restores the pre-apply snapshot
+exactly and the full pipeline re-produces the applied snapshot exactly (0
+differences); `pronunciation_id`, `ipa_transcription`, audio links, primary
+and order unchanged across all 7 531 rows. The rebuild was through the
+pipeline on the existing database, not from an empty schema.
+
+Closed by maintainer decision, with the override artifact approved as it
+stands. Accepted residuals, not reopened: ~570 written rows are absent from
+CMUdict and follow the frozen rules without independent validation, and the 6
+ambiguous rows stay unmarked unless curated by hand. Deferred, not part of
+closure: placing `.` marks in the main visible IPA from `syllable_breakdown`
+(a word-page rendering change under Frontend Baseline §8). No further general
+syllabification work.
+
+Original plan, kept for reference:
 
 - write inferred structure to `syllable_breakdown` only, never
   `ipa_transcription`;
@@ -149,7 +176,8 @@ npm run fetch:wiktionary    # network, ~4 min
 npm run seed                # words, offline, ~30 s
 npm run seed:phonemes       # inventory + occurrences, ~1.7 min
 npm run inventory:check     # fails if the artifact drifts from D4
-npm run seed:syllables:dry-run   # report; --apply is NOT approved yet
+npm run seed:syllables:dry-run   # report
+npm run seed:syllables           # write syllable_breakdown; after every seed
 
 # IPA quality
 node scripts/validate-syllabification.js            # CMUdict + Gorman report

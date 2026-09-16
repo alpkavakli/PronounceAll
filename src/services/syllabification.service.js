@@ -32,6 +32,9 @@
 /** Categories in the D4 artifact that can be a syllable nucleus. */
 export const NUCLEUS_CATEGORIES = new Set(['vowel', 'central rhotic', 'diphthong']);
 
+/** Override-artifact statuses that carry an applied proposal. */
+const REVIEWED_STATUSES = new Set(['adopt-reference', 'keep-algorithm']);
+
 /** The non-clickable stress marks D4 §5.5 permits. */
 const STRESS_MARKS = new Set(['ˈ', 'ˌ']);
 
@@ -237,19 +240,33 @@ export function insertSyllableMarks(transcription, units) {
 
   const starts = syllabify(units, stressedOnsets);
 
-  // Every syllable, whether bounded by our separator or the source's stress
-  // mark, must hold a nucleus. A span without one
-  // means the source's mark sits where no syllable can begin, so the row is
-  // left unmarked rather than shown with a broken division.
+  return writeSeparators(transcription, units, starts, stressedOnsets);
+}
+
+/**
+ * Write separators at the given syllable starts.
+ *
+ * Every syllable, whether bounded by a separator or the source's stress mark,
+ * must hold a nucleus. A span without one means a boundary sits where no
+ * syllable can begin, so nothing is written rather than a broken division.
+ * A start the source already marked with stress gets no separator —
+ * `ɹɪˈkɔɹd`, never `ɹɪ.ˈkɔɹd`.
+ *
+ * @param {string} transcription stored IPA, without slashes
+ * @param {Array<{ipaSymbol: string, category: string}>} units ordered canonical units
+ * @param {number[]} starts unit indices that begin a syllable
+ * @param {Set<number>} stressedOnsets unit indices a source stress mark precedes
+ * @returns {string|null} the transcription with separators, or null if it
+ *   gained nothing or would be broken
+ */
+function writeSeparators(transcription, units, starts, stressedOnsets) {
   const boundaries = [...new Set([0, ...starts, ...stressedOnsets])].sort((a, b) => a - b);
   for (let b = 0; b < boundaries.length; b += 1) {
     const span = units.slice(boundaries[b], boundaries[b + 1] ?? units.length);
     if (!span.some((unit) => NUCLEUS_CATEGORIES.has(unit.category))) return null;
   }
 
-  // Write a separator at each computed start the source did not
-  // already mark with stress — `ɹɪˈkɔɹd`, never `ɹɪ.ˈkɔɹd`.
-  const separators = new Set(starts.slice(1).filter((index) => !stressedOnsets.has(index)));
+  const separators = new Set(starts.filter((index) => index > 0 && !stressedOnsets.has(index)));
   if (separators.size === 0) return null;
 
   let out = '';
@@ -269,4 +286,114 @@ export function insertSyllableMarks(transcription, units) {
   }
 
   return out;
+}
+
+/**
+ * Apply a reviewed division from the curated syllable-override artifact.
+ *
+ * The proposal is written without stress marks (`ɹɪ.pleɪs.mənt`), because it
+ * records the DIVISION under review. The stored transcription's stress marks
+ * are kept, so the result still identifies stress as FR-WORD-03 requires. A
+ * proposal that spells different units, or omits a boundary a source stress
+ * mark states, contradicts the source and is refused.
+ *
+ * @param {string} transcription stored IPA, without slashes
+ * @param {Array<{ipaSymbol: string, category: string}>} units ordered canonical units
+ * @param {string} proposal unit symbols with `.` between syllables
+ * @returns {string|null} the transcription with separators, or null if refused
+ */
+export function applyProposedDivision(transcription, units, proposal) {
+  if (typeof transcription !== 'string' || transcription.includes('.')) return null;
+  if (typeof proposal !== 'string' || !Array.isArray(units) || units.length === 0) return null;
+
+  const stressedOnsets = sourceStressOnsets(transcription, units);
+  if (stressedOnsets === null) return null;
+
+  const starts = [0];
+  let cursor = 0;
+  for (let index = 0; index < units.length; index += 1) {
+    if (proposal[cursor] === '.' && index > 0) {
+      starts.push(index);
+      cursor += 1;
+    }
+    if (!proposal.startsWith(units[index].ipaSymbol, cursor)) return null;
+    cursor += units[index].ipaSymbol.length;
+  }
+  if (cursor !== proposal.length) return null;
+  if ([...stressedOnsets].some((index) => !starts.includes(index))) return null;
+
+  return writeSeparators(transcription, units, starts, stressedOnsets);
+}
+
+/**
+ * Decide the written syllable breakdown for one stored pronunciation.
+ *
+ * Precedence, highest first:
+ *
+ *   1. **source** — the transcription already carries a separator, so the
+ *      seeded breakdown is the source's own division;
+ *   2. **curated** — the seeded breakdown differs from what the transcription
+ *      alone derives, so a maintainer supplied it in the curation file;
+ *   3. **held** — the row is a proven source-profile defect, so its units
+ *      are not the word's real sounds and no computed boundary is written
+ *      until the defect is resolved (`source-defects.service.js`);
+ *   4. **override** — a reviewed row in the syllable-override artifact. An
+ *      unreviewed or ambiguous row writes NO computed boundary (D4 §5.6);
+ *   5. **inferred** — the algorithm;
+ *   6. otherwise the seeded breakdown stands.
+ *
+ * Curation is recognised by comparison rather than by key lookup because the
+ * curation file is keyed partly on raw upstream strings that no longer match
+ * the stored canonical form. That comparison is only meaningful against the
+ * breakdown the word seed wrote, which is why this step always runs after
+ * `seed`: a value it wrote on an earlier run is recomputed, found equal, and
+ * left unchanged.
+ *
+ * @param {object} input
+ * @param {string} input.transcription stored `ipa_transcription`
+ * @param {string} input.storedBreakdown stored `syllable_breakdown`
+ * @param {string} input.derivedBreakdown the breakdown the transcription alone derives
+ * @param {Array<{ipaSymbol: string, category: string}>} input.units ordered canonical units
+ * @param {{reviewStatus: string, proposedBreakdown: string|null}} [input.override] artifact row, if any
+ * @param {boolean} [input.sourceDefect] the row is a proven source-profile defect
+ * @param {(transcription: string) => string} input.toBreakdown the ingestion breakdown formatter
+ * @returns {{source: string, breakdown: string}} the layer that decided, and the breakdown to store
+ */
+export function planSyllableBreakdown({
+  transcription,
+  storedBreakdown,
+  derivedBreakdown,
+  units,
+  override,
+  sourceDefect = false,
+  toBreakdown,
+}) {
+  if (transcription.includes('.')) return { source: 'source', breakdown: storedBreakdown };
+
+  let source = 'none';
+  let target = derivedBreakdown;
+
+  if (sourceDefect) {
+    source = 'held-defect';
+  } else if (override) {
+    const reviewed = REVIEWED_STATUSES.has(override.reviewStatus) && Boolean(override.proposedBreakdown);
+    const marked = reviewed ? applyProposedDivision(transcription, units, override.proposedBreakdown) : null;
+    if (marked) {
+      source = 'override';
+      target = toBreakdown(marked);
+    } else {
+      source = reviewed ? 'override-refused' : 'override-unreviewed';
+    }
+  } else {
+    const marked = insertSyllableMarks(transcription, units);
+    if (marked) {
+      source = 'inferred';
+      target = toBreakdown(marked);
+    }
+  }
+
+  if (storedBreakdown !== derivedBreakdown && storedBreakdown !== target) {
+    return { source: 'curated', breakdown: storedBreakdown };
+  }
+  return { source, breakdown: target };
 }

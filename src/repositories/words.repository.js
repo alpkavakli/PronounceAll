@@ -278,11 +278,11 @@ export async function listWordsForVariant(variantId, executor = defaultExecutor(
  *
  * @param {number} variantId
  * @param {import('./transaction.js').Executor} [executor]
- * @returns {Promise<Array<{ pronunciationId: number, wordId: number, ipaTranscription: string }>>}
+ * @returns {Promise<Array<{ pronunciationId: number, wordId: number, ipaTranscription: string, syllableBreakdown: string }>>}
  */
 export async function listAllPronunciations(variantId, executor = defaultExecutor()) {
   const [rows] = await executor.execute(
-    `SELECT p.pronunciation_id, p.word_id, p.ipa_transcription
+    `SELECT p.pronunciation_id, p.word_id, p.ipa_transcription, p.syllable_breakdown
        FROM word_pronunciations p
        JOIN words w ON w.word_id = p.word_id
       WHERE w.variant_id = ?
@@ -293,6 +293,7 @@ export async function listAllPronunciations(variantId, executor = defaultExecuto
     pronunciationId: row.pronunciation_id,
     wordId: row.word_id,
     ipaTranscription: row.ipa_transcription,
+    syllableBreakdown: row.syllable_breakdown,
   }));
 }
 
