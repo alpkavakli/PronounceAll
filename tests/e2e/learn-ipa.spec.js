@@ -28,7 +28,13 @@ test.describe('FR-IPA-07 — the ranked inventory renders', () => {
     const first = await page
       .locator('.phoneme-row__symbol')
       .first()
-      .evaluate((node) => node.textContent.replace(/Phoneme:\s*/, '').trim());
+      // The visually hidden prefix and, once hydrated, learner status (FR-IPA-02)
+      // are part of the accessible name but not the symbol.
+      .evaluate((node) => {
+        const copy = node.cloneNode(true);
+        copy.querySelectorAll('.visually-hidden').forEach((hidden) => hidden.remove());
+        return copy.textContent.trim();
+      });
 
     // Derived from the corpus, so the exact leader is data — but it must be a
     // single canonical unit, not a rank number or empty.

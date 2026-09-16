@@ -38,6 +38,10 @@
       word is built from these.
     </p>
 
+    <%# FR-IPA-07/10: the viewer's `M / N learned`, filled in by hydration.
+        Hidden until then, so a no-JavaScript page shows no count. %>
+    <p class="learn-progress" data-learn-progress data-total="<%= phonemes.length %>" hidden></p>
+
     <% if (scope === 'variant') { %>
       <%- include('partials/search-form', { variantCode: variant.code }) %>
     <% } %>
@@ -49,11 +53,11 @@
           query returned. Nothing re-sorts it here. %>
       <ol class="phoneme-list">
         <% phonemes.forEach(function (phoneme) { %>
-          <li class="phoneme-row">
+          <li class="phoneme-row" data-row-phoneme="<%= phoneme.phonemeId %>">
             <span class="phoneme-row__rank" aria-hidden="true"><%= phoneme.frequencyRank %></span>
 
-            <span class="phoneme-row__symbol" lang="und-fonipa">
-              <span class="visually-hidden">Phoneme: </span><%= phoneme.ipaSymbol %>
+            <span class="phoneme-row__symbol" lang="und-fonipa" data-learner-phoneme="<%= phoneme.phonemeId %>">
+              <span class="visually-hidden">Phoneme: </span><%= phoneme.ipaSymbol %><span class="visually-hidden" data-learner-status></span>
             </span>
 
             <span class="phoneme-row__example">
@@ -104,5 +108,6 @@
   <%- include('partials/footer') %>
   <script type="module" src="/js/bootstrap.js"></script>
   <script type="module" src="/js/save-control.js"></script>
+  <script type="module" src="/js/learner-state.js"></script>
 </body>
 </html>

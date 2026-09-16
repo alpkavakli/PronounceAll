@@ -55,6 +55,13 @@
            href="/save/confirm?kind=word&amp;id=<%= word.wordId %>&amp;return=<%= encodeURIComponent(pagePath) %>">Save</a>
       </header>
 
+      <%# FR-WORD-06: the progress-aware banner. The shell carries the viewer-
+          neutral invitation with N from the `phonemes` table; hydration swaps
+          in "M/N — doing great! K to go" once the viewer has learned a phoneme. %>
+      <p class="ipa-banner" data-ipa-banner data-total="<%= phonemeTotal %>">
+        <a class="ipa-banner__link" href="/<%= variant.code %>/learnIPA">Learn every sound in English! Just learn these <%= phonemeTotal %> IPA symbols to pronounce every word</a>
+      </p>
+
       <%# FR-WORD-03: every pronunciation from `word_pronunciations`, in
           `display_order`, with the single `is_primary` row leading. A heteronym
           such as `lead` renders each of its pronunciations here. %>
@@ -100,6 +107,7 @@
                       class="phoneme"
                       data-phoneme-id="<%= occurrence.phonemeId %>"
                       data-symbol="<%= occurrence.ipaSymbol %>"
+                      aria-label="phoneme /<%= occurrence.ipaSymbol %>/"
                       <% if (occurrence.detail && occurrence.detail.exampleWord) { %>data-example-word="<%= occurrence.detail.exampleWord %>"<% } %>
                       <% if (occurrence.detail && occurrence.detail.examplePhonemicTranscription) { %>data-example-ipa="<%= occurrence.detail.examplePhonemicTranscription %>"<% } %>
                       <% if (occurrence.detail && occurrence.detail.audioStorageKey) { %>data-audio="<%= audioPublicPrefix %>/<%= occurrence.detail.audioStorageKey %>"<% } %>
@@ -194,6 +202,7 @@
       already reads without it. External module, so the nonce-free shell CSP
       (`script-src 'self'`) admits it. %>
   <script type="module" src="/js/save-control.js"></script>
+  <script type="module" src="/js/learner-state.js"></script>
   <script type="module" src="/js/phoneme-popover.js"></script>
   <%# FR-IPA-05 tier 3. Only reveals a control where the browser can actually
       speak; every word with a server-side asset already played without it. %>

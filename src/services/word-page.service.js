@@ -215,6 +215,9 @@ export async function getWordPage(variant, slug) {
     word,
     pronunciations: composed,
     preloadAudioKeys,
+    // FR-WORD-06: N, the variant's inventory size, derived from `phonemes` at
+    // render time and never authored into copy.
+    phonemeTotal: phonemeDetails.length,
     // Ingestion guarantees exactly one primary at the lowest `display_order`,
     // so the ordered read already leads with it (E4, FR-WORD-03).
     primaryPronunciation: composed.find((entry) => entry.isPrimary) ?? composed[0],

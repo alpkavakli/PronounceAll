@@ -33,6 +33,10 @@
   --color-danger: #9c2f2f;
   --color-focus: #1f5b55;
 
+  /* Learner state (baseline §4.1, amended 2026-09-17). Never the danger colour. */
+  --color-learned: var(--color-success);
+  --color-not-learned: var(--color-muted);
+
   /* 4px spacing scale (§4.3) */
   --space-1: 4px;
   --space-2: 8px;
@@ -787,4 +791,72 @@ a:focus-visible,
   border: 0;
   border-radius: var(--radius-md);
   cursor: pointer;
+}
+
+/* Learner state on phonemes (FR-IPA-02, baseline §8.1). Applied only after
+   hydration; the default presentation asserts nothing. The underline is the
+   non-colour cue; hover, focus and the open state keep their own treatment. */
+.phoneme--learned {
+  color: var(--color-learned);
+  text-decoration: underline 2px solid var(--color-learned);
+  text-underline-offset: 0.2em;
+}
+
+.phoneme--not-learned {
+  color: var(--color-not-learned);
+}
+
+/* FR-WORD-06 progress banner. */
+.ipa-banner {
+  margin: var(--space-4) 0 0;
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-accent-soft);
+  border-radius: var(--radius-md);
+}
+
+.ipa-banner__link {
+  color: var(--color-accent-hover);
+  font-weight: 500;
+}
+
+/* /learnIPA progress and filter (FR-IPA-07/10, baseline §11). */
+.learn-progress {
+  margin: 0 0 var(--space-3);
+  color: var(--color-muted);
+}
+
+.learn-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: 0 0 var(--space-4);
+}
+
+.learn-filter__option {
+  min-height: 40px;
+  padding: 0.3rem 0.8rem;
+  font: inherit;
+  font-size: 0.9375rem;
+  color: var(--color-ink);
+  background: transparent;
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+}
+
+.learn-filter__option[aria-pressed='true'] {
+  color: var(--color-surface);
+  background: var(--color-ink);
+  border-color: var(--color-ink);
+}
+
+.learn-filter__option:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+/* The filter hides rows with the `hidden` attribute, which a `display` rule on
+   the row would otherwise override. */
+.phoneme-row[hidden] {
+  display: none;
 }

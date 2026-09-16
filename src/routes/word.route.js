@@ -147,6 +147,7 @@ export function wordRouter({ wordRequestRateLimit, verifyTurnstile }) {
         pronunciations: page.pronunciations,
         primaryPronunciation: page.primaryPronunciation,
         preloadAudioKeys: page.preloadAudioKeys,
+        phonemeTotal: page.phonemeTotal,
         sourceName: sourceNameFor(page.word.sourceUrl),
         title: pageTitle(page.word.displayHeadword, variant.displayName),
         metaDescription: metaDescription(page.word.meaning),
