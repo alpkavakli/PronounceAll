@@ -1,0 +1,170 @@
+# PronounceAll — Threat Model (DRAFT v0.1)
+
+**Status:** DRAFT for owner review, 2026-09-17. First version, scoped to the
+architecture frozen in SRS 1.0.6, SDD v1.1 and the Round 1 Decisions, and to what is
+built through Iteration 3. It is the Threat Model that NFR-PRIV-01, NFR-PRIV-06,
+NFR-LEGAL-01 and FR-SAVE-10 require; later security work expands it rather than
+replacing it.
+**Not a redesign.** Every control named here is already specified. Where a control
+is specified but not yet built, the status column says so.
+
+**Status key:** **Built** — implemented and tested in the repository. **Specified** —
+fixed by the SRS/SDD, scheduled for a later iteration. **Open** — a finding that needs
+a decision.
+
+---
+
+## 1. Scope and trust boundaries
+
+```mermaid
+flowchart LR
+    subgraph Client["Browser (untrusted)"]
+      B[Page scripts, pa_uid cookie + localStorage mirror]
+    end
+    subgraph Edge["Cloudflare edge"]
+      CF[CDN cache, WAF, Turnstile]
+    end
+    subgraph Origin["Origin — Hetzner, EU"]
+      NG[Nginx: TLS, access log, static audio]
+      APP[Express application]
+      WK[Worker tier: jobs — not yet built]
+      DB[(MySQL 8)]
+      RD[(Redis: rate limits, idempotency, sessions)]
+    end
+    subgraph Third["Third parties"]
+      GO[Google OAuth]
+      EM[Transactional email]
+      HI[Have I Been Pwned]
+      BK[Backblaze B2]
+      ET[Error tracker]
+    end
+    B -->|HTTPS| CF --> NG --> APP
+    APP --> DB
+    APP --> RD
+    WK --> DB
+    WK --> RD
+    APP -.->|Iteration 4| GO
+    APP -.->|Iteration 4| EM
+    APP -.->|Iteration 4| HI
+    DB -.->|encrypted backup| BK
+    APP -.->|if adopted| ET
+```
+
+Trust boundaries: browser ↔ edge; edge ↔ origin; application ↔ data stores (least-
+privilege principals, SDD §4.9); origin ↔ each third party.
+
+## 2. Assets
+
+| Asset | Where | Sensitivity |
+|---|---|---|
+| Anonymous identity `pa_uid` | Cookie, localStorage, `anonymous_profiles` | Pseudonymous; the key to a learner's history |
+| Learning history: save/tag, listen and encounter events | `user_activity_events` | Personal data once linked to a person; reveals study behaviour |
+| Derived save state | `user_word_states`, `user_phoneme_states` | As above |
+| CSRF key `CSRF_SECRET` | Configuration | Secret — forging tokens for any identity |
+| Word requests | `word_requests` | Low; carries `pa_uid` |
+| Logs | Nginx access log, application log | IP address (access log only), request addresses including search terms |
+| [Iteration 4] Accounts, credentials, sessions, tokens | `users`, `user_accounts`, Redis, `auth_tokens` | High |
+| Catalogue and audio | MySQL, audio store | Public content; integrity matters |
+
+## 3. Third-party personal-data flows (NFR-PRIV-06)
+
+| Recipient | Data exchanged | When | Status |
+|---|---|---|---|
+| Cloudflare edge | IP address, request metadata, Turnstile token | Every request; word request form | Specified (edge not deployed) |
+| Google OAuth | Email, subject identifier, profile picture URL | Login with Google | Specified — Iteration 4 |
+| Have I Been Pwned | First five hex characters of a SHA-1 password hash (k-anonymity) | Password choice | Specified — Iteration 4 |
+| Transactional email (Brevo, provisional) | Recipient email and token URL | Verification, reset, deletion emails | Specified — Iteration 4 |
+| Backblaze B2 | Encrypted logical database backup | Scheduled backup | Specified |
+| Error tracker (Sentry or equivalent) | Exception and 5xx diagnostics, named PII scrubbed | On error | **Open** — no service selected; the residual-metadata determination is made before production use |
+
+No other intentional personal-data flow leaves the origin. Encounter and listen
+events never leave it.
+
+## 4. Threats and controls
+
+| # | Threat | Control | Status |
+|---|---|---|---|
+| T1 | **Cross-site request forgery** on a state-changing endpoint | Stateless HMAC token under `CSRF_SECRET` over `csrf:v1:anon:<pa_uid>`, issued only on uncached per-viewer responses, verified in constant time; same-origin `Origin` check, `Sec-Fetch-Site` fallback, neither refused (SDD §6.6) | Built for `/save`, `/listen`; **Open** for `/request-word` (see F1) |
+| T2 | **Per-viewer data in a shared cache** (a token, state or cookie served to another viewer) | Shells carry no token, state or `Set-Cookie`; per-viewer data only on `private, no-store` hydration and confirmation responses (B2) | Built, tested |
+| T3 | **Cross-user data exposure** through hydration or writes | Owner resolved from the request's own `pa_uid` through `current_identity_bindings`; no client-supplied owner; hydration reads only that owner's rows | Built, tested |
+| T4 | **Forged or arbitrary target ids** | `target_kind` enumerated; `target_id` validated as a positive integer and checked to exist in `words`/`phonemes` before any write | Built, tested |
+| T5 | **Event flooding** / storage exhaustion | Save/tag bucket 60/min per `pa_uid` (Appendix C), edge limit 1000/min per IP; encounters one per actor, word and UTC day by database key | Built (rate limit); Specified (encounter key, Slice 4) |
+| T6 | **Rate-limit evasion by discarding cookies** | A request without `pa_uid` has no identity a token was issued for, so writes fail CSRF; edge IP limit still applies | Built |
+| T7 | **Duplicate or replayed writes** | Idempotency reservation, 30 s window, per identity; state machine makes repeats no-ops (FR-SAVE-08) | Built, tested |
+| T8 | **Event-log tampering** | Runtime role holds INSERT/SELECT only on `user_activity_events` and `identity_bindings` (SDD §4.9); no application UPDATE/DELETE path | Built in code; **Specified** as database grants (F3) |
+| T9 | **Derived-state drift** misrepresenting progress | Reconciliation recomputes from the log, dry run and repair (FR-SAVE-04) | Built, tested; schedule Specified (worker tier) |
+| T10 | **Passive-visitor profiling** | Reads never create a profile (FR-AUTH-03); listen and encounter writes require an existing progress profile and never create one (FR-SAVE-09, FR-SAVE-10) | Built for listens, tested; Specified for encounters |
+| T11 | **Free-text leakage into learning history** | Listen and encounter payloads accept only `targetKind` and `targetId`; no query, referrer or text field exists | Built for listens; Specified for encounters |
+| T12 | **Sensitive values in logs** | Central redaction of cookies, tokens, passwords and credentials (NFR-SEC-10); IP only in access logs; request bodies not logged | Built; search terms in URLs are logged (F2) |
+| T13 | **Open redirect** through the no-JS save flow | Return path restricted to a same-site relative path, otherwise `/` | Built, tested |
+| T14 | **Injection** | Parameterised static SQL only, enforced by lint (NFR-SEC-07); output escaping in views | Built |
+| T15 | **Script injection** | CSP without `unsafe-inline`; shells nonce-free `script-src 'self'` (amended NFR-SEC-03) | Built |
+| T16 | **Microphone or device access** | `Permissions-Policy` denies at least camera, microphone, geolocation, payment, usb and interest-cohort (NFR-SEC headers) | **Open** — the header is not sent (F6) |
+| T17 | **Retention beyond purpose** | Dormancy prune of unbound anonymous identities after 2 years; account lifecycle for bound ones (NFR-PRIV-02) | Specified (worker tier) |
+| T18 | **Incomplete erasure** | Ordered hard delete of all owner rows including bound anonymous identities' events, audit tombstone without PII (FR-SET-08, SDD §4.9) | Specified — Iteration 4/6 |
+| T19 | **Account and session attacks** | ASVS L2 controls: bcrypt 12, HIBP, generic errors, session epoch, rotation, Turnstile, auth rate limits | Specified — Iteration 4 |
+| T20 | **Secret compromise** (`CSRF_SECRET`) | Secret from environment only, never committed, ≥ 32 characters required in production; rotation invalidates outstanding tokens only | Built |
+
+## 5. Endpoint entries
+
+### 5.1 `GET /viewer-state` (hydration)
+
+Read only; never writes, never creates a profile. Returns the requesting identity's
+states, counts, `recordsHistory` and its CSRF token. `private, no-store`. Threats T2,
+T3.
+
+### 5.2 `POST /save` and `GET /save/confirm`
+
+CSRF (T1), rate limit and idempotency (T5, T7), target validation (T4), owner
+resolution (T3). The confirmation page is private, issues token and a CSPRNG
+idempotency key, and restricts the return path (T13).
+
+### 5.3 `POST /listen` (FR-SAVE-09)
+
+CSRF (T1), save/tag bucket (T5), target validation (T4). Records only for an actor
+with an existing profile; otherwise a successful no-op (T10). Payload is two
+identifiers (T11). Never touches derived state. Not deduplicated by design; flooding
+is bounded by the rate limit.
+
+### 5.4 `POST /encounter` (FR-SAVE-10) — required before Slice 4 is enabled
+
+| Threat | Required control |
+|---|---|
+| CSRF (T1) | Frozen §6.6 token and same-origin check |
+| Forged target (T4) | `targetKind` fixed to `word`; `targetId` validated and checked to exist |
+| Passive-visitor profiling (T10) | Records only for a registered user or an anonymous actor with an existing progress profile; never creates a profile; a no-op success otherwise; hydration's eligibility flag spares the request |
+| Free-text leakage (T11) | The request accepts no query, referrer or text; the stored row is owner, `word_id`, null value, `occurred_at` |
+| Flooding (T5) | Save/tag rate-limit bucket; one event per owner, word and UTC day enforced by a unique key on a generated column, duplicate key treated as success; no update or delete |
+| Cross-user exposure (T3) | Owner resolved from the request's own identity |
+| Tampering and drift (T8, T9) | Append-only; excluded from derived state and from reconciliation |
+| Erasure (T18) | Ordinary event-log rows: dormancy prune and hard delete remove them |
+| Logs (T12) | Only the request address `/encounter` is logged, never the body |
+| Cached shell (T2) | Sent by the page script after hydration; the shell and the hydration read never write |
+
+### 5.5 `POST /request-word`
+
+Turnstile and a 10/hour limit per `pa_uid` (FR-WORD-05). **No CSRF token** (F1).
+
+## 6. GDPR crosswalk (NFR-LEGAL-01)
+
+| Article | Implemented by |
+|---|---|
+| 5 — principles | NFR-PRIV-01 minimisation; NFR-PRIV-02 retention; FR-AUTH-03 no profile on read; FR-SAVE-09/10 eligibility boundary; this model's controls for integrity and confidentiality |
+| 6 — legal basis | Privacy Policy §4 (proposed, pending legal review) |
+| 7 — consent | FR-CONSENT-03/04 consent records for opt-ins; no consent-based processing in Iteration 3 |
+| 12 — response times | NFR-PRIV-04 (acknowledge 3 business days, fulfil 30 days, extension 60) |
+| 13 — information | Privacy Policy and KVKK notice (FR-CONSENT-05), drafts pending review |
+| 15 — access | NFR-PRIV-04 DSAR procedure in the Runbook |
+| 17 — erasure | FR-SET-07/08, NFR-PRIV-03 |
+| 20 — portability | NFR-PRIV-04 export, scoped to what v1.0 stores |
+
+## 7. Open findings
+
+| # | Finding | Proposed handling |
+|---|---|---|
+| F1 | `POST /request-word` has no CSRF token, contrary to FR-AUTH-20. It predates the §6.6 scheme. Impact is low (Turnstile and a rate limit guard it; a forged request adds or up-votes a word request). | Bring it under §6.6 in a small change before production |
+| F2 | Request logging records full URLs, so search terms (`/search?q=…`) reach application and access logs for every visitor, unlinked to a profile. | Owner decision: disclose as drafted, or strip query strings from application logs before launch |
+| F3 | The least-privilege database principals of SDD §4.9 are not provisioned; development uses one application user. The append-only rule is enforced by code and tests, not yet by grants. | Provision with deployment |
+| F4 | The worker tier is not built: dormancy prune, hard delete, scheduled reconciliation. | Build with deployment and Iteration 4/6 |
+| F5 | Error tracker not selected; NFR-PRIV-06 residual-data determination outstanding. | Decide before production |
+| F6 | The `Permissions-Policy` header required by the NFR-SEC response-header requirement is not sent (verified on a live response 2026-09-17; the other required headers are present). Nothing in the product requests a device today, so exposure is low. | Add to the security-headers middleware with its specified test before production |
