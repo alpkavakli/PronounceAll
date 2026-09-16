@@ -123,3 +123,59 @@ the consonants, for the reason in §2.
 at 41/41 and 6 191 assets, which is exactly the point this document exists to
 qualify: **verification proves the files are valid, not that they teach the right
 sound.**
+
+---
+
+## 5. Second review pass and the change of plan, 2026-09-16
+
+**This section supersedes §3's open question. The hybrid was built and reviewed,
+and then set aside by the maintainer.**
+
+### 5.1 What was reviewed
+
+Between 2026-09-11 and 2026-09-16 the hybrid described in §3 was implemented:
+`V6` added `commons_human`, 25 Wikimedia Commons isolated-articulation
+recordings were fetched and stored as unpromoted assets, and Piper candidate
+batches of five draws each were generated for `w`, `ɚ`, and later `i`, `æ`, `ʌ`
+and `ɔ`. All 86 clips were presented on the review page.
+
+### 5.2 The second learnIPA verdict, 2026-09-15
+
+Listening again to `/en-us/learnIPA`, the maintainer accepted 11 units and
+rejected the other 30:
+
+| Verdict | Units | n |
+|---|---|---|
+| Accepted | `s ɛ ɑ eɪ aɪ oʊ u ɝ ʊ aʊ ɔɪ` | 11 |
+| Rejected | the remaining 30 | 30 |
+
+This differs from §1 in six units: `i æ ʌ ɔ ʃ` moved from accepted to rejected,
+and `s` from rejected to accepted.
+
+### 5.3 The review-page verdict and the decision, 2026-09-16
+
+Of everything on the review page — 25 Commons recordings and 30 Piper candidates
+— the maintainer found only the current Piper `/ɪ/` and `/ʃ/` acceptable, and
+stated the limit of the judgement being applied: *"I can only understand if they
+are noisy (dirty, dizzy) or not."*
+
+They then changed the plan:
+
+> *"I'll be recording all of these sounds when I'm available. Lets take the
+> existing sounds as mock data knowing they are wrong, and continue like we
+> normally would."*
+
+### 5.4 Consequences, all current
+
+- **Nothing was promoted.** All 41 canonical units still serve their `tts_piper`
+  clips. `phonemes.audio_asset_id` was not repointed for any unit.
+- **The 25 Commons and 30 Piper candidates remain stored, `ready` and
+  unpromoted.** They are not referenced by any phoneme and reach no learner.
+- **The shipped phoneme audio is knowingly placeholder.** It satisfies
+  FR-CONTENT-02 and passes `audio:verify`; as §4 says, that proves the files are
+  valid, not that they teach the right sound. It must not be described as
+  pedagogically approved.
+- **No further audio QA is to be undertaken** — no new Piper draws, no Commons
+  fetches, no promotion — until the maintainer supplies their own recordings.
+  Those will be ingested through the existing pipeline and `audio:promote`,
+  which already exists and is reversible.

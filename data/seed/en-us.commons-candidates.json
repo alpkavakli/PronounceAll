@@ -18,6 +18,7 @@
     { "ipaSymbol": "ð", "verdict": "rejected", "candidates": ["Voiced dental fricative.ogg"] },
     { "ipaSymbol": "s", "verdict": "rejected", "candidates": ["Voiceless alveolar fricative.ogg", "Voiceless alveolar sibilant.ogg"] },
     { "ipaSymbol": "z", "verdict": "rejected-quality", "candidates": ["Voiced alveolar fricative.ogg", "Voiced alveolar sibilant.ogg"] },
+    { "ipaSymbol": "ʃ", "verdict": "rejected", "candidates": ["Voiceless postalveolar fricative.ogg", "Voiceless palato-alveolar fricative.ogg"] },
     { "ipaSymbol": "ʒ", "verdict": "rejected-quality", "candidates": ["Voiced postalveolar fricative.ogg", "Voiced palato-alveolar fricative.ogg"] },
     { "ipaSymbol": "h", "verdict": "rejected", "candidates": ["Voiceless glottal fricative.ogg"] },
     { "ipaSymbol": "m", "verdict": "rejected-quality", "candidates": ["Bilabial nasal.ogg"] },
