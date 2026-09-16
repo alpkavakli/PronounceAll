@@ -6,6 +6,7 @@
 
 **Changelog:**
 - 2026-09-16 amendment — per pronunciation provenance (§4.2, §4.12; migration V7).
+- 2026-09-17 amendment — CSRF scheme (§6.6, SRS 1.0.5).
 - 2026-09-17 amendment — Iteration 3 (SRS 1.0.4): `word_encounter` events (§4.4, §4.5, §3.4, §5.3), learned phoneme presentation and learned progress read from the existing hydration state (§3.4), and no new state or table for either.
 - 1.0 — Merge of SDD Rounds 2 and 3 with the Round 4 mechanical pass applied, followed by the final regression patch restoring the previously approved Flow 1 to 5 corrections. Sections 1, 2, 3, 6, and 7 are the frozen Round 2 sections; Section 4 is assembled from its layered sources with the final owner decisions applied; all six Section 5 flows are frozen; Sections 8 and 9 are complete.
 
@@ -1135,7 +1136,7 @@ Invalidation, genuinely new design choice, alternatives recorded. Audio and stat
 
 The design follows NFR-SEC-06 and the C4 `config/` layer.
 
-All secrets are supplied through environment variables loaded by dotenv, per NFR-SEC-06: the database credentials, the session signing keys, the Google OAuth client secret, the Turnstile secret, the transactional email API key, the HIBP API key if one is required, the Sentry DSN, and, added by the §6.3 caching design, the Cloudflare API token scoped to cache purge. The repository carries a `.env.example` listing every required variable with a placeholder and a one line description; `.env` is git ignored; no real secret value is committed; and CI runs a secret scanner (trufflehog, gitleaks, or the GitHub equivalent) per NFR-SEC-06.
+All secrets are supplied through environment variables loaded by dotenv, per NFR-SEC-06: the database credentials, the session signing keys, the Google OAuth client secret, the Turnstile secret, the transactional email API key, the HIBP API key if one is required, the Sentry DSN, and, added by the §6.3 caching design, the Cloudflare API token scoped to cache purge, and the `CSRF_SECRET` of §6.6. The repository carries a `.env.example` listing every required variable with a placeholder and a one line description; `.env` is git ignored; no real secret value is committed; and CI runs a secret scanner (trufflehog, gitleaks, or the GitHub equivalent) per NFR-SEC-06.
 
 Configuration loading lives in the `config/` layer (C4). A single configuration module reads and validates the environment once at startup and fails fast if a required variable is absent or malformed in staging or production, so a misconfiguration surfaces at boot rather than at first use. Business services do not read the environment directly; they receive the configuration values they need as arguments or through the composition root, consistent with the C4 dependency rule that keeps ambient state out of the domain. The rate limit store follows NFR-SEC-11: Redis in staging and production, in memory only in local development, selected by configuration.
 
@@ -1162,6 +1163,20 @@ The per job mechanisms fixed in C6:
 The erasure jobs, hard deletion and dormancy purge, share the one narrow `DELETE` credential (V6, B1); the reconciliation and TTS jobs run under the ordinary application privileges their work needs. The word page cache purge introduced in §6.3 runs as a step in the content pipeline through the same thin adapter pattern and is idempotent by nature, since purging an already fresh URL is harmless.
 
 A job that exhausts its bounded retries is moved to a failed state and raises an operational alert to the maintainer, consistent with the operations posture in NFR-OPS-04 for job observability. The atomic claims above imply the small state columns named at the head of this section; those columns are formalised in the Section 4 data model (Round 3) and are only referenced here.
+### 6.6 CSRF protection
+
+*Amendment 2026-09-17 (SRS 1.0.5, FR-AUTH-20).* Frozen scheme.
+
+**Token.** A stateless HMAC-SHA256 under a dedicated `CSRF_SECRET` (§6.4, at least 32 bytes, required in staging and production) over a purpose- and version-bound input, `csrf:v1:anon:<pa_uid>` for an anonymous identity. Nothing is persisted and no cookie is set. When authentication arrives (Iteration 4) the same service binds to the session instead (`csrf:v1:session:…`), so rotation on login, logout and password change follows from the session changing; the version prefix lets the scheme change later without ambiguity.
+
+**Issuance.** Only on uncached, per-viewer responses: the `/viewer-state` hydration read, and the no-JavaScript confirmation pages. A cached shell (B2) never carries a token.
+
+**Verification** on every state-changing request: the token from the `X-CSRF-Token` header (JavaScript) or the `_csrf` form field (no JavaScript) is recomputed for the request's identity and compared in constant time; the `Origin` header, when present, must be this site's origin, and a request with neither `Origin` nor a same-origin `Sec-Fetch-Site` is refused. Failure is HTTP 403 with no state change.
+
+**No-JavaScript save.** The save control is a link to `GET /save/confirm`, an uncached private page that resolves or issues `pa_uid`, and renders a one-button form carrying the target, the token, a server-generated CSPRNG idempotency key and a return path. `POST /save` verifies token and idempotency, performs the transition, and answers `303` to the return path, which must be a same-site relative path (a single leading `/`, no scheme or authority); anything else returns to `/`.
+
+**Idempotency keys are separate from tokens.** A JavaScript client generates its key with `crypto.getRandomValues`; the confirmation page generates one server-side (NFR-SEC-12).
+
 ## 7. Directory structure and coding conventions
 
 The canonical source layout and each layer's responsibility are fixed in §3.3 and are not repeated here. This section fixes the conventions that make that layout enforceable and consistent: how files are organised within a layer, how things are named, how the dependency rule is kept true in practice, and the data access, security, view, and testing rules every module follows. The intent is that a new file has an obvious home and an obvious shape, and that the checks in continuous integration, not manual vigilance, hold the conventions in place. Conventions that only restate a Round 1 decision or a cross cutting mechanic already specified in Section 6 are cited rather than re expanded.

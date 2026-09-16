@@ -1,6 +1,6 @@
 # PronounceAll — Software Requirements Specification
 
-**Version:** 1.0.4
+**Version:** 1.0.5
 **Status:** Approved (pending maintainer sign-off)
 **Owner:** Alp K. (solo developer)
 **Domain:** pronounceall.com
@@ -21,6 +21,7 @@
 | 1.0.2 | FR-PRACTICE-01 clarified for zero-due sessions and upcoming-review preview. |
 | 1.0.3 | FIND-07 resolved: FR-IPA-01 replaced by the canonical pedagogical inventory model; count constraints removed from FR-IPA-01, FR-IPA-09, Appendix B, and §1–2 scope text. |
 | 1.0.4 | Iteration 3 product amendments (maintainer, 2026-09-17): "Broad en-US IPA" labelling (FR-WORD-03); learned-phoneme presentation (FR-IPA-02); learned progress on the IPA pages (FR-IPA-07, FR-IPA-10); playback speed (new FR-IPA-11); word encounter events (FR-SAVE-03, FR-SAVE-04, new FR-SAVE-10, Appendix E, Appendix F, NFR-PRIV-02). No change to the iteration order or to v1.0 exclusions. |
+| 1.0.5 | CSRF and save amendments (maintainer, 2026-09-17): FR-AUTH-20 token issuance under B2; FR-SAVE-07 no-JavaScript save through an uncached confirmation page; FR-SAVE-09 listen events recorded only for actors who already have progress; Appendix D CSRF cookie row removed (the scheme sets no cookie). |
 ---
 
 ## Table of contents
@@ -586,13 +587,14 @@ If the server determines that a request carries no UUID cookie and the response'
 
 #### FR-SAVE-07 — Save control behaviour without JavaScript. *Priority: Should.*
 
-With JavaScript disabled but cookies enabled, the save control shall submit a standard HTML form (`POST /save`) that performs the save transition server-side and returns to the same page. Tag selection, which requires a popover, is not supported without JavaScript; untagged saved is the only reachable saved state in that mode.
+With JavaScript disabled but cookies enabled, the save control shall lead to an uncached, private confirmation page (`GET /save/confirm`) carrying a CSRF token (FR-AUTH-20) and a server-generated idempotency key (FR-SAVE-08); submitting its form (`POST /save`) performs the transition server-side and redirects with HTTP 303 back to the originating page. The return target is restricted to a same-site relative path. Tag selection, which requires a popover, is not supported without JavaScript; untagged saved is the only reachable saved state in that mode.
 
 **Rationale:** Progressive-enhancement promise for reading-related functionality (FR-WORD-08) can extend cheaply to the primary save action.
 
 **Acceptance criteria:**
-- With JS disabled, activating the save control on `/en-us/cupcake` results in an `unsaved → saved` transition and a fresh page load reflecting the state.
-- The same form submission, when the target is already saved, yields an `unsave` transition (the control acts as a toggle in this mode).
+- With JS disabled, activating the save control on `/en-us/cupcake` opens the confirmation page; submitting it results in an `unsaved → saved` transition and a 303 redirect back to `/en-us/cupcake`.
+- The same flow, when the target is already saved, yields an `unsave` transition (the control acts as a toggle in this mode).
+- A return target that is not a same-site relative path redirects to `/` instead.
 
 #### FR-SAVE-08 — Idempotency and double-submit safety. *Priority: Must.*
 
@@ -606,12 +608,13 @@ Save-state-changing requests shall carry a CSRF token (Foundational Decisions §
 
 #### FR-SAVE-09 — Audio-listen events. *Priority: Must.*
 
-Playing whole-word audio shall write an `audio_listen_word` event, and playing phoneme audio shall write an `audio_listen_phoneme` event, to `user_activity_events`, tagged with the target kind and target ID. These events do not affect derived save state.
+Playing whole-word audio shall write an `audio_listen_word` event, and playing phoneme audio shall write an `audio_listen_phoneme` event, to `user_activity_events`, tagged with the target kind and target ID, for a registered user or an anonymous actor that already has an `anonymous_profiles` row created by a deliberate progress write (FR-AUTH-03). For a viewer with no progress profile the audio plays normally, no event is stored, and no profile is created. Listens by an eligible actor are recorded as they occur and are not deduplicated. These events do not affect derived save state.
 
 **Rationale:** Audio listens inform the future "your weakest phonemes are…" analytics that are out of scope for v1.0 but whose data should be captured now to avoid a rewrite later.
 
 **Acceptance criteria:**
-- Clicking a phoneme on `/en-us/cupcake` produces one `audio_listen_phoneme` event per click, rate-limited under §10.3 (save/tag bucket).
+- For an actor with a progress profile, clicking a phoneme on `/en-us/cupcake` produces one `audio_listen_phoneme` event per click, rate-limited under §10.3 (save/tag bucket).
+- For a viewer with no progress profile, the same click plays the audio and writes no event and no `anonymous_profiles` row.
 - Derived save state does not change as a consequence of an `audio_listen_word` or `audio_listen_phoneme` event.
 
 #### FR-SAVE-10 — Word encounter events. *Priority: Should.*
@@ -902,7 +905,7 @@ If an already-logged-in user returns to a different device that has its own anon
 
 #### FR-AUTH-20 — CSRF protection on state-changing POSTs. *Priority: Must.*
 
-All state-changing `POST` / `PATCH` / `DELETE` endpoints shall require a CSRF token tied to the current session (or the anonymous UUID for pre-login flows). Requests without a valid token are rejected with HTTP 403. Tokens are issued on page render and rotated on login, logout, and password change.
+All state-changing `POST` / `PATCH` / `DELETE` endpoints shall require a CSRF token tied to the current session (or the anonymous UUID for pre-login flows). Requests without a valid token are rejected with HTTP 403. Because a cached reader page (SDD B2) is identical for every viewer and cannot carry a per-viewer token, tokens are issued on an uncached per-viewer bootstrap or hydration response, or on an uncached confirmation or form response for no-JavaScript flows; a cached shell never contains one. Tokens are rotated on login, logout, and password change. The scheme is specified in SDD §6.6.
 
 **Rationale:** OWASP ASVS L2 control.
 
@@ -922,7 +925,7 @@ On first visit the system shall display a banner stating that PronounceAll uses 
 
 #### FR-CONSENT-02 — Cookie table accuracy. *Priority: Must.*
 
-The Privacy Policy shall contain a cookie table listing every cookie the site may set, including at minimum: `pa_uid` (strictly necessary, 2-year sliding), `pa_sid` (session, 12 h absolute / 30 min idle; only for logged-in users), `XSRF-TOKEN` or equivalent CSRF cookie, and any Cloudflare cookies set at the edge. For each cookie: name, purpose, duration, scope, and category (strictly necessary vs non-essential).
+The Privacy Policy shall contain a cookie table listing every cookie the site may set, including at minimum: `pa_uid` (strictly necessary, 2-year sliding), `pa_sid` (session, 12 h absolute / 30 min idle; only for logged-in users), and any Cloudflare cookies set at the edge. For each cookie: name, purpose, duration, scope, and category (strictly necessary vs non-essential).
 
 **Acceptance criteria:**
 - The cookie table matches the set actually produced by the running system, verified by an automated check that compares `Set-Cookie` headers observed in an end-to-end flow against the table.
@@ -1966,11 +1969,10 @@ Normative source: FR-CONSENT-02. The Privacy Policy and Cookie Table shall refle
 |------|----------|---------|----------|-------|----------|--------|----------|
 | `pa_uid` | Strictly necessary | Anonymous profile identifier (FR-AUTH-01) | 2-year sliding | Origin | **No** (JS access required for localStorage mirror per FR-AUTH-02) | Yes | Lax |
 | `pa_sid` | Strictly necessary (authenticated users only) | Session token (FR-AUTH-12) | 12 h absolute / 30 min idle | Origin | Yes | Yes | Lax |
-| `pa_csrf` or `XSRF-TOKEN` | Strictly necessary | CSRF token (FR-AUTH-20) | Session-scoped | Origin | Configurable per CSRF scheme — documented in SDD | Yes | Lax |
 | Cloudflare `cf_*` cookies (edge) | Strictly necessary | WAF / bot management at the edge | Per Cloudflare policy | Origin | Yes | Yes | Lax or None per Cloudflare |
 | `pa_ads_*` (if ever enabled) | Non-essential, opt-in only | Ad personalisation | Per ad network, TBD | Origin | Per ad network | Yes | Lax |
 
-No other cookies are permitted. Any new cookie requires an update to this table, to the Privacy Policy, and to FR-CONSENT-02's automated check in the same PR.
+The CSRF scheme (FR-AUTH-20, SDD §6.6) is a stateless token carried in a request header or form field; it sets no cookie. No other cookies are permitted. Any new cookie requires an update to this table, to the Privacy Policy, and to FR-CONSENT-02's automated check in the same PR.
 
 ### Appendix E — PII field inventory
 
