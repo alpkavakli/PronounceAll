@@ -116,6 +116,34 @@ describe('secondary stress', () => {
   });
 });
 
+describe('a stress mark inside a cluster fixes that boundary', () => {
+  // Maximal onset on the unstressed sequence would put the separator one unit
+  // before the mark, leaving a consonant as a syllable with no nucleus:
+  // `tɹæn.sˈfɚ`. The source's mark decides the gap instead.
+  it.each([
+    ['transfer', 'tɹænsˈfɚ', [['t'], ['ɹ'], ['æ', 'v'], ['n'], ['s'], ['f'], ['ɚ', 'r']], null],
+    ['atmosphere', 'ˈætməsˌfɪɹ', [['æ', 'v'], ['t'], ['m'], ['ə', 'v'], ['s'], ['f'], ['ɪ', 'v'], ['ɹ']], 'ˈæt.məsˌfɪɹ'],
+    ['software', 'ˈsɔftˌwɛɹ', [['s'], ['ɔ', 'v'], ['f'], ['t'], ['w'], ['ɛ', 'v'], ['ɹ']], null],
+    ['graveyard', 'ˈɡɹeɪvˌjɑɹd', [['ɡ'], ['ɹ'], ['eɪ', 'd'], ['v'], ['j'], ['ɑ', 'v'], ['ɹ'], ['d']], null],
+    [
+      'transmission',
+      'tɹænsˈmɪʃən',
+      [['t'], ['ɹ'], ['æ', 'v'], ['n'], ['s'], ['m'], ['ɪ', 'v'], ['ʃ'], ['ə', 'v'], ['n']],
+      'tɹænsˈmɪʃ.ən',
+    ],
+  ])('%s', (_word, transcription, spec, expected) => {
+    expect(insertSyllableMarks(transcription, units(spec))).toBe(expected);
+  });
+});
+
+describe('no syllable is ever written without a nucleus', () => {
+  it('leaves a row unmarked when the source stress mark cannot begin a syllable', () => {
+    // A mark before a consonant with no nucleus between it and the word start.
+    const spec = [['s'], ['t'], ['ɑ', 'v'], ['p'], ['i', 'v']];
+    expect(insertSyllableMarks('sˈtɑpi', units(spec))).toBeNull();
+  });
+});
+
 describe('a boundary the source supplied is never re-divided', () => {
   it('measure keeps ˈmɛʒ.ɚ though maximal onset prefers ˈmɛ.ʒɚ', () => {
     const spec = [['m'], ['ɛ', 'v'], ['ʒ'], ['ɚ', 'r']];

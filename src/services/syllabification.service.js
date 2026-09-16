@@ -32,6 +32,9 @@
 /** Categories in the D4 artifact that can be a syllable nucleus. */
 export const NUCLEUS_CATEGORIES = new Set(['vowel', 'central rhotic', 'diphthong']);
 
+/** The non-clickable stress marks D4 §5.5 permits. */
+const STRESS_MARKS = new Set(['ˈ', 'ˌ']);
+
 /**
  * Onset clusters English permits word-initially, which is the standard test for
  * whether a medial cluster may open the following syllable.
@@ -96,10 +99,17 @@ export function isLegalOnset(cluster) {
  * can, and whatever remains closes the preceding syllable — the division
  * English speakers and pronunciation dictionaries both tend to prefer.
  *
+ * A stress mark the source placed inside a cluster is itself a boundary, so a
+ * gap containing one is not computed at all: the stressed unit begins the
+ * syllable. Without this the division is made on the unstressed sequence and a
+ * separator can land one unit away from the mark — `tɹæn.sˈfɚ`, which leaves
+ * `/s/` as a syllable with no nucleus.
+ *
  * @param {Array<{ipaSymbol: string, category: string}>} units ordered canonical units
+ * @param {Set<number>} [stressedOnsets] indices of units a source stress mark precedes
  * @returns {number[]} indices in `units` that begin a syllable, ascending, always starting at 0
  */
-export function syllabify(units) {
+export function syllabify(units, stressedOnsets = new Set()) {
   if (!Array.isArray(units) || units.length === 0) return [];
 
   const nuclei = [];
@@ -115,6 +125,16 @@ export function syllabify(units) {
   const starts = [0];
 
   for (let n = 0; n < nuclei.length - 1; n += 1) {
+    // The source's stress mark decides this gap outright.
+    let fixed = null;
+    for (let index = nuclei[n] + 1; index <= nuclei[n + 1]; index += 1) {
+      if (stressedOnsets.has(index)) fixed = index;
+    }
+    if (fixed !== null) {
+      starts.push(fixed);
+      continue;
+    }
+
     const cluster = units.slice(nuclei[n] + 1, nuclei[n + 1]).map((unit) => unit.ipaSymbol);
 
     // Hiatus: two nuclei in a row, so the boundary sits between them —
@@ -162,6 +182,37 @@ export function syllabify(units) {
 }
 
 /**
+ * Where the source's stress marks fall, as unit indices.
+ *
+ * The transcription is aligned against the decided unit sequence, so a mark is
+ * located by the unit it precedes rather than by a character offset. A mark
+ * before the first unit is not a boundary and is not reported.
+ *
+ * @param {string} transcription stored IPA, without slashes
+ * @param {Array<{ipaSymbol: string}>} units ordered canonical units
+ * @returns {Set<number>|null} indices a stress mark precedes, or null if the
+ *   transcription does not align to the units
+ */
+export function sourceStressOnsets(transcription, units) {
+  const onsets = new Set();
+  let cursor = 0;
+  let next = 0;
+  while (cursor < transcription.length) {
+    const unit = units[next];
+    if (unit && transcription.startsWith(unit.ipaSymbol, cursor)) {
+      cursor += unit.ipaSymbol.length;
+      next += 1;
+    } else if (STRESS_MARKS.has(transcription[cursor])) {
+      if (next > 0) onsets.add(next);
+      cursor += 1;
+    } else {
+      return null;
+    }
+  }
+  return next === units.length ? onsets : null;
+}
+
+/**
  * Write the separators into a stored transcription.
  *
  * The transcription is walked against the same decided unit sequence the word
@@ -181,41 +232,41 @@ export function insertSyllableMarks(transcription, units) {
   if (transcription.includes('.')) return null;
   if (!Array.isArray(units) || units.length === 0) return null;
 
-  const starts = new Set(syllabify(units).slice(1));
-  if (starts.size === 0) return null;
+  const stressedOnsets = sourceStressOnsets(transcription, units);
+  if (stressedOnsets === null) return null;
 
-  const STRESS = new Set(['ˈ', 'ˌ']);
+  const starts = syllabify(units, stressedOnsets);
+
+  // Every syllable, whether bounded by our separator or the source's stress
+  // mark, must hold a nucleus. A span without one
+  // means the source's mark sits where no syllable can begin, so the row is
+  // left unmarked rather than shown with a broken division.
+  const boundaries = [...new Set([0, ...starts, ...stressedOnsets])].sort((a, b) => a - b);
+  for (let b = 0; b < boundaries.length; b += 1) {
+    const span = units.slice(boundaries[b], boundaries[b + 1] ?? units.length);
+    if (!span.some((unit) => NUCLEUS_CATEGORIES.has(unit.category))) return null;
+  }
+
+  // Write a separator at each computed start the source did not
+  // already mark with stress — `ɹɪˈkɔɹd`, never `ɹɪ.ˈkɔɹd`.
+  const separators = new Set(starts.slice(1).filter((index) => !stressedOnsets.has(index)));
+  if (separators.size === 0) return null;
+
   let out = '';
   let cursor = 0;
   let next = 0;
-  // A stress mark IS a syllable boundary, and the source placed it. Where one
-  // falls inside a cluster, it states where that syllable begins and overrides
-  // the computed division for that gap entirely — `ɹɪˈkɔɹd`, never
-  // `ɹɪˈk.ɔɹd`, even though a checked `/ɪ/` would otherwise demand the coda.
-  let stressSinceNucleus = false;
-
   while (cursor < transcription.length) {
     const unit = units[next];
-
     if (unit && transcription.startsWith(unit.ipaSymbol, cursor)) {
-      if (starts.has(next) && !stressSinceNucleus) out += '.';
+      if (separators.has(next)) out += '.';
       out += unit.ipaSymbol;
-      if (NUCLEUS_CATEGORIES.has(unit.category)) stressSinceNucleus = false;
       cursor += unit.ipaSymbol.length;
       next += 1;
-      continue;
-    }
-
-    if (STRESS.has(transcription[cursor])) {
+    } else {
       out += transcription[cursor];
-      stressSinceNucleus = true;
       cursor += 1;
-      continue;
     }
-
-    return null;
   }
 
-  if (next !== units.length) return null;
-  return out === transcription ? null : out;
+  return out;
 }

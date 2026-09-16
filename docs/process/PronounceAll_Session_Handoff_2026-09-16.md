@@ -9,7 +9,7 @@ for current state; that document remains accurate for Iteration 0–2 history.
 
 ## 0. The one decision blocking progress
 
-**Review `data/seed/en-us.syllable-overrides.json` (29 rows).**
+**Review `data/seed/en-us.syllable-overrides.json` (19 rows).**
 
 Nothing else is waiting on anything. The syllabification work is built,
 validated and frozen; it is not yet persisted, and persistence is gated on this
@@ -20,15 +20,23 @@ divide a word differently with no settled rule to explain it. Almost all are
 morpheme boundaries — `base+ment`, `world+wide`, `police+man` — which no
 phonological rule can see.
 
-- **18 rows** carry a proposal, each justified by evidence already in the
+- **13 rows** carry a proposal, each justified by evidence already in the
   repository: Wiktionary hyphenation (syllable count), a compound seam proven by
   both halves being headwords, or a derivational suffix.
-- **11 rows** are `ambiguous` and carry **no** proposal, so persistence will
-  write no boundary for them: `amusing`, `convenience`, `senior`, `perfume`,
-  `transfer`, `transmission`, `explanation`, `insecure`, `occupied`,
-  `atmosphere`, `documents`. Several are probably right as the algorithm has
+- **6 rows** are `ambiguous` and carry **no** proposal, so persistence will
+  write no boundary for them: `convenience`, `documents`, `explanation`,
+  `occupied`, `perfume`, `senior`. Several are probably right as the algorithm has
   them, but no checkable reference here settles it. Resolving any of these is
   hand curation — set `proposedBreakdown` and `reviewStatus` in the artifact.
+
+**Stress-mark fix (post-handoff, same day).** The algorithm divided the
+unstressed sequence and could place a separator one unit before a source stress
+mark, writing a nucleus-less syllable (`tɹæn.sˈfɚ`) in 26 corpus rows. A stress
+mark now fixes its gap's boundary, a division with a nucleus-less syllable is
+refused, and validation compares the division actually displayed. The artifact
+was regenerated: 29 → 19 rows, with the removed rows now explained by the
+source's own stress marks (`source-stress`). Proposals are stress-free
+divisions; persistence must re-apply the stress marks (FR-WORD-03).
 
 Re-run the evidence pass at any time:
 
@@ -66,8 +74,8 @@ with evidence and is recorded.
    `PronounceAll_Phoneme_Audio_Listening_Pass_2026-09-11.md` §5.
 3. **Syllabification general rules.** Maximal onset, checked-vowel policy,
    rhotic-coda policy, source boundaries win, stress marks win, genuine hiatus
-   is divided, vowel + `/ɚ/` fails closed. Validated at 1 631 of 1 660 alignable
-   rows. A new edge case goes in the override artifact, **not** into the
+   is divided, vowel + `/ɚ/` fails closed. Validated at 1 630 of 1 649 alignable
+   rows after the stress-mark fix. A new edge case goes in the override artifact, **not** into the
    algorithm, unless it proves a general rule is fundamentally wrong.
 4. **`ipa_transcription` is never rewritten for display.** It is half of
    `uq_word_pronunciations_natural (word_id, ipa_transcription)`. Writing dots

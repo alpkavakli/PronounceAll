@@ -39,6 +39,7 @@ import { resolveActiveVariant } from '../src/services/catalogue.service.js';
 import {
   NUCLEUS_CATEGORIES,
   insertSyllableMarks,
+  sourceStressOnsets,
   syllabify,
 } from '../src/services/syllabification.service.js';
 
@@ -188,7 +189,7 @@ function referenceBoundaries(items) {
  * A cause is read from our side, because the question being asked is what OUR
  * pass did that maximal onset alone would not.
  */
-function classify(units, ourStarts, referenceStarts) {
+function classify(units, ourStarts, referenceStarts, stressedOnsets) {
   const reasons = new Set();
   const pairs = Math.min(ourStarts.length, referenceStarts.length);
 
@@ -198,6 +199,14 @@ function classify(units, ourStarts, referenceStarts) {
     const ours = ourStarts[i];
     const theirs = referenceStarts[i];
     if (ours === theirs) continue;
+
+    // The source's stress mark placed this boundary, and a stress mark wins
+    // over any computed division. The disagreement is with the source's
+    // convention, not with a rule of ours.
+    if (stressedOnsets.has(ours)) {
+      reasons.add('source-stress');
+      continue;
+    }
 
     if (ours > theirs) {
       // A LATER start means the previous syllable keeps consonants the
@@ -336,10 +345,11 @@ async function main() {
       failed.push(row);
       continue;
     }
-    const ours = syllabify(row.units);
+    const stressedOnsets = sourceStressOnsets(row.ipaTranscription, row.units);
+    const ours = syllabify(row.units, stressedOnsets);
     const same = ours.length === theirs.length && ours.every((value, index) => value === theirs[index]);
     if (same) agree.push(row);
-    else disagree.push({ ...row, ours, theirs, reasons: classify(row.units, ours, theirs) });
+    else disagree.push({ ...row, ours, theirs, reasons: classify(row.units, ours, theirs, stressedOnsets) });
   }
 
   const byReason = new Map();
@@ -377,7 +387,7 @@ async function main() {
   // The unexplained rows only. The checked-vowel and rhotic-coda buckets are
   // settled policy and are deliberately NOT exported: this artifact exists so
   // the residue becomes curation rather than another round of rule design.
-  const SETTLED = new Set(['checked-vowel', 'rhotic-coda']);
+  const SETTLED = new Set(['checked-vowel', 'rhotic-coda', 'source-stress']);
   const unexplained = disagree.filter((row) => row.reasons.some((reason) => !SETTLED.has(reason)));
 
   const raw = JSON.parse(

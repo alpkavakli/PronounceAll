@@ -15,34 +15,6 @@
   },
   "rows": [
     {
-      "headword": "amusing",
-      "pronunciationId": 7191,
-      "canonicalIpa": "əˈmjuzɪŋ",
-      "algorithmBreakdown": "ə.mju.zɪŋ",
-      "referenceBreakdown": "əm.ju.zɪŋ",
-      "wiktionaryHyphenation": null,
-      "reason": "onset-too-greedy",
-      "proposedBreakdown": null,
-      "reviewStatus": "ambiguous",
-      "note": "no checkable evidence settles this row"
-    },
-    {
-      "headword": "atmosphere",
-      "pronunciationId": 8308,
-      "canonicalIpa": "ˈætməsˌfɪɹ",
-      "algorithmBreakdown": "æt.mə.sfɪɹ",
-      "referenceBreakdown": "æt.məs.fɪɹ",
-      "wiktionaryHyphenation": [
-        "at",
-        "mos",
-        "phere"
-      ],
-      "reason": "onset-too-greedy",
-      "proposedBreakdown": null,
-      "reviewStatus": "ambiguous",
-      "note": "Wiktionary hyphenation at-mos-phere is present but does not settle where the consonant falls"
-    },
-    {
       "headword": "basement",
       "pronunciationId": 4812,
       "canonicalIpa": "ˈbeɪsmənt",
@@ -143,42 +115,6 @@
       "canonicalIpa": "ˌɛkspləˈneɪʃən",
       "algorithmBreakdown": "ɛk.splə.neɪ.ʃən",
       "referenceBreakdown": "ɛks.plə.neɪ.ʃən",
-      "wiktionaryHyphenation": null,
-      "reason": "onset-too-greedy",
-      "proposedBreakdown": null,
-      "reviewStatus": "ambiguous",
-      "note": "no checkable evidence settles this row"
-    },
-    {
-      "headword": "graveyard",
-      "pronunciationId": 9830,
-      "canonicalIpa": "ˈɡɹeɪvˌjɑɹd",
-      "algorithmBreakdown": "ɡɹeɪ.vjɑɹd",
-      "referenceBreakdown": "ɡɹeɪv.jɑɹd",
-      "wiktionaryHyphenation": null,
-      "reason": "onset-too-greedy",
-      "proposedBreakdown": "ɡɹeɪv.jɑɹd",
-      "reviewStatus": "adopt-reference",
-      "note": "compound: grave+yard, both parts are headwords, so the seam is a syllable boundary"
-    },
-    {
-      "headword": "hardware",
-      "pronunciationId": 8195,
-      "canonicalIpa": "ˈhɑɹdˌwɛɹ",
-      "algorithmBreakdown": "hɑɹ.dwɛɹ",
-      "referenceBreakdown": "hɑɹd.wɛɹ",
-      "wiktionaryHyphenation": null,
-      "reason": "onset-too-greedy",
-      "proposedBreakdown": "hɑɹd.wɛɹ",
-      "reviewStatus": "adopt-reference",
-      "note": "derivational suffix -ware, whose boundary is fixed by word structure"
-    },
-    {
-      "headword": "insecure",
-      "pronunciationId": 7297,
-      "canonicalIpa": "ɪnsəˈkjɝ",
-      "algorithmBreakdown": "ɪn.sə.kjɝ",
-      "referenceBreakdown": "ɪn.sək.jɝ",
       "wiktionaryHyphenation": null,
       "reason": "onset-too-greedy",
       "proposedBreakdown": null,
@@ -296,10 +232,10 @@
       "headword": "replacement",
       "pronunciationId": 8779,
       "canonicalIpa": "ɹɪˈpleɪsmənt",
-      "algorithmBreakdown": "ɹɪp.leɪ.smənt",
+      "algorithmBreakdown": "ɹɪ.pleɪ.smənt",
       "referenceBreakdown": "ɹɪ.pleɪs.mənt",
       "wiktionaryHyphenation": null,
-      "reason": "checked-vowel+onset-too-greedy",
+      "reason": "onset-too-greedy",
       "proposedBreakdown": "ɹɪ.pleɪs.mənt",
       "reviewStatus": "adopt-reference",
       "note": "derivational suffix -ment, whose boundary is fixed by word structure"
@@ -332,45 +268,6 @@
       "note": "compound: side+walk, both parts are headwords, so the seam is a syllable boundary"
     },
     {
-      "headword": "software",
-      "pronunciationId": 9330,
-      "canonicalIpa": "ˈsɔftˌwɛɹ",
-      "algorithmBreakdown": "sɔf.twɛɹ",
-      "referenceBreakdown": "sɔft.wɛɹ",
-      "wiktionaryHyphenation": [
-        "soft",
-        "ware"
-      ],
-      "reason": "onset-too-greedy",
-      "proposedBreakdown": "sɔft.wɛɹ",
-      "reviewStatus": "adopt-reference",
-      "note": "derivational suffix -ware, whose boundary is fixed by word structure"
-    },
-    {
-      "headword": "transfer",
-      "pronunciationId": 5704,
-      "canonicalIpa": "tɹænsˈfɚ",
-      "algorithmBreakdown": "tɹæn.sfɚ",
-      "referenceBreakdown": "tɹæns.fɚ",
-      "wiktionaryHyphenation": null,
-      "reason": "onset-too-greedy",
-      "proposedBreakdown": null,
-      "reviewStatus": "ambiguous",
-      "note": "no checkable evidence settles this row"
-    },
-    {
-      "headword": "transmission",
-      "pronunciationId": 9641,
-      "canonicalIpa": "tɹænsˈmɪʃən",
-      "algorithmBreakdown": "tɹæn.smɪʃ.ən",
-      "referenceBreakdown": "tɹæns.mɪ.ʃən",
-      "wiktionaryHyphenation": null,
-      "reason": "checked-vowel+onset-too-greedy",
-      "proposedBreakdown": null,
-      "reviewStatus": "ambiguous",
-      "note": "no checkable evidence settles this row"
-    },
-    {
       "headword": "useful",
       "pronunciationId": 6078,
       "canonicalIpa": "ˈjusfəl",
@@ -381,36 +278,6 @@
       "proposedBreakdown": "jus.fəl",
       "reviewStatus": "adopt-reference",
       "note": "derivational suffix -ful, whose boundary is fixed by word structure"
-    },
-    {
-      "headword": "worldwide",
-      "pronunciationId": 8431,
-      "canonicalIpa": "ˈwɝldˌwaɪd",
-      "algorithmBreakdown": "wɝl.dwaɪd",
-      "referenceBreakdown": "wɝld.waɪd",
-      "wiktionaryHyphenation": [
-        "world",
-        "wide"
-      ],
-      "reason": "onset-too-greedy",
-      "proposedBreakdown": "wɝld.waɪd",
-      "reviewStatus": "adopt-reference",
-      "note": "compound: world+wide, both parts are headwords, so the seam is a syllable boundary"
-    },
-    {
-      "headword": "worldwide",
-      "pronunciationId": 8432,
-      "canonicalIpa": "ˌwɝldˈwaɪd",
-      "algorithmBreakdown": "wɝl.dwaɪd",
-      "referenceBreakdown": "wɝld.waɪd",
-      "wiktionaryHyphenation": [
-        "world",
-        "wide"
-      ],
-      "reason": "onset-too-greedy",
-      "proposedBreakdown": "wɝld.waɪd",
-      "reviewStatus": "adopt-reference",
-      "note": "compound: world+wide, both parts are headwords, so the seam is a syllable boundary"
     }
   ]
 }

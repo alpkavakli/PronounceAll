@@ -5,7 +5,7 @@
 /**
  * Attach evidence to the curated syllable-override rows (FR-WORD-03, D4 §3.8).
  *
- * The 29 exported rows are where the algorithm and the independent reference
+ * The exported rows are where the algorithm and the independent reference
  * disagree with no settled rule to explain it. Nearly all of them turn out to
  * be MORPHEME boundaries — `base+ment`, `world+wide`, `peace+ful` — which no
  * phonological rule can see, because the division follows word structure rather
