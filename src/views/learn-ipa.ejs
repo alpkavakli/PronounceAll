@@ -80,7 +80,8 @@
                 asset exists; until then there is nothing to play and no button. %>
             <% if (phoneme.hasAudio) { %>
               <audio class="phoneme-row__audio" controls preload="none"
-                     src="<%= audioPublicPrefix %>/<%= phoneme.audioStorageKey %>">
+                     src="<%= audioPublicPrefix %>/<%= phoneme.audioStorageKey %>"
+                     data-listen-kind="phoneme" data-listen-id="<%= phoneme.phonemeId %>">
                 Your browser cannot play this recording.
               </audio>
             <% } %>
@@ -109,5 +110,6 @@
   <script type="module" src="/js/bootstrap.js"></script>
   <script type="module" src="/js/save-control.js"></script>
   <script type="module" src="/js/learner-state.js"></script>
+  <script type="module" src="/js/playback.js"></script>
 </body>
 </html>

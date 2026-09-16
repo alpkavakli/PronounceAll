@@ -29,6 +29,8 @@
  * word with a real asset still plays through its native control (§7.7).
  */
 
+import { prepareUtterance } from './playback.js';
+
 const UNAVAILABLE = 'Audio unavailable.';
 
 /**
@@ -69,6 +71,8 @@ function speak(button) {
   if (button.dataset.lang) {
     utterance.lang = button.dataset.lang;
   }
+  // FR-IPA-11 rate, and an FR-SAVE-09 listen only once speech actually starts.
+  prepareUtterance(utterance, button.dataset.wordId ? { kind: 'word', id: button.dataset.wordId } : null);
   // A failure here is the end of the chain: there is no fourth tier, so the
   // visitor is told rather than left with a control that did nothing.
   utterance.addEventListener('error', () => announce(status, UNAVAILABLE));

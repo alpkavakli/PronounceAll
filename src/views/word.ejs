@@ -68,6 +68,15 @@
       <section class="pronunciations" aria-labelledby="pronunciations-heading">
         <h2 id="pronunciations-heading" class="section-heading">Pronunciation</h2>
 
+        <%# FR-WORD-03 (SRS 1.0.4), baseline §7.4: the transcription convention,
+            once per page, with its help text in a native disclosure — keyboard
+            and screen-reader operable, not hover-only, and present without
+            JavaScript. %>
+        <details class="ipa-convention">
+          <summary class="ipa-convention__label">Broad en-US IPA</summary>
+          <p class="ipa-convention__help">PronounceAll uses a consistent learner-oriented phonemic transcription. Other dictionaries may use different IPA conventions for the same pronunciation.</p>
+        </details>
+
         <ul class="pronunciation-list">
           <% pronunciations.forEach(function (pronunciation) { %>
             <li class="pronunciation<%= pronunciation.isPrimary ? ' pronunciation--primary' : '' %>">
@@ -131,7 +140,8 @@
                   JavaScript fallback: it plays without any script at all. %>
               <% if (pronunciation.audioStorageKey) { %>
                 <p class="pronunciation__audio">
-                  <audio controls preload="none" src="<%= audioPublicPrefix %>/<%= pronunciation.audioStorageKey %>">
+                  <audio controls preload="none" src="<%= audioPublicPrefix %>/<%= pronunciation.audioStorageKey %>"
+                         data-listen-kind="word" data-listen-id="<%= word.wordId %>">
                     Your browser cannot play this recording.
                   </audio>
                 </p>
@@ -150,7 +160,8 @@
                 <p class="pronunciation__audio">
                   <button type="button" class="pronunciation__speak" hidden
                           data-speak="<%= word.displayHeadword %>"
-                          data-lang="<%= variant.code %>">
+                          data-lang="<%= variant.code %>"
+                          data-word-id="<%= word.wordId %>">
                     Play <span class="visually-hidden"><%= word.displayHeadword %></span>
                   </button>
                   <span class="pronunciation__audio-status" role="status" hidden></span>

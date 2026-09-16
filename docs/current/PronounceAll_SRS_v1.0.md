@@ -1,6 +1,6 @@
 # PronounceAll — Software Requirements Specification
 
-**Version:** 1.0.5
+**Version:** 1.0.6
 **Status:** Approved (pending maintainer sign-off)
 **Owner:** Alp K. (solo developer)
 **Domain:** pronounceall.com
@@ -22,6 +22,7 @@
 | 1.0.3 | FIND-07 resolved: FR-IPA-01 replaced by the canonical pedagogical inventory model; count constraints removed from FR-IPA-01, FR-IPA-09, Appendix B, and §1–2 scope text. |
 | 1.0.4 | Iteration 3 product amendments (maintainer, 2026-09-17): "Broad en-US IPA" labelling (FR-WORD-03); learned-phoneme presentation (FR-IPA-02); learned progress on the IPA pages (FR-IPA-07, FR-IPA-10); playback speed (new FR-IPA-11); word encounter events (FR-SAVE-03, FR-SAVE-04, new FR-SAVE-10, Appendix E, Appendix F, NFR-PRIV-02). No change to the iteration order or to v1.0 exclusions. |
 | 1.0.5 | CSRF and save amendments (maintainer, 2026-09-17): FR-AUTH-20 token issuance under B2; FR-SAVE-07 no-JavaScript save through an uncached confirmation page; FR-SAVE-09 listen events recorded only for actors who already have progress; Appendix D CSRF cookie row removed (the scheme sets no cookie). |
+| 1.0.6 | Appendix F lists `POST /listen`, the FR-SAVE-09 listen endpoint (maintainer, 2026-09-17). No behaviour change. |
 ---
 
 ## Table of contents
@@ -2023,6 +2024,7 @@ The canonical source of endpoints is the API Specification (OpenAPI 3.1 YAML). T
 - `POST /settings/*` — account mgmt, cookie prefs, ad toggle, language (FR-SET-02, FR-SET-03, FR-SET-04, FR-SET-05).
 - `POST /settings/delete` (two-step) — account deletion (FR-SET-07).
 - `POST /practice/attempt` — self-assessment (FR-PRACTICE-03).
+- `POST /listen` — audio-listen event (FR-SAVE-09); save/tag rate-limit bucket; recorded only after playback has started.
 - `POST /encounter` — word encounter event (FR-SAVE-10); save/tag rate-limit bucket.
 
 **External callbacks:**

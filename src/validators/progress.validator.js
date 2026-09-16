@@ -140,3 +140,20 @@ export function parseConfirmQuery(query) {
   }
   return { targetKind: parsed.data.kind, targetId: parsed.data.id, returnTo: safeReturnPath(parsed.data.return) };
 }
+
+const listenSchema = z.object({
+  targetKind: z.enum(['word', 'phoneme']),
+  targetId: z.coerce.number().int().positive(),
+});
+
+/**
+ * @param {unknown} body
+ * @returns {{ targetKind: 'word'|'phoneme', targetId: number }}
+ */
+export function parseListenRequest(body) {
+  const parsed = listenSchema.safeParse(body);
+  if (!parsed.success) {
+    throw AppError.validation('That request could not be read.', { cause: parsed.error });
+  }
+  return parsed.data;
+}

@@ -92,5 +92,33 @@ export async function sendSaveAction(change) {
   });
   if (!response.ok) throw new Error(`save failed: ${response.status}`);
   const result = await response.json();
+  // A successful write means a progress profile now exists (FR-AUTH-03), so
+  // this viewer's later listens are recorded without waiting for a reload.
+  const state = await loadViewerState();
+  if (state) state.recordsHistory = true;
   return result.state;
+}
+
+/**
+ * Report one playback start (FR-SAVE-09). Sent only when hydration says this
+ * viewer's history is recorded; a failure is swallowed, because a listen record
+ * must never interfere with the audio itself.
+ *
+ * @param {'word'|'phoneme'} targetKind
+ * @param {string} targetId
+ * @returns {Promise<void>}
+ */
+export async function sendListen(targetKind, targetId) {
+  const state = await loadViewerState();
+  if (!state?.recordsHistory || !csrfToken) return;
+  try {
+    await fetch('/listen', {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrfToken },
+      body: JSON.stringify({ targetKind, targetId: Number(targetId) }),
+    });
+  } catch {
+    /* see above */
+  }
 }

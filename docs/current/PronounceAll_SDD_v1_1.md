@@ -1175,6 +1175,8 @@ A job that exhausts its bounded retries is moved to a failed state and raises an
 
 **No-JavaScript save.** The save control is a link to `GET /save/confirm`, an uncached private page that resolves or issues `pa_uid`, and renders a one-button form carrying the target, the token, a server-generated CSPRNG idempotency key and a return path. `POST /save` verifies token and idempotency, performs the transition, and answers `303` to the return path, which must be a same-site relative path (a single leading `/`, no scheme or authority); anything else returns to `/`.
 
+**Listen events** (FR-SAVE-09) use `POST /listen` under the same token and origin check and the save and tag rate-limit bucket. The page sends one only after playback has actually started — the media element's `playing` event from the start of the clip, or the Web Speech utterance's `start` — and only when hydration reports the viewer's history as recorded. The write appends one event, never touches derived state, never creates a profile, and is not deduplicated; for a viewer with no progress profile it is a successful no-op.
+
 **Idempotency keys are separate from tokens.** A JavaScript client generates its key with `crypto.getRandomValues`; the confirmation page generates one server-side (NFR-SEC-12).
 
 ## 7. Directory structure and coding conventions

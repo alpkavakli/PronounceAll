@@ -860,3 +860,90 @@ a:focus-visible,
 .phoneme-row[hidden] {
   display: none;
 }
+
+/* Playback speed (FR-IPA-11, baseline §10): a compact two-option toggle. */
+.speed-toggle {
+  display: inline-flex;
+  margin-left: var(--space-2);
+  vertical-align: middle;
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.speed-toggle__option {
+  min-height: 40px;
+  min-width: 3rem;
+  padding: 0.3rem 0.6rem;
+  font: inherit;
+  font-size: 0.875rem;
+  color: var(--color-ink);
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+
+.speed-toggle__option + .speed-toggle__option {
+  border-left: 1px solid var(--color-rule);
+}
+
+.speed-toggle__option[aria-pressed='true'] {
+  color: var(--color-surface);
+  background: var(--color-ink);
+}
+
+.speed-toggle__option:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: -3px;
+}
+
+.speed-bar {
+  margin: 0 0 var(--space-3);
+}
+
+.pronunciation__audio {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.phoneme-popover__controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+}
+
+.phoneme-popover__controls[hidden] {
+  display: none;
+}
+
+/* The transcription convention (FR-WORD-03, baseline §7.4). */
+.ipa-convention {
+  margin: 0 0 var(--space-3);
+  color: var(--color-muted);
+  font-size: 0.875rem;
+}
+
+.ipa-convention__label {
+  display: inline-block;
+  min-height: 32px;
+  padding: 0.2rem 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.ipa-convention__label:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.ipa-convention__help {
+  margin: var(--space-1) 0 0;
+  max-width: var(--narrow-max);
+}

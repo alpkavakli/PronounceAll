@@ -45,6 +45,7 @@ import { homeRouter } from './routes/home.route.js';
 import { learnIpaRouter } from './routes/learn-ipa.route.js';
 import { searchRouter } from './routes/search.route.js';
 import { viewerStateRouter } from './routes/viewer-state.route.js';
+import { listenRouter } from './routes/listen.route.js';
 import { saveRouter } from './routes/save.route.js';
 import { createSaveStateService } from './services/save-state.service.js';
 import { createInMemoryIdempotencyStore, createRedisIdempotencyStore } from './lib/idempotency-store.js';
@@ -160,6 +161,12 @@ export function createApp() {
       // Appendix C: save/tag POSTs, 60 per minute keyed on `pa_uid`.
       saveRateLimit: rateLimitMiddleware({ store: rateLimitStore, bucket: 'save-tag', ...RATE_LIMITS.SAVE_TAG }),
       saveStateService,
+    }),
+  );
+  // FR-SAVE-09 listens share the save/tag rate-limit bucket (Appendix C).
+  app.use(
+    listenRouter({
+      listenRateLimit: rateLimitMiddleware({ store: rateLimitStore, bucket: 'save-tag', ...RATE_LIMITS.SAVE_TAG }),
     }),
   );
   // MUST precede the word router. `/:variant/learnIPA` matches

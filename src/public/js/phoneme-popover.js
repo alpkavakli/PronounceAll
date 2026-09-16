@@ -20,6 +20,7 @@
  * hidden dialogs per pronunciation would cost markup for nothing.
  */
 
+import { createSpeedToggle, trackMedia } from './playback.js';
 import { createSaveControl, knownState } from './save-control.js';
 
 const POPOVER_ID = 'phoneme-popover';
@@ -65,7 +66,12 @@ function ensurePopover() {
   const save = document.createElement('div');
   save.className = 'phoneme-popover__save';
 
-  popover.append(symbol, example, replay, save);
+  // FR-IPA-11: the speed toggle beside the replay control (baseline §10).
+  const controls = document.createElement('p');
+  controls.className = 'phoneme-popover__controls';
+  controls.append(replay, createSpeedToggle());
+
+  popover.append(symbol, example, controls, save);
   document.body.append(popover);
   return popover;
 }
@@ -79,10 +85,17 @@ function play(source) {
   }
   // One reused element: FR-IPA-04 wants click-to-audible latency low, and
   // recreating an <audio> per press re-runs resource selection every time.
-  player ??= new Audio();
+  if (!player) {
+    player = new Audio();
+    // One listen per genuine playback start of the phoneme open at the time.
+    trackMedia(player, () => (openFor?.dataset.phonemeId ? { kind: 'phoneme', id: openFor.dataset.phonemeId } : null));
+  }
   if (player.src !== new URL(source, document.baseURI).href) {
     player.src = source;
   }
+  // Pausing first makes a restart mid-clip a real new start: `play` fires again,
+  // so the FR-SAVE-09 listen for the replay is counted.
+  player.pause();
   player.currentTime = 0;
   // A rejected play() is normal — autoplay policy, or a missing file — and must
   // not surface as an unhandled rejection.
@@ -110,6 +123,7 @@ function open(button) {
   // on the same rule the server applies to whole-word audio.
   const replay = element.querySelector('.phoneme-popover__replay');
   replay.hidden = !audio;
+  element.querySelector('.phoneme-popover__controls').hidden = !audio;
 
   // Only once hydration has reported this phoneme's state: a control shown
   // before then would claim `unsaved` without knowing it.
