@@ -34,23 +34,21 @@ const NON_US_ACCENTS = new Set([
 
 const US_ACCENTS = new Set(['GA', 'GenAm', 'US', 'America', 'American', 'Canada', 'CA', 'cot-caught']);
 
-/** Canonical units that can be a syllable nucleus, for the offglide check. */
-const NUCLEI = new Set([
-  'i', 'ɪ', 'ɛ', 'æ', 'ʌ', 'ə', 'ɑ', 'ɔ', 'ʊ', 'u', 'ɝ', 'ɚ',
-  'eɪ', 'aɪ', 'ɔɪ', 'aʊ', 'oʊ',
-]);
-
 /**
  * Notation that en-GB uses and the en-us profile should never keep.
  *
  * `/əʊ/` is the GOAT vowel of RP where en-us has `/oʊ/`, and `/ɒ/` is the LOT
  * vowel RP distinguishes and General American does not. Either surviving into a
  * canonical en-us row means the profile took a British transcription.
+ *
+ * `/ɜː/` counts only where no `/ɹ/` follows. `/bɜː(ɹ)k/` writes the rhotic
+ * realisation as optional, and D4 §5.4 resolves it to General American `/ɝ/` —
+ * an approved normalisation, not a British form that survived.
  */
 const BRITISH_NOTATION = [
-  ['əʊ', 'RP GOAT vowel /əʊ/'],
-  ['ɒ', 'RP LOT vowel /ɒ/'],
-  ['ɜː', 'RP NURSE vowel /ɜː/'],
+  [/əʊ/, 'RP GOAT vowel /əʊ/'],
+  [/ɒ/, 'RP LOT vowel /ɒ/'],
+  [/ɜː(?!\(?ɹ)/, 'RP NURSE vowel /ɜː/'],
 ];
 
 const stripSlashes = (ipa) => ipa.replace(/^[/[]|[/\]]$/g, '');
@@ -112,7 +110,7 @@ export function findSourceDefects({ pronunciations, unitsByPronunciation, headwo
       const accents = transcription.accents ?? [];
       if (accents.some((accent) => US_ACCENTS.has(accent))) return found;
       for (const [needle, label] of BRITISH_NOTATION) {
-        if (transcription.ipa.includes(needle)) found.push(label);
+        if (needle.test(transcription.ipa)) found.push(label);
       }
       for (const accent of accents) {
         if (NON_US_ACCENTS.has(accent)) found.push(`source labelled ${accent}`);
@@ -133,28 +131,19 @@ export function findSourceDefects({ pronunciations, unitsByPronunciation, headwo
     // A second, independent proof. The non-syllabic offglide mark is the source
     // stating that two vowel letters are ONE diphthong. D4 §5 drops the mark,
     // which is correct for `/aɪ̯/` because `/aɪ/` is canonical — but where the
-    // source spells the diphthong differently, as General American `/ɔʊ̯/` for
-    // `/oʊ/`, dropping the mark leaves two separate vowel units and the
-    // diphthong is lost. The source proved its own intent, so this needs no
-    // inference from adjacency.
-    // The split has to look like the one the offglide describes: a vowel
-    // followed by the GLIDE itself as a separate nucleus. `quiet` is
-    // `/ˈkwaɪ̯.ət/` and tokenises as `aɪ` + `ə` — the offglide there belongs to
-    // `/aɪ/`, which is already one canonical unit, and the `ə` after it is
-    // ordinary hiatus. Requiring the second unit to be `/ɪ/` or `/ʊ/` keeps
-    // that out while still catching `ɔ` + `ʊ`.
-    const splitDiphthong = (units) =>
-      units.some(
-        (symbol, index) =>
-          index > 0 && ['ɪ', 'ʊ'].includes(symbol) && NUCLEI.has(units[index - 1]),
+    // source spells a diphthong the inventory lacks, as `/ˈlʌɪ̯f/`, dropping the
+    // mark leaves two separate vowel units and the diphthong is lost.
+    //
+    // It is a defect only when THAT marked pair became two adjacent canonical
+    // units. `crying` is `/ˈkɹaɪ̯.ɪŋ/`: the mark belongs to `/aɪ/`, one unit, and
+    // the `/ɪ/` after it is ordinary hiatus, so nothing was split.
+    const units = unitsByPronunciation.get(pronunciation.pronunciationId) ?? [];
+    const splitByOffglide = ({ transcription }) =>
+      [...transcription.ipa.normalize('NFC').matchAll(/(\p{L})([ɪʊ])\u032F/gu)].some(([, vowel, glide]) =>
+        units.some((symbol, index) => symbol === vowel && units[index + 1] === glide),
       );
-
-    if (splitDiphthong(unitsByPronunciation.get(pronunciation.pronunciationId) ?? [])) {
-      for (const { transcription } of matches) {
-        if (transcription.ipa.includes('̯')) {
-          reasons.add('source marks one diphthong with an offglide; canonical row holds two vowel units');
-        }
-      }
+    if (matches.some(splitByOffglide)) {
+      reasons.add('source marks one diphthong with an offglide; canonical row holds two vowel units');
     }
 
     if (reasons.size === 0) continue;

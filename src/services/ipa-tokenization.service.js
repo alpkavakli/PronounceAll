@@ -189,6 +189,12 @@ export function normaliseSource(raw) {
   rewrite(/g/g, 'ɡ', 'LATIN SMALL LETTER G -> IPA script g');
   rewrite(/r/g, 'ɹ', 'source r -> ɹ');
   rewrite(/ː/g, '', 'length mark dropped');
+  // General American GOAT written as `ɔʊ̯`, the offglide mark stating the two
+  // letters are ONE diphthong (D4 §5.2). It must run before the mark is
+  // dropped: once the mark is gone, `ɔʊ` is indistinguishable from two vowel
+  // units. Only the explicitly marked sequence is rewritten — a bare `ɔʊ` is
+  // never touched.
+  rewrite(/ɔʊ̯/g, 'oʊ', 'GA offglide ɔʊ̯ -> oʊ');
   rewrite(/̯/g, '', 'non-syllabic offglide mark dropped');
   // A syllabic consonant is schwa plus that consonant in this broad pedagogical
   // convention (D4 §5.3.2) — not a claim about the surface realisation.

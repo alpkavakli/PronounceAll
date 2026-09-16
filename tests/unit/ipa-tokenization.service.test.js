@@ -138,6 +138,19 @@ describe('D4 §7 — must tokenise', () => {
     expect(units('ˈaʊ̯t')).toEqual(['aʊ', 't']);
   });
 
+  test.each([
+    ['close', 'ˈklɔʊ̯z', ['k', 'l', 'oʊ', 'z']],
+    ['phone', 'ˈfɔʊ̯n', ['f', 'oʊ', 'n']],
+    ['bow', 'ˈbɔʊ̯', ['b', 'oʊ']],
+    ['sofa', 'ˈsɔʊ̯fə', ['s', 'oʊ', 'f', 'ə']],
+  ])('GA offglide ɔʊ̯ is the GOAT diphthong /oʊ/ — %s', (_word, source, expected) => {
+    expect(units(source)).toEqual(expected);
+  });
+
+  test('a bare ɔʊ with no offglide mark is not rewritten', () => {
+    expect(units('ˈklɔʊz')).toEqual(['k', 'l', 'ɔ', 'ʊ', 'z']);
+  });
+
   test('vowel plus R is compositional — two clickable units', () => {
     expect(units('kɑɹ')).toEqual(['k', 'ɑ', 'ɹ']);
   });

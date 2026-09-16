@@ -221,37 +221,6 @@ export async function upsertPronunciation(pronunciation, executor = defaultExecu
 }
 
 /**
- * Remove one pronunciation of one word by its natural key, so a seed re-run
- * that drops a transcription converges rather than leaving an orphan behind.
- *
- * Deliberately one statement per stale row rather than a `NOT IN (...)` list
- * built at call time: a generated placeholder list would be dynamically
- * assembled SQL, which §7.4 and NFR-SEC-07 rule out, and the stale set on a
- * re-seed is at most a couple of rows per word. It also keeps
- * `pronunciation_id` stable across re-runs, which matters once Iteration 2's
- * `pronunciation_phonemes` references it.
- *
- * Runs under the `pa_seed` content credential, not the runtime `pa_app` role,
- * which holds no DELETE on any table (SDD §4.9).
- *
- * @param {number} wordId
- * @param {string} ipaTranscription
- * @param {import('./transaction.js').Executor} [executor]
- * @returns {Promise<number>} rows removed, 0 or 1
- */
-export async function deletePronunciationByIpa(
-  wordId,
-  ipaTranscription,
-  executor = defaultExecutor(),
-) {
-  const [result] = await executor.execute(
-    'DELETE FROM word_pronunciations WHERE word_id = ? AND ipa_transcription = ?',
-    [wordId, ipaTranscription],
-  );
-  return result.affectedRows;
-}
-
-/**
  * Every word in a variant, for the Iteration 2 reconciliation pass.
  *
  * @param {number} variantId

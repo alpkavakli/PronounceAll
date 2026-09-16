@@ -368,6 +368,52 @@
           "syllableBreakdown": "ˈt͡ʃɪl·dɹən"
         }
       }
+    },
+    "life": {
+      "ipa": [
+        "/ˈlaɪ̯f/"
+      ]
+    },
+    "still": {
+      "ipa": [
+        "/ˈstɪl/"
+      ]
+    },
+    "flew": {
+      "ipa": [
+        "/fluː/",
+        "/fljuː/"
+      ]
+    },
+    "drew": {
+      "ipa": [
+        "/dɹuː/"
+      ]
+    },
+    "both": {
+      "ipa": [
+        "/boʊθ/"
+      ]
+    },
+    "comes": {
+      "ipa": [
+        "/kʌmz/"
+      ]
+    },
+    "shove": {
+      "ipa": [
+        "/ʃʌv/"
+      ]
+    },
+    "rosa": {
+      "ipa": [
+        "/ˈɹoʊzə/"
+      ]
+    },
+    "worry": {
+      "ipa": [
+        "/ˈwɝ.i/"
+      ]
     }
   }
 }

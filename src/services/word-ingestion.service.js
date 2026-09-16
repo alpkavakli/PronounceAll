@@ -23,7 +23,7 @@
 
 import { AppError } from '../errors/index.js';
 import {
-  deletePronunciationByIpa,
+  deletePronunciationById,
   findPronunciationsByWordId,
   upsertPronunciation,
   upsertWord,
@@ -564,11 +564,14 @@ export async function loadEntry(normalised, variantId) {
       await upsertPronunciation({ ...pronunciation, wordId }, tx);
     }
 
+    // A dropped transcription is removed together with its `pronunciation_phonemes`
+    // occurrences, which the RESTRICT foreign key of SDD §4.9 would otherwise
+    // refuse. `seed:phonemes` recomputes occurrences for the rows that remain.
     const keep = new Set(normalised.pronunciations.map((entry) => entry.ipaTranscription));
     let removed = 0;
     for (const row of existing) {
       if (!keep.has(row.ipaTranscription)) {
-        removed += await deletePronunciationByIpa(wordId, row.ipaTranscription, tx);
+        removed += await deletePronunciationById(row.pronunciationId, tx);
       }
     }
 

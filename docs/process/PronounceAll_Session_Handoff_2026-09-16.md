@@ -141,7 +141,39 @@ Original plan, kept for reference:
 
 Do not perform another general syllabification research cycle after that.
 
-### 3.2 The 37 source-normalization defects
+### 3.2 The 37 source-normalization defects — CLOSED (2026-09-16)
+
+**Outcome, per maintainer decision:**
+
+| Class | Rows | Resolution |
+|---|---|---|
+| GA offglide `ɔʊ̯` for /oʊ/ | 10 | D4 §5.2 row `ɔʊ̯` → `oʊ` (marked sequence only; bare `ɔʊ` untouched). Rows merged into their existing `/oʊ/` twins |
+| Non-US offglide forms | 5 (life ×2, still, flew, drew) | Curation `ipa` pins to the existing US forms |
+| RP /əʊ/, secondary | 5 (both, comes ×2, shove, rosa) | Curation `ipa` pins |
+| RP /əʊ/, primary | 13 | `worry` pinned to Wiktionary's own `/ˈwɝ.i/` (hurry-furry, CA). **12 unresolved**, see below |
+| False positives | 4 (crying, burke, monsieur, bourbon) | Kept; detector tightened (offglide only when that pair split; `ɜː(ɹ)` is approved rhotic normalisation) |
+
+**The 12 unresolved rows** — leo, tony, holding, roman, overnight, joanna,
+quote, diagnosis, hormones, overboard, opponent, toll. Raw Wiktionary holds
+only the RP form; the US form exists only in CMUdict. Curation pins must
+appear upstream (by design), and pronunciation provenance is word-level
+(`words.source_url`), so there is no honest path to store a CMUdict
+transcription. They stay as they are, their syllable boundaries held, and are
+the ONLY rows the defect report now prints. Resolving them needs a decision:
+a per-pronunciation provenance extension (schema, SDD §4.2), a Wiktionary
+re-fetch, or skipping the headwords.
+
+Found and fixed on the way: a word re-seed could not remove a pronunciation
+once `pronunciation_phonemes` referenced it (RESTRICT FK); it now uses the
+occurrence-clearing delete, with an integration test.
+
+Gate: 7 531 → 7 511 rows (21 removed, `worry` primary replaced and its audio
+reattached from the existing asset); no other row changed except two
+display-order compactions; one primary per word, contiguous order, every
+primary has audio; `inventory:check`, `seed:syllables` second run 0, lint,
+270 unit, 170 integration, `audio:verify`, 93 Chromium + no-JS e2e.
+
+Original brief, kept for reference:
 
 A separate, finite batch. `node scripts/report-source-defects.js` prints them
 with evidence. Two classes:

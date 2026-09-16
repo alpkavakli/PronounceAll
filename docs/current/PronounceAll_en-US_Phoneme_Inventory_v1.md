@@ -7,6 +7,9 @@
 by the maintainer on 2026-09-11; the normalisation corrections of §5.3, §5.4 and
 §5.7 were directed in the same review. Instantiates the frozen policy of
 `FIND-07` / `D-R3-07`. Not a new design decision, and not to be reopened.
+**2026-09-16:** §5.2 gained the `ɔʊ̯` → `oʊ` source-profile row, approved by the
+maintainer as an ordinary §5 content change (§9); the inventory and §2–§4 are
+unchanged.
 
 ---
 
@@ -171,6 +174,7 @@ one thing awaiting maintainer sign-off.** Phonetician review remains a pre-launc
 | `g` (U+0067) | `ɡ` (U+0261) | Latin g for IPA script g |
 | `r` | `ɹ` | §3.1, the documented alias rule |
 | `ː` (U+02D0) | *removed* | §3.7, no canonical length marks |
+| `ɔʊ̯` (offglide-marked) | `oʊ` | General American GOAT notation; the mark states one diphthong. Applied before the mark is removed. A bare `ɔʊ` is never rewritten |
 | `◌̯` (U+032F non-syllabic) | *removed* | Redundant inside an atomic diphthong |
 | `oɹ` (pre-rhotic, not `oʊɹ`) | `ɔɹ` | See §5.3 |
 | `ɜɹ` | `ɝ` | NURSE, where this profile writes `ɜɹ` for the stressed central rhotic |
@@ -339,6 +343,8 @@ implementing §5 on 2026-09-10; results are in §8.
 | `ɔ` vs `ɑ` | `/ˈɔ.θɚ/`, `/ˈɑtɚ/` | `ɔ`; `ɑ` |
 | length marks | `/fuːd/` | `u` |
 | non-syllabic offglide | `/ˈaʊ̯t/` | `aʊ` |
+| GA offglide `ɔʊ̯` → `oʊ` | `/ˈklɔʊ̯z/` | `oʊ` as one row |
+| bare `ɔʊ` untouched | `/ˈklɔʊz/` | `ɔ` then `ʊ` — proves the `ɔʊ̯` rule is not global |
 | vowel+R compositional | `/kɑɹ/` | `ɑ` then `ɹ`, two rows |
 | atomic diphthong | `/aɪs/` | `aɪ` as one row |
 | syllabic consonant | `/ˈhɑs.pɪ.tl̩/` | `ə` `l` |
