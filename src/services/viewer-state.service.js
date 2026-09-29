@@ -16,6 +16,7 @@
 
 import {
   anonymousProfileExists,
+  countAnonymousSavedTargets,
   countLearnedPhonemes,
   findBoundUserId,
   findTargetLabel,
@@ -25,6 +26,9 @@ import { countPhonemes } from '../repositories/phonemes.repository.js';
 
 /** A page asks about at most this many targets of one kind. */
 export const MAX_TARGETS_PER_KIND = 200;
+
+/** FR-AUTH-17: the registration nudge appears from this many saved items. */
+export const REGISTRATION_NUDGE_THRESHOLD = 5;
 
 /**
  * @param {Map<number, string>} states
@@ -43,7 +47,8 @@ function withDefaults(states, ids) {
  * @param {number[]} request.wordIds
  * @param {number[]} request.phonemeIds
  * @returns {Promise<{ words: Record<string,string>, phonemes: Record<string,string>, learned: number, total: number, recordsHistory: boolean }>}
- *   `recordsHistory` says whether this viewer's listens and word encounters are recorded (FR-SAVE-09, FR-SAVE-10: a registered user, or a progress profile exists), so the page need not send a request that would be a no-op
+ *   `recordsHistory` says whether this viewer's listens and word encounters are recorded (FR-SAVE-09, FR-SAVE-10: a registered user, or a progress profile exists), so the page need not send a request that would be a no-op;
+ *   `registrationNudge` whether to suggest an account (FR-AUTH-17): only when signed out, with 5 or more saved items
  */
 export async function getViewerState({ anonymousId, userId = null, variant, wordIds, phonemeIds }) {
   const total = await countPhonemes(variant.variantId);
@@ -55,16 +60,20 @@ export async function getViewerState({ anonymousId, userId = null, variant, word
       learned: 0,
       total,
       recordsHistory: false,
+      registrationNudge: false,
     };
   }
 
   const ownerUserId = userId ?? (await findBoundUserId(anonymousId));
   const owner = ownerUserId === null ? { anonymousId } : { userId: ownerUserId };
 
-  const [words, phonemes, learned] = await Promise.all([
+  const [words, phonemes, learned, saved] = await Promise.all([
     findTargetStates(owner, 'word', wordIds),
     findTargetStates(owner, 'phoneme', phonemeIds),
     countLearnedPhonemes(owner, variant.variantId),
+    // FR-AUTH-17: never for anyone signed in, nor for an identity that is an
+    // account's; only an anonymous owner's own saves count.
+    'anonymousId' in owner ? countAnonymousSavedTargets(owner.anonymousId) : Promise.resolve(0),
   ]);
 
   return {
@@ -73,6 +82,7 @@ export async function getViewerState({ anonymousId, userId = null, variant, word
     learned,
     total,
     recordsHistory: true,
+    registrationNudge: saved >= REGISTRATION_NUDGE_THRESHOLD,
   };
 }
 

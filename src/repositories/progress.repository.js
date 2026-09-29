@@ -93,6 +93,11 @@ const SQL = Object.freeze({
     anonymous: `SELECT COUNT(*) AS learned FROM user_phoneme_states s JOIN phonemes p ON p.phoneme_id = s.phoneme_id
                  WHERE s.anonymous_id = ? AND s.state = 'learned' AND p.variant_id = ?`,
   },
+  // FR-AUTH-17: saved items, words and phonemes together, by derived state.
+  savedCount: {
+    anonymous: `SELECT (SELECT COUNT(*) FROM user_word_states WHERE anonymous_id = ? AND state <> 'unsaved')
+                     + (SELECT COUNT(*) FROM user_phoneme_states WHERE anonymous_id = ? AND state <> 'unsaved') AS saved`,
+  },
 });
 
 /**
@@ -276,6 +281,19 @@ export async function countLearnedPhonemes(owner, variantId, executor = defaultE
   const who = ownerOf(owner);
   const [rows] = await executor.execute(SQL.learnedCount[who.kind], [who.value, variantId]);
   return Number(rows[0].learned);
+}
+
+/**
+ * How many words and phonemes an anonymous identity has saved, in any tag
+ * (FR-AUTH-17). Counted from derived state, as the requirement says.
+ *
+ * @param {string} anonymousId
+ * @param {import('./transaction.js').Executor} [executor]
+ * @returns {Promise<number>}
+ */
+export async function countAnonymousSavedTargets(anonymousId, executor = defaultExecutor()) {
+  const [rows] = await executor.execute(SQL.savedCount.anonymous, [anonymousId, anonymousId]);
+  return Number(rows[0].saved);
 }
 
 /**
