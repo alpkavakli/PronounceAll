@@ -157,3 +157,25 @@ export function parseListenRequest(body) {
   }
   return parsed.data;
 }
+
+/**
+ * FR-SAVE-10: the encounter carries the canonical word id and an idempotency
+ * key, and nothing else is read from it. Any other field — a search string, a
+ * referrer — is dropped here and can never reach storage.
+ */
+const encounterSchema = z.object({
+  wordId: z.coerce.number().int().positive(),
+  idempotencyKey,
+});
+
+/**
+ * @param {unknown} body
+ * @returns {{ wordId: number, idempotencyKey: string }}
+ */
+export function parseEncounterRequest(body) {
+  const parsed = encounterSchema.safeParse(body);
+  if (!parsed.success) {
+    throw AppError.validation('That request could not be read.', { cause: parsed.error });
+  }
+  return { wordId: parsed.data.wordId, idempotencyKey: parsed.data.idempotencyKey };
+}

@@ -35,7 +35,7 @@
   <% }); %>
 </head>
 <body>
-  <main class="page word-page" data-viewer-variant="<%= variant.code %>">
+  <main class="page word-page" data-viewer-variant="<%= variant.code %>" data-encounter-word="<%= word.wordId %>">
     <%# FIND-10: look up the next word without going back to the home page.
 
         Safe on the cacheable shell: a plain GET form is static markup, identical
@@ -218,5 +218,7 @@
   <%# FR-IPA-05 tier 3. Only reveals a control where the browser can actually
       speak; every word with a server-side asset already played without it. %>
   <script type="module" src="/js/whole-word-audio.js"></script>
+  <%# FR-SAVE-10: after hydration, only for a viewer who already has progress. %>
+  <script type="module" src="/js/word-encounter.js"></script>
 </body>
 </html>

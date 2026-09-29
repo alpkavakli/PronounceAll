@@ -127,7 +127,11 @@ test.describe('with JavaScript', () => {
     ]);
   });
 
-  test('a playback that fails to load sends no listen', async ({ page }) => {
+  test('a playback that fails to load sends no listen', async ({ page, browserName }) => {
+    // WebKit loads media outside `page.route`, so the 404 below never applies
+    // and the clip really plays; the failure cannot be staged there. The same
+    // behaviour is asserted in Chromium and Firefox.
+    test.skip(browserName === 'webkit', 'page.route does not intercept WebKit media requests');
     const listens = recordListens(page);
     await page.route('**/audio/**', (route) => route.fulfill({ status: 404, body: '' }));
     await page.goto(WORD);

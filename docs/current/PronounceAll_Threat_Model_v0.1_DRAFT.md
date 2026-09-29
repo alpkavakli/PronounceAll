@@ -88,13 +88,13 @@ events never leave it.
 | T2 | **Per-viewer data in a shared cache** (a token, state or cookie served to another viewer) | Shells carry no token, state or `Set-Cookie`; per-viewer data only on `private, no-store` hydration and confirmation responses (B2) | Built, tested |
 | T3 | **Cross-user data exposure** through hydration or writes | Owner resolved from the request's own `pa_uid` through `current_identity_bindings`; no client-supplied owner; hydration reads only that owner's rows | Built, tested |
 | T4 | **Forged or arbitrary target ids** | `target_kind` enumerated; `target_id` validated as a positive integer and checked to exist in `words`/`phonemes` before any write | Built, tested |
-| T5 | **Event flooding** / storage exhaustion | Save/tag bucket 60/min per `pa_uid` (Appendix C), edge limit 1000/min per IP; encounters one per actor, word and UTC day by database key | Built (rate limit); Specified (encounter key, Slice 4) |
+| T5 | **Event flooding** / storage exhaustion | Save/tag bucket 60/min per `pa_uid` (Appendix C), edge limit 1000/min per IP; encounters one per actor, word and UTC day by database key | Built (rate limit and the V9 encounter key) |
 | T6 | **Rate-limit evasion by discarding cookies** | A request without `pa_uid` has no identity a token was issued for, so writes fail CSRF; edge IP limit still applies | Built |
 | T7 | **Duplicate or replayed writes** | Idempotency reservation, 30 s window, per identity; state machine makes repeats no-ops (FR-SAVE-08) | Built, tested |
 | T8 | **Event-log tampering** | Runtime role holds INSERT/SELECT only on `user_activity_events` and `identity_bindings` (SDD §4.9); no application UPDATE/DELETE path | Built in code; **Specified** as database grants (F3) |
 | T9 | **Derived-state drift** misrepresenting progress | Reconciliation recomputes from the log, dry run and repair (FR-SAVE-04) | Built, tested; schedule Specified (worker tier) |
-| T10 | **Passive-visitor profiling** | Reads never create a profile (FR-AUTH-03); listen and encounter writes require an existing progress profile and never create one (FR-SAVE-09, FR-SAVE-10) | Built for listens, tested; Specified for encounters |
-| T11 | **Free-text leakage into learning history** | Listen and encounter payloads accept only `targetKind` and `targetId`; no query, referrer or text field exists | Built for listens; Specified for encounters |
+| T10 | **Passive-visitor profiling** | Reads never create a profile (FR-AUTH-03); listen and encounter writes require an existing progress profile and never create one (FR-SAVE-09, FR-SAVE-10) | Built for listens and encounters, tested |
+| T11 | **Free-text leakage into learning history** | Listen and encounter payloads accept only `targetKind` and `targetId`; no query, referrer or text field exists | Built for listens and encounters, tested |
 | T12 | **Sensitive values in logs** | Central redaction of cookies, tokens, passwords and credentials (NFR-SEC-10); IP only in access logs; request bodies not logged | Built; application logs record the path without its query string, so search terms reach only the access logs (F2 closed) |
 | T13 | **Open redirect** through the no-JS save flow | Return path restricted to a same-site relative path, otherwise `/` | Built, tested |
 | T14 | **Injection** | Parameterised static SQL only, enforced by lint (NFR-SEC-07); output escaping in views | Built |
@@ -127,6 +127,12 @@ identifiers (T11). Never touches derived state. Not deduplicated by design; floo
 is bounded by the rate limit.
 
 ### 5.4 `POST /encounter` (FR-SAVE-10) — required before Slice 4 is enabled
+
+**Built 2026-09-29** (V9, `encounter.service.js`), every control below covered by
+`tests/integration/encounter-http.test.js` and `tests/e2e/word-encounter.spec.js`. The
+body carries `wordId` and the FR-SAVE-08 idempotency key; any other field is dropped by
+the validator. Not to be enabled in production until the FR-SAVE-10 release gate is
+met (the Privacy Policy published with its owner facts).
 
 | Threat | Required control |
 |---|---|

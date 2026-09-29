@@ -193,6 +193,36 @@ export async function insertActivityEvent(
 }
 
 /**
+ * Append one `word_encounter` event unless the owner already has one for this
+ * word on this UTC day (FR-SAVE-10, V9).
+ *
+ * The daily limit is the `uq_user_activity_events_encounter_day` unique key on a
+ * generated column, so the duplicate is refused by the database and reported
+ * here as `false`. Nothing is updated or deleted: the earlier event stands.
+ *
+ * @param {object} encounter
+ * @param {Owner} encounter.owner
+ * @param {number} encounter.wordId
+ * @param {Date} encounter.occurredAt
+ * @param {import('mysql2/promise').Pool | import('mysql2/promise').PoolConnection} [executor]
+ * @returns {Promise<boolean>} whether a row was written
+ */
+export async function insertWordEncounter({ owner, wordId, occurredAt }, executor = defaultExecutor()) {
+  try {
+    await insertActivityEvent(
+      { owner, targetKind: 'word', targetId: wordId, eventType: 'word_encounter', eventValue: null, occurredAt },
+      executor,
+    );
+    return true;
+  } catch (error) {
+    if (error?.code === 'ER_DUP_ENTRY' && String(error.message).includes('uq_user_activity_events_encounter_day')) {
+      return false;
+    }
+    throw error;
+  }
+}
+
+/**
  * Project the latest qualifying event onto the derived state row (B3).
  *
  * The update only moves forward: a row already reflecting a later event is left

@@ -45,8 +45,10 @@ import { homeRouter } from './routes/home.route.js';
 import { learnIpaRouter } from './routes/learn-ipa.route.js';
 import { searchRouter } from './routes/search.route.js';
 import { viewerStateRouter } from './routes/viewer-state.route.js';
+import { encounterRouter } from './routes/encounter.route.js';
 import { listenRouter } from './routes/listen.route.js';
 import { saveRouter } from './routes/save.route.js';
+import { createEncounterService } from './services/encounter.service.js';
 import { createSaveStateService } from './services/save-state.service.js';
 import { createInMemoryIdempotencyStore, createRedisIdempotencyStore } from './lib/idempotency-store.js';
 import { wordRouter } from './routes/word.route.js';
@@ -92,6 +94,7 @@ export function createApp() {
   const idempotencyStore =
     config.rateLimitStore === 'redis' ? createRedisIdempotencyStore() : createInMemoryIdempotencyStore();
   const saveStateService = createSaveStateService({ idempotencyStore });
+  const encounterService = createEncounterService({ idempotencyStore });
 
   const verifyTurnstile = config.turnstile.isConfigured
     ? createTurnstileVerifier(config.turnstile.secretKey)
@@ -167,6 +170,13 @@ export function createApp() {
   app.use(
     listenRouter({
       listenRateLimit: rateLimitMiddleware({ store: rateLimitStore, bucket: 'save-tag', ...RATE_LIMITS.SAVE_TAG }),
+    }),
+  );
+  // FR-SAVE-10 encounters share the save/tag rate-limit bucket (Appendix C).
+  app.use(
+    encounterRouter({
+      encounterRateLimit: rateLimitMiddleware({ store: rateLimitStore, bucket: 'save-tag', ...RATE_LIMITS.SAVE_TAG }),
+      encounterService,
     }),
   );
   // MUST precede the word router. `/:variant/learnIPA` matches

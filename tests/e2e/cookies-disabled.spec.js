@@ -31,6 +31,12 @@ test.beforeEach(async ({ page }) => {
     });
   });
   await page.route('**/*', async (route) => {
+    // WebKit routes `blob:` URLs here too, which cannot be fetched and carry
+    // no cookies; only HTTP responses need the `Set-Cookie` stripped.
+    if (!route.request().url().startsWith('http')) {
+      await route.continue();
+      return;
+    }
     const response = await route.fetch();
     const headers = { ...response.headers() };
     delete headers['set-cookie'];

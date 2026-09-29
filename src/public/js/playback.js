@@ -93,11 +93,18 @@ export function trackMedia(element, target) {
     applyRate(element);
     armed = element.currentTime < 0.05;
   });
-  element.addEventListener('playing', () => {
+  const report = () => {
     if (!armed) return;
     armed = false;
     const resolved = target();
     if (resolved) sendListen(resolved.kind, resolved.id);
+  };
+  element.addEventListener('playing', report);
+  // WebKit can play a restart that was requested while still buffering without
+  // ever firing `playing`. Time advancing from the start is the same evidence
+  // that playback began; a load that fails never advances.
+  element.addEventListener('timeupdate', () => {
+    if (!element.paused && element.currentTime > 0) report();
   });
   element.addEventListener('error', () => {
     armed = false;

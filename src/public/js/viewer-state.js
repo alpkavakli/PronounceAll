@@ -21,6 +21,8 @@ import './bootstrap.js';
 let hydration = null;
 /** @type {string | null} */
 let csrfToken = null;
+/** Whether history was recorded for this viewer when the page was opened. */
+let recordedOnOpen = false;
 
 /** @returns {string[]} unique numeric ids from the matching elements */
 function idsOf(selector, attribute) {
@@ -56,6 +58,7 @@ export function loadViewerState() {
       if (!response.ok) return null;
       const state = await response.json();
       csrfToken = state.csrfToken;
+      recordedOnOpen = state.recordsHistory === true;
       return state;
     } catch {
       return null;
@@ -117,6 +120,32 @@ export async function sendListen(targetKind, targetId) {
       credentials: 'same-origin',
       headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrfToken },
       body: JSON.stringify({ targetKind, targetId: Number(targetId) }),
+    });
+  } catch {
+    /* see above */
+  }
+}
+
+/**
+ * Report that this word's page was opened (FR-SAVE-10). Decided from the
+ * hydration response as it arrived: a viewer whose profile is created by a save
+ * on this page is not reported for this visit, because an encounter before the
+ * profile existed is never reconstructed. The server enforces one per word and
+ * UTC day and re-checks eligibility. A failure is swallowed; reading the page
+ * never depends on it.
+ *
+ * @param {string} wordId
+ * @returns {Promise<void>}
+ */
+export async function sendEncounter(wordId) {
+  await loadViewerState();
+  if (!recordedOnOpen || !csrfToken) return;
+  try {
+    await fetch('/encounter', {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrfToken },
+      body: JSON.stringify({ wordId: Number(wordId), idempotencyKey: idempotencyKey() }),
     });
   } catch {
     /* see above */
