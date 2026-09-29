@@ -118,10 +118,25 @@ export function contentSecurityPolicyMiddleware() {
 }
 
 /**
+ * NFR-SEC-04: the browser features the product never uses, switched off for
+ * every document. `microphone` above all — v1.0 refuses microphone use
+ * (FR-PRACTICE-03), and the policy blocks a future code path that asks for it.
+ * Helmet does not emit this header, so it is written here, beside the rest.
+ */
+export const PERMISSIONS_POLICY = [
+  'camera=()',
+  'microphone=()',
+  'geolocation=()',
+  'payment=()',
+  'usb=()',
+  'interest-cohort=()',
+].join(', ');
+
+/**
  * @returns {import('express').RequestHandler}
  */
 export function securityHeadersMiddleware() {
-  return helmet({
+  const applyHelmet = helmet({
     // Written by `contentSecurityPolicyMiddleware` instead; see above.
     contentSecurityPolicy: false,
     // TLS is terminated at Cloudflare and Nginx; HSTS is only meaningful, and
@@ -132,4 +147,9 @@ export function securityHeadersMiddleware() {
     referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
     crossOriginEmbedderPolicy: false,
   });
+
+  return function applySecurityHeaders(req, res, next) {
+    res.setHeader('Permissions-Policy', PERMISSIONS_POLICY);
+    applyHelmet(req, res, next);
+  };
 }

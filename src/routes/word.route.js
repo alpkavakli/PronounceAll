@@ -13,6 +13,7 @@
 import { Router } from 'express';
 
 import { config } from '../config/index.js';
+import { requireCsrf } from '../middleware/index.js';
 import { markCacheableShell } from '../middleware/response-class.js';
 import { getWordPage, requireActiveVariant } from '../services/word-page.service.js';
 import { submitWordRequest } from '../services/word-request.service.js';
@@ -65,9 +66,11 @@ export function wordRouter({ wordRequestRateLimit, verifyTurnstile }) {
 
   /**
    * FR-WORD-05. Registered before the `/:variant` patterns so the fixed path
-   * is never shadowed by a variant segment.
+   * is never shadowed by a variant segment. CSRF-verified like every
+   * state-changing POST (FR-AUTH-20); the token is carried by the form on the
+   * uncached word-not-found page.
    */
-  router.post('/request-word', wordRequestRateLimit, async (req, res, next) => {
+  router.post('/request-word', wordRequestRateLimit, requireCsrf(), async (req, res, next) => {
     try {
       const input = parseWordRequest(req.body);
       const result = await submitWordRequest(input, {

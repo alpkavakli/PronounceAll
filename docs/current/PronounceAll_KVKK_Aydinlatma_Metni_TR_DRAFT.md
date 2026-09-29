@@ -71,12 +71,13 @@ bilgi istemez ve Cloudflare Turnstile ile korunur.
 
 - **Erişim kayıtları** (sunucumuzda ve Cloudflare'da): IP adresiniz, istenen adres
   (içindeki arama terimi dahil), zaman ve teknik istek ayrıntıları.
-- **Uygulama kayıtları:** istenen adres ve teknik tanılama bilgileri; IP adresiniz ve
-  çerezleriniz kaydedilmez.
+- **Uygulama kayıtları:** istenen sayfa (adresteki `?` işaretinden sonraki kısım
+  hariç) ve teknik tanılama bilgileri; arama terimleri, IP adresiniz ve çerezleriniz
+  kaydedilmez.
 
-**[SAHİP]** Arama sayfaları arama terimini adreste taşır (`/search?q=…`); bu nedenle
-arama terimleri bu kayıtlarda yer alır ve ilerleme profilinizle ilişkilendirilmez.
-İngilizce taslaktaki inceleme notuna bakınız.
+Arama sayfaları arama terimini adreste taşır (`/search?q=…`); bu nedenle arama terimi
+yalnızca yukarıdaki, 30 gün saklanan erişim kayıtlarında yer alır ve ilerleme
+profilinizle ilişkilendirilmez.
 
 **Amaç:** Hizmeti işletmek, arızaları gidermek ve kötüye kullanıma karşı korumak.
 

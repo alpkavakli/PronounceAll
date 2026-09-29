@@ -84,7 +84,7 @@ events never leave it.
 
 | # | Threat | Control | Status |
 |---|---|---|---|
-| T1 | **Cross-site request forgery** on a state-changing endpoint | Stateless HMAC token under `CSRF_SECRET` over `csrf:v1:anon:<pa_uid>`, issued only on uncached per-viewer responses, verified in constant time; same-origin `Origin` check, `Sec-Fetch-Site` fallback, neither refused (SDD §6.6) | Built for `/save`, `/listen`; **Open** for `/request-word` (see F1) |
+| T1 | **Cross-site request forgery** on a state-changing endpoint | Stateless HMAC token under `CSRF_SECRET` over `csrf:v1:anon:<pa_uid>`, issued only on uncached per-viewer responses, verified in constant time; same-origin `Origin` check, `Sec-Fetch-Site` fallback, neither refused (SDD §6.6) | Built for `/save`, `/listen`, `/request-word` (F1 closed) |
 | T2 | **Per-viewer data in a shared cache** (a token, state or cookie served to another viewer) | Shells carry no token, state or `Set-Cookie`; per-viewer data only on `private, no-store` hydration and confirmation responses (B2) | Built, tested |
 | T3 | **Cross-user data exposure** through hydration or writes | Owner resolved from the request's own `pa_uid` through `current_identity_bindings`; no client-supplied owner; hydration reads only that owner's rows | Built, tested |
 | T4 | **Forged or arbitrary target ids** | `target_kind` enumerated; `target_id` validated as a positive integer and checked to exist in `words`/`phonemes` before any write | Built, tested |
@@ -95,11 +95,11 @@ events never leave it.
 | T9 | **Derived-state drift** misrepresenting progress | Reconciliation recomputes from the log, dry run and repair (FR-SAVE-04) | Built, tested; schedule Specified (worker tier) |
 | T10 | **Passive-visitor profiling** | Reads never create a profile (FR-AUTH-03); listen and encounter writes require an existing progress profile and never create one (FR-SAVE-09, FR-SAVE-10) | Built for listens, tested; Specified for encounters |
 | T11 | **Free-text leakage into learning history** | Listen and encounter payloads accept only `targetKind` and `targetId`; no query, referrer or text field exists | Built for listens; Specified for encounters |
-| T12 | **Sensitive values in logs** | Central redaction of cookies, tokens, passwords and credentials (NFR-SEC-10); IP only in access logs; request bodies not logged | Built; search terms in URLs are logged (F2) |
+| T12 | **Sensitive values in logs** | Central redaction of cookies, tokens, passwords and credentials (NFR-SEC-10); IP only in access logs; request bodies not logged | Built; application logs record the path without its query string, so search terms reach only the access logs (F2 closed) |
 | T13 | **Open redirect** through the no-JS save flow | Return path restricted to a same-site relative path, otherwise `/` | Built, tested |
 | T14 | **Injection** | Parameterised static SQL only, enforced by lint (NFR-SEC-07); output escaping in views | Built |
 | T15 | **Script injection** | CSP without `unsafe-inline`; shells nonce-free `script-src 'self'` (amended NFR-SEC-03) | Built |
-| T16 | **Microphone or device access** | `Permissions-Policy` denies at least camera, microphone, geolocation, payment, usb and interest-cohort (NFR-SEC headers) | **Open** — the header is not sent (F6) |
+| T16 | **Microphone or device access** | `Permissions-Policy` denies at least camera, microphone, geolocation, payment, usb and interest-cohort (NFR-SEC headers) | Built — sent on every response; a browser test confirms Chromium refuses `getUserMedia` (F6 closed) |
 | T17 | **Retention beyond purpose** | Dormancy prune of unbound anonymous identities after 2 years; account lifecycle for bound ones (NFR-PRIV-02) | Specified (worker tier) |
 | T18 | **Incomplete erasure** | Ordered hard delete of all owner rows including bound anonymous identities' events, audit tombstone without PII (FR-SET-08, SDD §4.9) | Specified — Iteration 4/6 |
 | T19 | **Account and session attacks** | ASVS L2 controls: bcrypt 12, HIBP, generic errors, session epoch, rotation, Turnstile, auth rate limits | Specified — Iteration 4 |
@@ -143,7 +143,7 @@ is bounded by the rate limit.
 
 ### 5.5 `POST /request-word`
 
-Turnstile and a 10/hour limit per `pa_uid` (FR-WORD-05). **No CSRF token** (F1).
+Turnstile and a 10/hour limit per `pa_uid` (FR-WORD-05). CSRF-verified under §6.6: the token is carried by the form on the uncached word-not-found page (F1 closed).
 
 ## 6. GDPR crosswalk (NFR-LEGAL-01)
 
@@ -162,9 +162,9 @@ Turnstile and a 10/hour limit per `pa_uid` (FR-WORD-05). **No CSRF token** (F1).
 
 | # | Finding | Proposed handling |
 |---|---|---|
-| F1 | `POST /request-word` has no CSRF token, contrary to FR-AUTH-20. It predates the §6.6 scheme. Impact is low (Turnstile and a rate limit guard it; a forged request adds or up-votes a word request). | Bring it under §6.6 in a small change before production |
-| F2 | Request logging records full URLs, so search terms (`/search?q=…`) reach application and access logs for every visitor, unlinked to a profile. | Owner decision: disclose as drafted, or strip query strings from application logs before launch |
+| F1 | `POST /request-word` has no CSRF token, contrary to FR-AUTH-20. It predates the §6.6 scheme. Impact is low (Turnstile and a rate limit guard it; a forged request adds or up-votes a word request). | **Closed 2026-09-29.** Under §6.6; refused without a valid token, tested |
+| F2 | Request logging records full URLs, so search terms (`/search?q=…`) reach application and access logs for every visitor, unlinked to a profile. | **Closed 2026-09-29.** Owner chose stripping: application logs record the path only; the Privacy Policy §3.4 says so |
 | F3 | The least-privilege database principals of SDD §4.9 are not provisioned; development uses one application user. The append-only rule is enforced by code and tests, not yet by grants. | Provision with deployment |
 | F4 | The worker tier is not built: dormancy prune, hard delete, scheduled reconciliation. | Build with deployment and Iteration 4/6 |
 | F5 | Error tracker not selected; NFR-PRIV-06 residual-data determination outstanding. | Decide before production |
-| F6 | The `Permissions-Policy` header required by the NFR-SEC response-header requirement is not sent (verified on a live response 2026-09-17; the other required headers are present). Nothing in the product requests a device today, so exposure is low. | Add to the security-headers middleware with its specified test before production |
+| F6 | The `Permissions-Policy` header required by the NFR-SEC response-header requirement is not sent (verified on a live response 2026-09-17; the other required headers are present). Nothing in the product requests a device today, so exposure is low. | **Closed 2026-09-29.** Sent from the security-headers middleware; integration and browser tests |

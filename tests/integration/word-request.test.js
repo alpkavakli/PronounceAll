@@ -8,7 +8,8 @@
  * The invariants, not the happy path: the duplicate up-vote must be ONE row
  * rather than two, the rate-limit boundary must be exact and carry
  * `Retry-After`, a missing Turnstile token must be refused before any write,
- * and the row must hold no personal data beyond the anonymous UUID.
+ * the row must hold no personal data beyond the anonymous UUID, and a request
+ * without a valid CSRF token must write nothing (FR-AUTH-20).
  */
 
 import { randomUUID } from 'node:crypto';
@@ -33,6 +34,10 @@ process.env.RATE_LIMIT_STORE = 'memory';
 const { createApp } = await import('../../src/app.js');
 const { closePool, getPool } = await import('../../src/lib/mysql.js');
 const { closeRedis } = await import('../../src/lib/redis.js');
+const { config } = await import('../../src/config/index.js');
+const { issueCsrfToken } = await import('../../src/services/csrf.service.js');
+
+const ORIGIN = new URL(config.baseUrl).origin;
 
 const app = createApp();
 
@@ -57,19 +62,22 @@ function nextUuid() {
 const PREFIX = 'zzreq';
 
 /**
+ * `csrf: null` sends no CSRF token; omitted, the correct one for `uuid` is sent.
+ *
  * @param {object} options
  * @returns {import('supertest').Test}
  */
-function submit({ word, uuid = nextUuid(), token = 'a-token', variant = 'en-us' }) {
+function submit({ word, uuid = nextUuid(), token = 'a-token', variant = 'en-us', csrf, origin = ORIGIN }) {
   const body = new URLSearchParams({ variant, word });
   if (typeof token === 'string') {
     body.set('cf-turnstile-response', token);
   }
-  return request(app)
-    .post('/request-word')
-    .set('Cookie', [`pa_uid=${uuid}`])
-    .type('form')
-    .send(body.toString());
+  const csrfToken = csrf === undefined ? issueCsrfToken(config.csrf.secret, uuid) : csrf;
+  if (csrfToken !== null) body.set('_csrf', csrfToken);
+
+  let call = request(app).post('/request-word').set('Cookie', [`pa_uid=${uuid}`]);
+  if (origin !== null) call = call.set('Origin', origin);
+  return call.type('form').send(body.toString());
 }
 
 /** @param {string} word @returns {Promise<object | null>} */
@@ -188,6 +196,47 @@ describe('FR-WORD-05 — the Turnstile gate', () => {
   });
 });
 
+describe('FR-AUTH-20 — CSRF on the word request', () => {
+  test('a submission with no CSRF token is refused with 403 and writes nothing', async () => {
+    const word = `${PREFIX}india`;
+    const response = await submit({ word, csrf: null });
+
+    expect(response.status).toBe(403);
+    expect(await readRequest(word)).toBeNull();
+  });
+
+  test("another visitor's token is refused", async () => {
+    const word = `${PREFIX}juliet`;
+    const response = await submit({ word, csrf: issueCsrfToken(config.csrf.secret, nextUuid()) });
+
+    expect(response.status).toBe(403);
+    expect(await readRequest(word)).toBeNull();
+  });
+
+  test('a foreign origin, or no origin evidence at all, is refused', async () => {
+    expect((await submit({ word: `${PREFIX}kilo`, origin: 'https://evil.example' })).status).toBe(403);
+    expect((await submit({ word: `${PREFIX}kilo`, origin: null })).status).toBe(403);
+    expect(await readRequest(`${PREFIX}kilo`)).toBeNull();
+  });
+
+  test('the word-not-found page carries a token for the identity it issues', async () => {
+    const uuid = nextUuid();
+    const response = await request(app).get(`/en-us/${PREFIX}lima`).set('Cookie', [`pa_uid=${uuid}`]);
+
+    expect(response.status).toBe(404);
+    // Uncached and per-viewer, so it may carry one (FR-AUTH-20, SDD §6.6).
+    expect(response.headers['cache-control']).toBe('private, no-store');
+    expect(response.text).toContain(`name="_csrf" value="${issueCsrfToken(config.csrf.secret, uuid)}"`);
+  });
+
+  test('a first-time visitor gets pa_uid and a matching token together', async () => {
+    const response = await request(app).get(`/en-us/${PREFIX}mike`);
+
+    const uuid = String(response.headers['set-cookie']).match(/pa_uid=([^;]+)/)[1];
+    expect(response.text).toContain(`name="_csrf" value="${issueCsrfToken(config.csrf.secret, uuid)}"`);
+  });
+});
+
 describe('FR-WORD-05 — input validation', () => {
   test('a slug outside the allow-list is refused and stored nowhere', async () => {
     const response = await submit({ word: `${PREFIX}bad word` });
@@ -201,11 +250,13 @@ describe('FR-WORD-05 — input validation', () => {
   });
 
   test('a missing field is a 400', async () => {
+    const uuid = nextUuid();
     const response = await request(app)
       .post('/request-word')
-      .set('Cookie', [`pa_uid=${nextUuid()}`])
+      .set('Cookie', [`pa_uid=${uuid}`])
+      .set('Origin', ORIGIN)
       .type('form')
-      .send('variant=en-us&cf-turnstile-response=a-token');
+      .send(`variant=en-us&cf-turnstile-response=a-token&_csrf=${issueCsrfToken(config.csrf.secret, uuid)}`);
 
     expect(response.status).toBe(400);
   });

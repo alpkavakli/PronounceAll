@@ -16,9 +16,12 @@
  * that same correlation id and are never serialised into the response.
  */
 
+import { config } from '../config/index.js';
 import { AppError, ERROR_CODES } from '../errors/index.js';
+import { pathWithoutQuery } from '../lib/http.js';
 import { generateCorrelationId } from '../lib/ids.js';
 import { logger } from '../lib/logger.js';
+import { issueCsrfToken } from '../services/csrf.service.js';
 
 export const ERROR_SURFACE = Object.freeze({
   HTML: 'html',
@@ -95,7 +98,7 @@ export function errorHandler() {
       code: error.code,
       status: error.status,
       method: req.method,
-      url: req.originalUrl,
+      url: pathWithoutQuery(req.originalUrl),
       err: error,
     };
     if (error.status >= 500) {
@@ -140,6 +143,11 @@ export function errorHandler() {
         slug: error.meta.slug,
         variant: error.meta.variant,
         suggestions: error.meta.suggestions ?? [],
+        // FR-AUTH-20: the word-request form is a no-JavaScript form on an
+        // uncached, per-viewer response (never the B2 shell), so it may carry
+        // the §6.6 token. Minting the identity here also issues `pa_uid` on
+        // this response, which the POST is then verified against.
+        csrfToken: issueCsrfToken(config.csrf.secret, req.ensureAnonymousId()),
         // Set by the POST-redirect-GET of the word-request form, so the
         // acknowledgement survives with JavaScript disabled (FR-WORD-08).
         // Constrained to the two known values: the query string is

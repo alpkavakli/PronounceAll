@@ -112,3 +112,36 @@ test('the health endpoint reports the dependency state', async ({ request }) => 
     checks: { database: true, redis: true },
   });
 });
+
+test('the Permissions-Policy blocks the microphone (NFR-SEC-04)', async ({
+  page,
+  browserName,
+  playwright,
+  baseURL,
+}) => {
+  const response = await page.goto('/');
+  expect(await response.headerValue('permissions-policy')).toContain('microphone=()');
+
+  test.skip(browserName !== 'chromium', 'Only Chromium enforces the Permissions-Policy header');
+
+  // A browser of its own, with a fake microphone granted without a prompt, so
+  // the only thing that can refuse the request is the policy. Without the
+  // header this same request succeeds, which is what makes the refusal evidence
+  // of the policy rather than of a missing device.
+  const browser = await playwright.chromium.launch({
+    args: ['--use-fake-device-for-media-stream', '--use-fake-ui-for-media-stream'],
+  });
+  try {
+    const probe = await browser.newPage();
+    await probe.goto(new URL('/', baseURL).href);
+    const outcome = await probe.evaluate(() =>
+      navigator.mediaDevices.getUserMedia({ audio: true }).then(
+        () => 'granted',
+        (error) => error.name,
+      ),
+    );
+    expect(outcome).toBe('NotAllowedError');
+  } finally {
+    await browser.close();
+  }
+});

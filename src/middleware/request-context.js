@@ -17,8 +17,19 @@
 
 import pinoHttp from 'pino-http';
 
+import { pathWithoutQuery } from '../lib/http.js';
 import { generateCorrelationId } from '../lib/ids.js';
 import { logger } from '../lib/logger.js';
+
+/**
+ * The default serialisers would attach headers and the body; only the fields
+ * named here may be logged (§6.2). The URL is logged without its query string,
+ * which can carry search text.
+ */
+export const REQUEST_LOG_SERIALIZERS = Object.freeze({
+  req: (req) => ({ id: req.id, method: req.method, url: pathWithoutQuery(req.url) }),
+  res: (res) => ({ statusCode: res.statusCode }),
+});
 
 /**
  * @returns {import('express').RequestHandler}
@@ -36,11 +47,6 @@ export function requestContextMiddleware() {
       if (res.statusCode >= 400) return 'warn';
       return 'info';
     },
-    // The default serialisers would attach headers and the body; only the
-    // fields named here may be logged (§6.2).
-    serializers: {
-      req: (req) => ({ id: req.id, method: req.method, url: req.url }),
-      res: (res) => ({ statusCode: res.statusCode }),
-    },
+    serializers: REQUEST_LOG_SERIALIZERS,
   });
 }

@@ -87,12 +87,13 @@ secure:
 - **Access logs** at our web server and at Cloudflare record your IP address, the
   requested address (including any search term in it), the time and technical request
   details.
-- **Application logs** record the requested address and technical diagnostics, but not
-  your IP address and not your cookies.
+- **Application logs** record the requested page without anything after the `?` in
+  its address, and technical diagnostics. They do not record search terms, your IP
+  address or your cookies.
 
-**[OWNER]** Search pages put the search term in the address (`/search?q=…`), so search
-terms appear in these logs. They are not linked to your progress profile. See the
-open item in the review notes.
+Search pages put the search term in the address (`/search?q=…`), so a search term
+appears only in the access logs above, which are kept for 30 days. It is not linked to
+your progress profile.
 
 **Purpose:** operating the site, diagnosing faults, and protecting it against abuse.
 
@@ -214,15 +215,15 @@ the last change.
 
 ## Review notes (not part of the published policy)
 
-1. **Search terms in logs.** Request logging records the full address, so search terms
-   reach application and access logs for every visitor, without a link to a progress
-   profile. Choose: (a) publish §3.4 as written, or (b) strip query strings from
-   application logs before launch — a small change — and keep them only in the 30-day
-   access logs.
+1. **Search terms in logs — decided 2026-09-29: (b).** Application logs now record the
+   path without its query string (Threat Model F2, closed); §3.4 describes that.
+   Search terms remain only in the 30-day access logs.
 2. **[OWNER] facts:** controller identity and address, contact address, publication
    date.
 3. **Legal review:** legal bases (§4), international transfers (§6), supervisory
-   authority and GDPR Art. 27 representative (§7).
+   authority and GDPR Art. 27 representative (§7). **Decided 2026-09-29:** the proposed
+   bases are accepted by the owner for implementation; a lawyer reviews these items
+   before public launch. The markers stay until that review.
 4. **Error tracker:** NFR-PRIV-06 leaves its residual-data determination to the
    Threat Model; no service is selected or deployed yet.
 5. **Promises beyond the specifications:** none intended. The statements of §3.2

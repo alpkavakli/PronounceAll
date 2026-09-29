@@ -30,3 +30,20 @@ export function onHeaders(res, listener) {
     return originalWriteHead.apply(this, args);
   };
 }
+
+/**
+ * The path of a request URL with its query string removed, for logging.
+ *
+ * Search text travels in the query string (`/search?q=…`), so a logged URL
+ * would copy it into the application logs for every visitor. Application logs
+ * record the path only; the query string reaches no log but the proxy's access
+ * log, under its own retention window (Privacy Policy §3.4, Threat Model F2).
+ *
+ * @param {string|undefined} url
+ * @returns {string|undefined}
+ */
+export function pathWithoutQuery(url) {
+  if (typeof url !== 'string') return url;
+  const cut = url.indexOf('?');
+  return cut === -1 ? url : url.slice(0, cut);
+}

@@ -66,6 +66,7 @@
       <form class="word-request" method="post" action="/request-word">
         <input type="hidden" name="variant" value="<%= variant.code %>">
         <input type="hidden" name="word" value="<%= slug %>">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
         <% if (locals.turnstileSiteKey) { %>
           <div class="cf-turnstile" data-sitekey="<%= locals.turnstileSiteKey %>"></div>
         <% } %>
