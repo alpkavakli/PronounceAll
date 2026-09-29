@@ -78,6 +78,14 @@ describe('FR-AUTH-07 — breached-password check', () => {
     expect(await createHibpChecker({ fetchImpl: answer(0) })('password')).toBe(false);
   });
 
+  test('a hanging API is abandoned at the bounded timeout', async () => {
+    const hanging = (url, { signal }) =>
+      new Promise((resolve, reject) => signal.addEventListener('abort', () => reject(signal.reason)));
+    const started = Date.now();
+    await expect(createHibpChecker({ fetchImpl: hanging, timeoutMs: 100 })('anything')).rejects.toThrow();
+    expect(Date.now() - started).toBeLessThan(1000);
+  });
+
   test('an API error throws rather than passing the password', async () => {
     const failing = async () => ({ ok: false, status: 503, text: async () => '' });
     await expect(createHibpChecker({ fetchImpl: failing })('anything')).rejects.toThrow();

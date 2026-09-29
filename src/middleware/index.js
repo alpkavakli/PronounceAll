@@ -2,7 +2,7 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  * See LICENSE-NOTICE.md at the repository root. */
 
-export { anonymousIdentityMiddleware } from './anonymous-identity.js';
+export { anonymousIdentityMiddleware, retiredIdentityMiddleware } from './anonymous-identity.js';
 export { csrfSubjectOf, csrfTokenFor, requireCsrf } from './csrf.js';
 export {
   clearSessionCookie,

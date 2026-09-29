@@ -15,7 +15,7 @@
  */
 
 // Imported first so a restored `pa_uid` is in place before hydration runs.
-import './bootstrap.js';
+import { adoptServerIdentity } from './bootstrap.js';
 
 /** @type {Promise<object|null> | null} */
 let hydration = null;
@@ -57,6 +57,8 @@ export function loadViewerState() {
       const response = await fetch(`/viewer-state?${query}`, { credentials: 'same-origin' });
       if (!response.ok) return null;
       const state = await response.json();
+      // The response set the authoritative `pa_uid`; keep the mirror in step.
+      adoptServerIdentity();
       csrfToken = state.csrfToken;
       recordedOnOpen = state.recordsHistory === true;
       return state;

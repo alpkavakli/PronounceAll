@@ -170,7 +170,7 @@ describe('FR-AUTH-04 / FR-CONSENT-04 — username registration', () => {
     const response = await register(newApp(), newAnonymousId(), { username });
 
     expect(response.status).toBe(303);
-    expect(response.headers.location).toBe('/login?signed-in=1');
+    expect(response.headers.location).toBe('/login');
 
     const rows = await rowsFor(username);
     expect(rows.users).toHaveLength(1);
@@ -237,12 +237,26 @@ describe('FR-AUTH-07 — password policy', () => {
     expect((await rowsFor(username)).users).toHaveLength(0);
   });
 
-  test('when the breach check cannot run, registration fails closed', async () => {
-    const username = newUsername();
-    const response = await register(newApp(), newAnonymousId(), { username, password: 'hibp-is-down-please' });
+  test('breached and unavailable are different outcomes: a rejected password vs a temporary failure', async () => {
+    const app = newApp();
+    const breachedName = newUsername();
+    const unavailableName = newUsername();
 
-    expect(response.status).toBe(500);
-    expect((await rowsFor(username)).users).toHaveLength(0);
+    const breached = await register(app, newAnonymousId(), { username: breachedName, password: BREACHED });
+    const unavailable = await register(app, newAnonymousId(), { username: unavailableName, password: 'hibp-is-down-please' });
+
+    expect(breached.status).toBe(400);
+    expect(breached.text).toContain('This password has appeared in a known breach; please choose another.');
+
+    // Fail closed, but as the service's failure, never the password's.
+    expect(unavailable.status).toBe(503);
+    expect(unavailable.text).toContain("We couldn&#39;t verify this password right now. Please try again shortly.");
+    expect(unavailable.text).not.toMatch(/known breach|pwned|HIBP|haveibeenpwned/i);
+    // The form is re-rendered, the username kept for the retry.
+    expect(unavailable.text).toContain(`value="${unavailableName}"`);
+
+    expect((await rowsFor(breachedName)).users).toHaveLength(0);
+    expect((await rowsFor(unavailableName)).users).toHaveLength(0);
   });
 
   test('the password never appears in any response', async () => {
@@ -551,7 +565,15 @@ describe('FR-AUTH-18 / FR-AUTH-19 — the merge', () => {
     await register(app, device, { username: first });
     await register(app, newAnonymousId(), { username: second });
 
-    const response = await login(app, device, second);
+    // The browser still carries the identity bound to `first`. Loading the
+    // sign-in form replaces it (it is retired), and the form's token is for
+    // the replacement — as it is for any real browser.
+    const form = await request(app).get('/login').set('Cookie', [`pa_uid=${device}`]);
+    const replacement = cookiesOf(form).pa_uid;
+    expect(replacement).not.toBe(device);
+    anonymousIds.push(replacement);
+
+    const response = await login(app, replacement, second);
     expect(response.status).toBe(303);
     expect(await bindingsOf((await rowsFor(second)).userId)).toEqual([]);
     expect(await bindingsOf((await rowsFor(first)).userId)).toEqual([device]);
@@ -607,16 +629,116 @@ describe('pages', () => {
     }
   });
 
-  test('the landing after sign-in tells the page to adopt the new pa_uid', async () => {
-    const app = newApp();
-    const anonymousId = newAnonymousId();
-    const sessionId = cookiesOf(await register(app, anonymousId)).pa_sid;
-    const landing = await request(app)
-      .get('/login?signed-in=1')
-      .set('Cookie', [`pa_uid=${anonymousId}`, `pa_sid=${sessionId}`]);
-    expect(landing.text).toContain('data-adopt-identity');
+});
 
-    const later = await request(app).get('/login').set('Cookie', [`pa_uid=${anonymousId}`, `pa_sid=${sessionId}`]);
-    expect(later.text).not.toContain('data-adopt-identity');
+describe('SDD §5.1 — the identity switch is part of the auth transition, not of any page', () => {
+  /** The anonymous owner of the actor's `save` events, and whether the account got one. */
+  const saveOwners = async (anonymousId, userId) => {
+    const [anonymous] = await getPool().execute(
+      "SELECT COUNT(*) AS n FROM user_activity_events WHERE anonymous_id = ? AND event_type = 'save'",
+      [anonymousId],
+    );
+    const [account] = await getPool().execute(
+      "SELECT COUNT(*) AS n FROM user_activity_events WHERE user_id = ? AND event_type = 'save'",
+      [userId],
+    );
+    return { anonymous: Number(anonymous[0].n), account: Number(account[0].n) };
+  };
+
+  test('the login response itself merges, starts the session and rotates pa_uid — no page visited', async () => {
+    const app = newApp();
+    const username = newUsername();
+    await register(app, newAnonymousId(), { username });
+    const { userId } = await rowsFor(username);
+
+    // Anonymous progress before signing in.
+    const device = newAnonymousId();
+    await save(app, { anonymousId: device });
+
+    const response = await login(app, device, username);
+    const issued = cookiesOf(response);
+
+    // All of it is in this one response; nothing after it is requested yet.
+    expect(response.status).toBe(303);
+    expect(issued.pa_sid).toBeTruthy();
+    expect(issued.pa_uid).toBeTruthy();
+    expect(issued.pa_uid).not.toBe(device);
+    anonymousIds.push(issued.pa_uid);
+    const [links] = await getPool().execute('SELECT user_id FROM identity_bindings WHERE anonymous_id = ?', [device]);
+    expect(links).toEqual([{ user_id: userId }]);
+    const [states] = await getPool().execute('SELECT state FROM user_word_states WHERE user_id = ? AND word_id = ?', [
+      userId,
+      wordId,
+    ]);
+    expect(states).toEqual([{ state: 'saved' }]);
+
+    // Skipping the landing page entirely: the next request works on the new
+    // identity with the session.
+    const hydration = await request(app)
+      .get(`/viewer-state?variant=en-us&words=${wordId}`)
+      .set('Cookie', [`pa_uid=${issued.pa_uid}`, `pa_sid=${issued.pa_sid}`]);
+    expect(hydration.body.words[String(wordId)]).toBe('saved');
+  });
+
+  test('a retired pa_uid presented later is replaced wherever it appears, and never feeds the account', async () => {
+    const app = newApp();
+    const username = newUsername();
+    const device = newAnonymousId();
+    await save(app, { anonymousId: device });
+    await register(app, device, { username });
+    const { userId } = await rowsFor(username);
+    const before = await saveOwners(device, userId);
+
+    // Signed out, the browser restores the retired identity (e.g. from its
+    // localStorage mirror) and goes straight to a word page — no /login visit.
+    const hydration = await request(app)
+      .get(`/viewer-state?variant=en-us&words=${wordId}`)
+      .set('Cookie', [`pa_uid=${device}`]);
+    const replacement = cookiesOf(hydration).pa_uid;
+    expect(replacement).toBeTruthy();
+    expect(replacement).not.toBe(device);
+    anonymousIds.push(replacement);
+    // The replaced identity starts empty: the account's saves are not shown.
+    expect(hydration.body.words[String(wordId)]).toBe('unsaved');
+    expect(hydration.body.recordsHistory).toBe(false);
+    expect(hydration.body.csrfToken).toBe(issueCsrfToken(config.csrf.secret, replacement));
+
+    // A write still carrying the retired cookie cannot reach the account.
+    expect((await save(app, { anonymousId: device })).status).toBe(403);
+    expect(await saveOwners(device, userId)).toEqual(before);
+
+    // Work on the fresh identity belongs to it, not to the account.
+    expect((await save(app, { anonymousId: replacement })).status).toBe(200);
+    expect(await saveOwners(replacement, userId)).toEqual({ anonymous: 1, account: before.account });
+  });
+
+  test('after sign-out, new work belongs to the fresh anonymous identity, not the account', async () => {
+    const app = newApp();
+    const username = newUsername();
+    const device = newAnonymousId();
+    await save(app, { anonymousId: device });
+    const signIn = cookiesOf(await register(app, device, { username }));
+    const { userId } = await rowsFor(username);
+
+    await postForm(app, '/logout', signIn.pa_uid, {}, {
+      sessionId: signIn.pa_sid,
+      csrf: issueCsrfTokenFor(config.csrf.secret, { sessionId: signIn.pa_sid }),
+    });
+    const accountBefore = await saveOwners(signIn.pa_uid, userId);
+
+    await save(app, { anonymousId: signIn.pa_uid, action: 'save' });
+
+    const after = await saveOwners(signIn.pa_uid, userId);
+    expect(after.anonymous).toBe(1);
+    expect(after.account).toBe(accountBefore.account);
+    const [links] = await getPool().execute('SELECT 1 FROM identity_bindings WHERE anonymous_id = ?', [signIn.pa_uid]);
+    expect(links).toHaveLength(0);
+  });
+
+  test('the landing page carries no identity marker', async () => {
+    const app = newApp();
+    const signIn = cookiesOf(await register(app, newAnonymousId()));
+    const landing = await request(app).get('/login').set('Cookie', [`pa_uid=${signIn.pa_uid}`, `pa_sid=${signIn.pa_sid}`]);
+    expect(landing.text).not.toContain('data-adopt-identity');
   });
 });

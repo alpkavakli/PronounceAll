@@ -5,9 +5,9 @@
     Sign in, or — when signed in — who you are and a sign-out button
     (FR-AUTH-12/13/14, FR-SET-06). DYNAMIC (private, no-store).
 
-    `data-adopt-identity` is rendered only on the landing after a successful
-    sign-in. It tells bootstrap.js to adopt the fresh `pa_uid` this response set
-    rather than restore the retired one from localStorage (SDD v1.1 §5.1). %>
+    This page plays no part in the post-sign-in identity switch: the sign-in
+    response itself rotates `pa_uid`, and the server refuses a retired one
+    wherever it is presented (SDD v1.1 §5.1). %>
 <!doctype html>
 <html lang="en">
 <head>
@@ -16,7 +16,7 @@
     <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer nonce="<%= cspNonce %>"></script>
   <% } %>
 </head>
-<body<% if (justSignedIn) { %> data-adopt-identity<% } %>>
+<body>
   <main class="page account">
     <% if (signedInAs) { %>
       <h1>Your account</h1>

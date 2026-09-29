@@ -13,10 +13,11 @@
  *   POST /logout     CSRF → end the session, clear `pa_sid`, back to `/`
  *
  * Every page here is DYNAMIC (private, no-store). A successful registration or
- * login merges the carried `pa_uid` (§5.1), sets a fresh `pa_sid` (rotation on
- * login) and, when the `pa_uid` was bound, replaces it with a fresh one; it then
- * lands on `/login?signed-in=1`, whose page tells the browser script to adopt
- * the new `pa_uid` rather than restore the retired one from its mirror.
+ * login is one auth transition, complete in its own response whatever the
+ * redirect target (§5.1): merge the carried `pa_uid`, start a fresh session
+ * (`pa_sid`, rotated on login), replace a bound `pa_uid` with a fresh one, then
+ * redirect. The server also refuses a retired `pa_uid` wherever it is presented
+ * later (`retiredIdentityMiddleware`), so no page has to finish the switch.
  *
  * Form errors re-render the form with the message and the status of the error,
  * so the page works without JavaScript and nothing typed except the password
@@ -35,7 +36,10 @@ import {
 } from '../middleware/index.js';
 
 /** Errors a form shows in place; anything else goes to the error page. */
-const FORM_ERRORS = new Set([ERROR_CODES.VALIDATION, ERROR_CODES.CONFLICT, ERROR_CODES.AUTH]);
+const FORM_ERRORS = new Set([ERROR_CODES.VALIDATION, ERROR_CODES.CONFLICT, ERROR_CODES.AUTH, ERROR_CODES.UNAVAILABLE]);
+
+/** Where a successful sign-in lands. Presentation only; see finishSignIn. */
+const POST_SIGN_IN_DESTINATION = '/login';
 
 /**
  * @param {object} dependencies
@@ -58,17 +62,19 @@ export function accountRouter({ accountService, sessionService, loginRateLimit, 
       error,
       identifier,
       signedInAs: req.session?.username ?? null,
-      justSignedIn: req.session !== null && req.query['signed-in'] === '1',
     });
 
-  /** Sign-in has succeeded: merge, rotate, land. */
+  /**
+   * The auth transition, in this order: merge (LINK), session, `pa_uid`
+   * rotation, response. The redirect target plays no part in it.
+   */
   async function finishSignIn(req, res, authenticated) {
     // Signing in again replaces the current session rather than adding one.
     if (req.session) await sessionService.endSession(req.session);
     const { sessionId, retireAnonymousId } = await accountService.completeSignIn(authenticated, req.anonymousId);
     setSessionCookie(res, sessionId);
     if (retireAnonymousId) retireAnonymousIdentity(req);
-    res.redirect(303, '/login?signed-in=1');
+    res.redirect(303, POST_SIGN_IN_DESTINATION);
   }
 
   router.get('/register', (req, res) => {

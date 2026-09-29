@@ -39,7 +39,7 @@ async function registerThroughForm(page, username) {
   await expect(page.getByRole('status')).toContainText(`Signed in as ${username}`);
 }
 
-test('register, keep what was saved signed out, adopt the new identity, sign out', async ({
+test('the sign-in response switches identity; skipping the landing page and restoring the old id change nothing', async ({
   page,
   context,
   javaScriptEnabled,
@@ -52,33 +52,53 @@ test('register, keep what was saved signed out, adopt the new identity, sign out
   // WebKit run this flow; Firefox runs the other account tests.
   test.skip(browserName === 'firefox', 'Playwright Firefox stalls on the repeat navigation (harness, not the page)');
 
+  const cookie = async (name) => (await context.cookies()).find((entry) => entry.name === name)?.value;
+  const mirror = () => page.evaluate(() => localStorage.getItem('pa_uid'));
+
+  // Anonymous progress before signing in.
   await page.goto('/en-us/cupcake');
   const control = page.locator('button.save-control').first();
   await control.click();
   await expect(control).toHaveText('Saved');
-  const before = (await context.cookies()).find((cookie) => cookie.name === 'pa_uid').value;
+  const retired = await cookie('pa_uid');
+  expect(await mirror()).toBe(retired);
 
-  await registerThroughForm(page, uniqueUsername());
+  // Register, but never look at the landing page: as soon as the sign-in
+  // response arrives, go straight to a word page.
+  await page.goto('/register');
+  await page.getByLabel('Username').fill(uniqueUsername());
+  await page.getByLabel('Password').fill(PASSWORD);
+  await page.getByLabel(/Without an email, we cannot recover your account/).check();
+  const signedIn = page.waitForResponse((response) => response.url().endsWith('/register') && response.status() === 303);
+  await page.getByRole('button', { name: 'Create account' }).click();
+  await signedIn;
 
-  // §5.1: the carried identity was bound and retired; the page adopted the new
-  // one instead of restoring the old one from localStorage.
-  const after = (await context.cookies()).find((cookie) => cookie.name === 'pa_uid').value;
-  expect(after).not.toBe(before);
-  // bootstrap.js is a deferred module; it may run just after the text renders.
-  await expect.poll(() => page.evaluate(() => localStorage.getItem('pa_uid'))).toBe(after);
+  // The sign-in response alone established the session and the fresh identity.
+  expect(await cookie('pa_sid')).toBeTruthy();
+  const fresh = await cookie('pa_uid');
+  expect(fresh).not.toBe(retired);
 
-  // Still saved, now through the account.
   await page.goto('/en-us/cupcake');
   await expect(page.locator('button.save-control').first()).toHaveText('Saved');
+  // Whatever bootstrap restored from the stale mirror, hydration settled the
+  // browser on a live identity, never the retired one.
+  await expect.poll(mirror).not.toBe(retired);
+  expect(await mirror()).toBe(await cookie('pa_uid'));
 
   await page.goto('/login');
   await page.getByRole('button', { name: 'Sign out' }).click();
   await expect(page).toHaveURL(/\/$/);
-  expect((await context.cookies()).find((cookie) => cookie.name === 'pa_sid')).toBeUndefined();
+  expect(await cookie('pa_sid')).toBeUndefined();
 
-  // Signed out on a fresh identity: the account's saves are no longer shown.
+  // The worst case: the retired identity is put back in both places.
+  await context.addCookies([{ name: 'pa_uid', value: retired, url: page.url() }]);
+  await page.evaluate((value) => localStorage.setItem('pa_uid', value), retired);
+
+  // The server refuses it; the account's saves are not shown to this browser.
   await page.goto('/en-us/cupcake');
   await expect(page.locator('button.save-control').first()).toHaveText('Save');
+  await expect.poll(mirror).not.toBe(retired);
+  expect(await cookie('pa_uid')).not.toBe(retired);
 });
 
 test('registration and sign-in work without JavaScript', async ({ page }) => {

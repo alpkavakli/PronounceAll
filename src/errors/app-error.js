@@ -28,6 +28,7 @@ export const ERROR_CODES = Object.freeze({
   WORD_NOT_FOUND: 'WORD_NOT_FOUND',
   CONFLICT: 'CONFLICT',
   RATE_LIMIT: 'RATE_LIMIT',
+  UNAVAILABLE: 'UNAVAILABLE',
   INTERNAL: 'INTERNAL',
 });
 
@@ -161,6 +162,15 @@ export class AppError extends Error {
       cause,
       meta: { retryAfterSeconds },
     });
+  }
+
+  /**
+   * A dependency needed to complete the request is temporarily unreachable.
+   * HTTP 503. The message says to try again; it never blames the user's input
+   * and never names the provider.
+   */
+  static unavailable(message = 'This is temporarily unavailable. Please try again shortly.', { cause } = {}) {
+    return new AppError({ code: ERROR_CODES.UNAVAILABLE, status: 503, message, cause });
   }
 
   /** Unexpected failure. HTTP 500. Nothing beyond a safe message reaches the user. */

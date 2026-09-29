@@ -67,14 +67,6 @@ export function syncAnonymousIdentity() {
   const cookie = readCookie();
   const mirrored = readMirror();
 
-  // After a sign-in the server retires the carried identity and issues a fresh
-  // one (SDD v1.1 §5.1, FR-AUTH-18). The landing page marks that response, and
-  // here — only here — the cookie wins over the mirror, so the retired identity
-  // is not restored and later signed-out activity stays out of the account.
-  if (cookie && document.body?.hasAttribute('data-adopt-identity')) {
-    writeMirror(cookie);
-    return cookie;
-  }
 
   // The mirror is the durable identity and wins when the two disagree.
   //
@@ -105,6 +97,18 @@ export function syncAnonymousIdentity() {
   }
 
   return null;
+}
+
+/**
+ * Adopt the identity the server has just confirmed. Called after the hydration
+ * read, whose response sets `pa_uid` authoritatively: if the browser presented a
+ * retired identity (SDD v1.1 §5.1) the server replaced it, and the mirror must
+ * follow or it would restore the retired value on the next page. When nothing
+ * was replaced this rewrites the mirror with the value it already holds.
+ */
+export function adoptServerIdentity() {
+  const cookie = readCookie();
+  if (cookie) writeMirror(cookie);
 }
 
 syncAnonymousIdentity();

@@ -25,6 +25,7 @@
  */
 
 import { AppError } from '../errors/index.js';
+import { logger } from '../lib/logger.js';
 import {
   DuplicateIdentityError,
   findPasswordCredentialByUsername,
@@ -38,12 +39,26 @@ import { withTransaction } from '../repositories/transaction.js';
 import { recomputeOwnerStates } from './state-reconciliation.service.js';
 import { requireAcceptableUsername } from './username-policy.service.js';
 
+/**
+ * Whether an anonymous identity has been bound to an account and so retired
+ * (SDD §5.1). A retired identity is never used again for signed-out activity.
+ *
+ * @param {string} anonymousId
+ * @returns {Promise<boolean>}
+ */
+export async function isRetiredAnonymousId(anonymousId) {
+  return (await findBoundUserId(anonymousId)) !== null;
+}
+
 /** FR-AUTH-07. */
 export const PASSWORD_MIN_LENGTH = 8;
 export const PASSWORD_MAX_LENGTH = 100;
 
 export const BREACHED_PASSWORD_MESSAGE =
   'This password has appeared in a known breach; please choose another.';
+
+export const PASSWORD_CHECK_UNAVAILABLE_MESSAGE =
+  "We couldn't verify this password right now. Please try again shortly.";
 
 /**
  * @param {object} dependencies
@@ -84,8 +99,11 @@ export function createAccountService({
     try {
       breached = await isBreachedPassword(password);
     } catch (cause) {
-      // Fail closed: an unchecked password is never accepted.
-      throw AppError.internal(cause);
+      // Fail closed: an unchecked password is never accepted. The failure is
+      // the service's, not the password's, and the message says so. Only the
+      // error's kind is logged — never the password, its hash or the response.
+      logger.warn({ reason: cause?.name ?? 'Error' }, 'Breached-password check unavailable; registration refused');
+      throw AppError.unavailable(PASSWORD_CHECK_UNAVAILABLE_MESSAGE);
     }
     if (breached) throw AppError.validation(BREACHED_PASSWORD_MESSAGE);
   }

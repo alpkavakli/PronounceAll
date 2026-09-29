@@ -33,6 +33,7 @@ import { hashPassword, verifyPassword } from './lib/passwords.js';
 import { createSessionStore } from './lib/session-store.js';
 import {
   anonymousIdentityMiddleware,
+  retiredIdentityMiddleware,
   byAnonymousIdAndIp,
   byIp,
   contentSecurityPolicyMiddleware,
@@ -55,7 +56,7 @@ import { viewerStateRouter } from './routes/viewer-state.route.js';
 import { encounterRouter } from './routes/encounter.route.js';
 import { listenRouter } from './routes/listen.route.js';
 import { saveRouter } from './routes/save.route.js';
-import { createAccountService } from './services/account.service.js';
+import { createAccountService, isRetiredAnonymousId } from './services/account.service.js';
 import { createEncounterService } from './services/encounter.service.js';
 import { createSessionService } from './services/session.service.js';
 import { createSaveStateService } from './services/save-state.service.js';
@@ -167,6 +168,8 @@ export function createApp({ isBreachedPassword = createHibpChecker() } = {}) {
   app.use(express.urlencoded({ extended: false, limit: '32kb' }));
   app.use(express.json({ limit: '32kb' }));
   app.use(anonymousIdentityMiddleware());
+  // SDD §5.1: a bound (retired) pa_uid is replaced wherever it is presented.
+  app.use(retiredIdentityMiddleware({ isRetiredAnonymousId }));
   // The registered session (FR-AUTH-12), validated against the MySQL epoch (V3).
   app.use(sessionMiddleware({ sessionService }));
 

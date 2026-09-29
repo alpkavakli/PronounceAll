@@ -84,3 +84,32 @@ export function anonymousIdentityMiddleware() {
     next();
   };
 }
+
+/**
+ * A retired identity is never taken back (SDD v1.1 §5.1, FR-AUTH-18).
+ *
+ * Signing in binds the carried `pa_uid` and the sign-in response replaces it
+ * with a fresh one. A browser can still present the old value later — restored
+ * from its localStorage mirror (FR-AUTH-02), or from a copy of the cookie. A
+ * bound identity presented on any request is therefore swapped for a fresh one
+ * here, before any route runs, so signed-out activity never resolves back into
+ * the account whatever page the browser went to after signing in. The fresh
+ * value is issued by the ordinary cookie write above on the next uncached
+ * response, which is always the hydration read for a page with JavaScript.
+ *
+ * @param {object} dependencies
+ * @param {(anonymousId: string) => Promise<boolean>} dependencies.isRetiredAnonymousId
+ * @returns {import('express').RequestHandler}
+ */
+export function retiredIdentityMiddleware({ isRetiredAnonymousId }) {
+  return async function replaceRetiredIdentity(req, res, next) {
+    try {
+      if (req.anonymousId && (await isRetiredAnonymousId(req.anonymousId))) {
+        req.anonymousId = generateAnonymousId();
+      }
+      next();
+    } catch (error) {
+      next(error);
+    }
+  };
+}
