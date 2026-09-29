@@ -227,6 +227,19 @@ export function loadConfig(env) {
       sameSite: 'lax',
       path: '/',
     }),
+
+    /**
+     * The registered session cookie (FR-AUTH-12, SRS Appendix D). A session
+     * cookie in the browser sense (no Max-Age): its lifetime is enforced by the
+     * server-side record, 30 minutes idle and 12 hours absolute (V3).
+     */
+    sessionCookie: Object.freeze({
+      name: 'pa_sid',
+      httpOnly: true,
+      secure: isProductionLike,
+      sameSite: 'lax',
+      path: '/',
+    }),
   });
 }
 

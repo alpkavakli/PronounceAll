@@ -29,22 +29,23 @@ const EVENT_TYPE = Object.freeze({ word: 'audio_listen_word', phoneme: 'audio_li
 /**
  * @param {object} listen
  * @param {string|null} listen.anonymousId the viewer's `pa_uid`
+ * @param {number|null} [listen.userId] the signed-in user, always eligible
  * @param {'word'|'phoneme'} listen.targetKind
  * @param {number} listen.targetId
  * @param {() => Date} [clock]
  * @returns {Promise<{ recorded: boolean }>}
  */
-export async function recordListen({ anonymousId, targetKind, targetId }, clock = () => new Date()) {
+export async function recordListen({ anonymousId, userId = null, targetKind, targetId }, clock = () => new Date()) {
   if (!(await targetExists(targetKind, targetId))) {
     throw AppError.notFound('That word or sound does not exist.');
   }
-  if (!anonymousId || !(await anonymousProfileExists(anonymousId))) {
+  if (userId === null && (!anonymousId || !(await anonymousProfileExists(anonymousId)))) {
     return { recorded: false };
   }
 
-  const userId = await findBoundUserId(anonymousId);
+  const ownerUserId = userId ?? (await findBoundUserId(anonymousId));
   await insertActivityEvent({
-    owner: userId === null ? { anonymousId } : { userId },
+    owner: ownerUserId === null ? { anonymousId } : { userId: ownerUserId },
     targetKind,
     targetId,
     eventType: EVENT_TYPE[targetKind],

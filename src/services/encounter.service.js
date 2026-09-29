@@ -39,21 +39,22 @@ export function createEncounterService({ idempotencyStore, clock = () => new Dat
   /**
    * @param {object} request
    * @param {string|null} request.anonymousId the viewer's `pa_uid`
+   * @param {number|null} [request.userId] the signed-in user, always eligible
    * @param {number} request.wordId
    * @param {string} request.idempotencyKey
    * @returns {Promise<{ recorded: boolean, replayed: boolean }>}
    *   `recorded` is true only when this request wrote the event
    */
-  async function recordEncounter({ anonymousId, wordId, idempotencyKey }) {
+  async function recordEncounter({ anonymousId, userId = null, wordId, idempotencyKey }) {
     if (!(await targetExists('word', wordId))) {
       throw AppError.notFound('That word does not exist.');
     }
-    if (!anonymousId || !(await anonymousProfileExists(anonymousId))) {
+    if (userId === null && (!anonymousId || !(await anonymousProfileExists(anonymousId)))) {
       return { recorded: false, replayed: false };
     }
 
     // Keyed per identity, so one viewer's key can never replay another's result.
-    const reservationKey = `encounter:${anonymousId}:${idempotencyKey}`;
+    const reservationKey = `encounter:${userId === null ? anonymousId : `user:${userId}`}:${idempotencyKey}`;
     const reservation = await idempotencyStore.reserve(reservationKey);
     if (reservation.status === 'completed') {
       return { ...reservation.result, replayed: true };
@@ -63,9 +64,9 @@ export function createEncounterService({ idempotencyStore, clock = () => new Dat
     }
 
     try {
-      const userId = await findBoundUserId(anonymousId);
+      const ownerUserId = userId ?? (await findBoundUserId(anonymousId));
       const recorded = await insertWordEncounter({
-        owner: userId === null ? { anonymousId } : { userId },
+        owner: ownerUserId === null ? { anonymousId } : { userId: ownerUserId },
         wordId,
         occurredAt: clock(),
       });

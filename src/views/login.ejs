@@ -1,0 +1,60 @@
+<%# PronounceAll — Copyright (C) 2026 Alp Kavaklı
+    SPDX-License-Identifier: AGPL-3.0-or-later
+    See LICENSE-NOTICE.md at the repository root.
+
+    Sign in, or — when signed in — who you are and a sign-out button
+    (FR-AUTH-12/13/14, FR-SET-06). DYNAMIC (private, no-store).
+
+    `data-adopt-identity` is rendered only on the landing after a successful
+    sign-in. It tells bootstrap.js to adopt the fresh `pa_uid` this response set
+    rather than restore the retired one from localStorage (SDD v1.1 §5.1). %>
+<!doctype html>
+<html lang="en">
+<head>
+  <%- include('partials/head', { title: title }) %>
+  <% if (!signedInAs && locals.turnstileSiteKey) { %>
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer nonce="<%= cspNonce %>"></script>
+  <% } %>
+</head>
+<body<% if (justSignedIn) { %> data-adopt-identity<% } %>>
+  <main class="page account">
+    <% if (signedInAs) { %>
+      <h1>Your account</h1>
+      <p class="lede" role="status">Signed in as <strong><%= signedInAs %></strong>.</p>
+      <p>Your saved words and sounds now belong to this account on every device you sign in on.</p>
+      <p><a href="/">Back to the dictionary</a></p>
+
+      <form class="account__form" method="post" action="/logout">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <button type="submit" class="button button--secondary">Sign out</button>
+      </form>
+    <% } else { %>
+      <h1>Sign in</h1>
+
+      <% if (error) { %>
+        <p class="account__error" role="alert"><%= error %></p>
+      <% } %>
+
+      <form class="account__form" method="post" action="/login">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+        <label class="account__label" for="login-identifier">Username</label>
+        <input class="account__input" id="login-identifier" name="identifier" type="text"
+               value="<%= identifier %>" autocomplete="username" required maxlength="320">
+
+        <label class="account__label" for="login-password">Password</label>
+        <input class="account__input" id="login-password" name="password" type="password"
+               autocomplete="current-password" required maxlength="100">
+
+        <%- include('partials/turnstile') %>
+        <button type="submit" class="button">Sign in</button>
+      </form>
+
+      <p>New here? <a href="/register">Create an account</a></p>
+    <% } %>
+  </main>
+
+  <%- include('partials/footer') %>
+  <script type="module" src="/js/bootstrap.js"></script>
+</body>
+</html>

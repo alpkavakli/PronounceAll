@@ -29,7 +29,9 @@ export function listenRouter({ listenRateLimit }) {
   router.post('/listen', jsonErrorSurface(), listenRateLimit, requireCsrf(), async (req, res, next) => {
     try {
       const { targetKind, targetId } = parseListenRequest(req.body);
-      res.json(await recordListen({ anonymousId: req.anonymousId, targetKind, targetId }));
+      res.json(
+        await recordListen({ anonymousId: req.anonymousId, userId: req.session?.userId ?? null, targetKind, targetId }),
+      );
     } catch (error) {
       next(error);
     }

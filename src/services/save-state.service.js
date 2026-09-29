@@ -61,6 +61,22 @@ export function decideTransition(current, action, tag = null) {
 }
 
 /**
+ * The owner of a signed-out write: the account the `pa_uid` is bound to, if
+ * any, else the `pa_uid` itself. FR-AUTH-03: the profile is created by the
+ * first write, never a read.
+ *
+ * @param {string} anonymousId
+ * @param {Date} now
+ * @param {import('../repositories/transaction.js').Executor} tx
+ * @returns {Promise<import('../repositories/progress.repository.js').Owner>}
+ */
+async function resolveAnonymousOwner(anonymousId, now, tx) {
+  await touchAnonymousProfile(anonymousId, now, tx);
+  const boundUserId = await findBoundUserId(anonymousId, tx);
+  return boundUserId === null ? { anonymousId } : { userId: boundUserId };
+}
+
+/**
  * @param {object} dependencies
  * @param {import('../lib/idempotency-store.js').IdempotencyStore} dependencies.idempotencyStore
  * @param {() => Date} [dependencies.clock]
@@ -69,6 +85,8 @@ export function createSaveStateService({ idempotencyStore, clock = () => new Dat
   /**
    * @param {object} request
    * @param {string} request.anonymousId the viewer's `pa_uid`
+   * @param {number|null} [request.userId] the signed-in user, who owns the write
+   *   outright; otherwise the `pa_uid` owns it, through its binding if any (§5.2)
    * @param {'word'|'phoneme'} request.targetKind
    * @param {number} request.targetId
    * @param {'save'|'unsave'|'tag'} request.action
@@ -76,9 +94,9 @@ export function createSaveStateService({ idempotencyStore, clock = () => new Dat
    * @param {string} request.idempotencyKey
    * @returns {Promise<{ targetKind: string, targetId: number, state: string, replayed: boolean }>}
    */
-  async function applySaveAction({ anonymousId, targetKind, targetId, action, tag = null, idempotencyKey }) {
+  async function applySaveAction({ anonymousId, userId = null, targetKind, targetId, action, tag = null, idempotencyKey }) {
     // Keyed per identity, so one viewer's key can never replay another's result.
-    const reservationKey = `save:${anonymousId}:${idempotencyKey}`;
+    const reservationKey = `save:${userId === null ? anonymousId : `user:${userId}`}:${idempotencyKey}`;
     const reservation = await idempotencyStore.reserve(reservationKey);
     if (reservation.status === 'completed') {
       return { ...reservation.result, replayed: true };
@@ -94,10 +112,7 @@ export function createSaveStateService({ idempotencyStore, clock = () => new Dat
         }
 
         const now = clock();
-        // FR-AUTH-03: the profile is created by the first write, never a read.
-        await touchAnonymousProfile(anonymousId, now, tx);
-        const userId = await findBoundUserId(anonymousId, tx);
-        const owner = userId === null ? { anonymousId } : { userId };
+        const owner = userId !== null ? { userId } : await resolveAnonymousOwner(anonymousId, now, tx);
 
         const current = await lockTargetState(owner, targetKind, targetId, tx);
         const transition = decideTransition(current, action, tag);

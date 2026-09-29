@@ -33,9 +33,10 @@ export const ERROR_CODES = Object.freeze({
 
 /**
  * The generic authentication failure message required by Foundational
- * Decisions §2. Never "user not found" and never "wrong password".
+ * Decisions §2, worded as FR-AUTH-13 fixes it. Never "user not found" and never
+ * "wrong password".
  */
-export const GENERIC_AUTH_MESSAGE = 'Invalid credentials.';
+export const GENERIC_AUTH_MESSAGE = 'Invalid username/email or password';
 
 export class AppError extends Error {
   /**

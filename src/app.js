@@ -28,8 +28,13 @@ import {
   createTurnstileVerifier,
   createUnconfiguredTurnstileVerifier,
 } from './lib/turnstile.js';
+import { createHibpChecker } from './lib/hibp.js';
+import { hashPassword, verifyPassword } from './lib/passwords.js';
+import { createSessionStore } from './lib/session-store.js';
 import {
   anonymousIdentityMiddleware,
+  byAnonymousIdAndIp,
+  byIp,
   contentSecurityPolicyMiddleware,
   cspNonceMiddleware,
   errorHandler,
@@ -39,7 +44,9 @@ import {
   requestContextMiddleware,
   responseClassMiddleware,
   securityHeadersMiddleware,
+  sessionMiddleware,
 } from './middleware/index.js';
+import { accountRouter } from './routes/account.route.js';
 import { healthRouter } from './routes/health.route.js';
 import { homeRouter } from './routes/home.route.js';
 import { learnIpaRouter } from './routes/learn-ipa.route.js';
@@ -48,7 +55,9 @@ import { viewerStateRouter } from './routes/viewer-state.route.js';
 import { encounterRouter } from './routes/encounter.route.js';
 import { listenRouter } from './routes/listen.route.js';
 import { saveRouter } from './routes/save.route.js';
+import { createAccountService } from './services/account.service.js';
 import { createEncounterService } from './services/encounter.service.js';
+import { createSessionService } from './services/session.service.js';
 import { createSaveStateService } from './services/save-state.service.js';
 import { createInMemoryIdempotencyStore, createRedisIdempotencyStore } from './lib/idempotency-store.js';
 import { wordRouter } from './routes/word.route.js';
@@ -59,9 +68,12 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 /**
  * Build the Express application.
  *
+ * @param {object} [overrides] test seams for third parties; production passes none
+ * @param {(password: string) => Promise<boolean>} [overrides.isBreachedPassword]
+ *   replaces the HIBP range client (FR-AUTH-07)
  * @returns {import('express').Express}
  */
-export function createApp() {
+export function createApp({ isBreachedPassword = createHibpChecker() } = {}) {
   const app = express();
 
   // Cloudflare and Nginx sit in front in production; the hop count is
@@ -99,6 +111,15 @@ export function createApp() {
   const verifyTurnstile = config.turnstile.isConfigured
     ? createTurnstileVerifier(config.turnstile.secretKey)
     : createUnconfiguredTurnstileVerifier();
+
+  // Registered sessions are Redis-backed in every environment (V3).
+  const sessionService = createSessionService({ store: createSessionStore() });
+  const accountService = createAccountService({
+    verifyTurnstile,
+    isBreachedPassword,
+    passwords: { hashPassword, verifyPassword },
+    sessionService,
+  });
 
   // 1. Observability first, so every later failure carries a correlation id.
   app.use(requestContextMiddleware());
@@ -146,6 +167,8 @@ export function createApp() {
   app.use(express.urlencoded({ extended: false, limit: '32kb' }));
   app.use(express.json({ limit: '32kb' }));
   app.use(anonymousIdentityMiddleware());
+  // The registered session (FR-AUTH-12), validated against the MySQL epoch (V3).
+  app.use(sessionMiddleware({ sessionService }));
 
   // 6. Routes. The word router is mounted LAST of the routers, because its
   //    `/:variant` and `/:variant/:word` patterns would otherwise shadow the
@@ -177,6 +200,27 @@ export function createApp() {
     encounterRouter({
       encounterRateLimit: rateLimitMiddleware({ store: rateLimitStore, bucket: 'save-tag', ...RATE_LIMITS.SAVE_TAG }),
       encounterService,
+    }),
+  );
+  // Registration, sign-in and sign-out. Before the word router, whose
+  // `/:variant` pattern would otherwise match `/login`.
+  app.use(
+    accountRouter({
+      accountService,
+      sessionService,
+      // Appendix C: 5 per 15 minutes per UUID + IP; 3 per hour per IP.
+      loginRateLimit: rateLimitMiddleware({
+        store: rateLimitStore,
+        bucket: 'login',
+        ...RATE_LIMITS.LOGIN,
+        keyOf: byAnonymousIdAndIp,
+      }),
+      registerRateLimit: rateLimitMiddleware({
+        store: rateLimitStore,
+        bucket: 'register',
+        ...RATE_LIMITS.REGISTER,
+        keyOf: byIp,
+      }),
     }),
   );
   // MUST precede the word router. `/:variant/learnIPA` matches

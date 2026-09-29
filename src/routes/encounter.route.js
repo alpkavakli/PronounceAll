@@ -32,6 +32,7 @@ export function encounterRouter({ encounterRateLimit, encounterService }) {
       const { wordId, idempotencyKey } = parseEncounterRequest(req.body);
       const { recorded } = await encounterService.recordEncounter({
         anonymousId: req.anonymousId,
+        userId: req.session?.userId ?? null,
         wordId,
         idempotencyKey,
       });

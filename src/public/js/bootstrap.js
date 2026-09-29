@@ -67,6 +67,15 @@ export function syncAnonymousIdentity() {
   const cookie = readCookie();
   const mirrored = readMirror();
 
+  // After a sign-in the server retires the carried identity and issues a fresh
+  // one (SDD v1.1 §5.1, FR-AUTH-18). The landing page marks that response, and
+  // here — only here — the cookie wins over the mirror, so the retired identity
+  // is not restored and later signed-out activity stays out of the account.
+  if (cookie && document.body?.hasAttribute('data-adopt-identity')) {
+    writeMirror(cookie);
+    return cookie;
+  }
+
   // The mirror is the durable identity and wins when the two disagree.
   //
   // FR-AUTH-02 describes the cookie as missing at this point, which is what

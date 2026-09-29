@@ -39,10 +39,16 @@ export default defineConfig({
     },
   ],
 
+  // One trusted proxy hop, so a test can present its own client address in
+  // `X-Forwarded-For`. The per-IP limits (FR-AUTH-15: 3 registrations per hour)
+  // then run unchanged while each test is its own "client"; without this every
+  // browser test shares 127.0.0.1 and the suite exhausts the limit on itself.
+  // A server started by hand for E2E_BASE_URL needs TRUST_PROXY_HOPS=1 too.
   webServer: process.env.E2E_BASE_URL
     ? undefined
     : {
         command: 'node src/server.js',
+        env: { TRUST_PROXY_HOPS: '1' },
         url: `${BASE_URL}/health`,
         reuseExistingServer: !process.env.CI,
         timeout: 60_000,

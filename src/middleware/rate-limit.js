@@ -28,7 +28,28 @@ export const RATE_LIMITS = Object.freeze({
   WORD_REQUEST: Object.freeze({ limit: 10, windowSeconds: 3600 }),
   /** Save/tag POSTs: 60 per minute, keyed by the `pa_uid` UUID (FR-SAVE-09 listens share it). */
   SAVE_TAG: Object.freeze({ limit: 60, windowSeconds: 60 }),
+  /** `POST /login`: 5 per 15 minutes, keyed by UUID + IP (FR-AUTH-15). */
+  LOGIN: Object.freeze({ limit: 5, windowSeconds: 900 }),
+  /** `POST /register`: 3 per hour, keyed by IP (FR-AUTH-15). */
+  REGISTER: Object.freeze({ limit: 3, windowSeconds: 3600 }),
 });
+
+/**
+ * The default identity key: the anonymous UUID. `ensureAnonymousId` mints one
+ * when the request carried no cookie, so a client that simply discards cookies
+ * still gets a stable key for the life of the request and cannot sidestep the
+ * limit by never presenting one.
+ *
+ * @param {import('express').Request} req
+ * @returns {string}
+ */
+export const byAnonymousId = (req) => req.ensureAnonymousId();
+
+/** Appendix C `POST /register`. @param {import('express').Request} req */
+export const byIp = (req) => `ip:${req.ip}`;
+
+/** Appendix C `POST /login`. @param {import('express').Request} req */
+export const byAnonymousIdAndIp = (req) => `${req.ensureAnonymousId()}:ip:${req.ip}`;
 
 /**
  * Build a rate-limit middleware for one endpoint.
@@ -39,16 +60,14 @@ export const RATE_LIMITS = Object.freeze({
  * @param {string} options.bucket a stable name for this limit's key space
  * @param {number} options.limit
  * @param {number} options.windowSeconds
+ * @param {(req: import('express').Request) => string} [options.keyOf] the
+ *   Appendix C identity key; the anonymous UUID unless the table says otherwise
  * @returns {import('express').RequestHandler}
  */
-export function rateLimitMiddleware({ store, bucket, limit, windowSeconds }) {
+export function rateLimitMiddleware({ store, bucket, limit, windowSeconds, keyOf = byAnonymousId }) {
   return async function enforceRateLimit(req, res, next) {
     try {
-      // Appendix C keys this bucket on the anonymous UUID. `ensureAnonymousId`
-      // mints one when the request carried no cookie, so a client that simply
-      // discards cookies still gets a stable key for the life of the request
-      // and cannot sidestep the limit by never presenting one.
-      const identity = req.ensureAnonymousId();
+      const identity = keyOf(req);
       const decision = await store.consume(`${bucket}:${identity}`, limit, windowSeconds);
 
       if (!decision.allowed) {

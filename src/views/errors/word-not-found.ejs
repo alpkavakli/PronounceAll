@@ -67,9 +67,7 @@
         <input type="hidden" name="variant" value="<%= variant.code %>">
         <input type="hidden" name="word" value="<%= slug %>">
         <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-        <% if (locals.turnstileSiteKey) { %>
-          <div class="cf-turnstile" data-sitekey="<%= locals.turnstileSiteKey %>"></div>
-        <% } %>
+        <%- include('../partials/turnstile') %>
         <button type="submit" class="button">Request this word</button>
       </form>
     </section>

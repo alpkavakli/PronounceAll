@@ -14,8 +14,10 @@ import { describe, expect, it } from '@jest/globals';
 import {
   issueConfirmationCredentials,
   issueCsrfToken,
+  issueCsrfTokenFor,
   isSameOrigin,
   verifyCsrfToken,
+  verifyCsrfTokenFor,
 } from '../../src/services/csrf.service.js';
 import { safeReturnPath } from '../../src/validators/progress.validator.js';
 
@@ -46,9 +48,23 @@ describe('CSRF token', () => {
     expect(verifyCsrfToken(SECRET, null, token)).toBe(false);
   });
 
+  it('binds to the session once signed in, and never crosses subjects', () => {
+    const session = 'a-session-id-value';
+    const sessionToken = issueCsrfTokenFor(SECRET, { sessionId: session });
+    expect(sessionToken).toBe(
+      createHmac('sha256', SECRET).update(`csrf:v1:session:${session}`).digest('base64url'),
+    );
+    expect(verifyCsrfTokenFor(SECRET, { sessionId: session }, sessionToken)).toBe(true);
+    // Rotation: a new session invalidates the old token (FR-AUTH-12, §6.6).
+    expect(verifyCsrfTokenFor(SECRET, { sessionId: 'the-next-session' }, sessionToken)).toBe(false);
+    // An anonymous token is not a session token, even for the same string.
+    expect(verifyCsrfTokenFor(SECRET, { anonymousId: session }, sessionToken)).toBe(false);
+    expect(verifyCsrfTokenFor(SECRET, { sessionId: '' }, sessionToken)).toBe(false);
+  });
+
   it('issues confirmation credentials as two separate values', () => {
-    const first = issueConfirmationCredentials(SECRET, ALICE);
-    const second = issueConfirmationCredentials(SECRET, ALICE);
+    const first = issueConfirmationCredentials(SECRET, { anonymousId: ALICE });
+    const second = issueConfirmationCredentials(SECRET, { anonymousId: ALICE });
     expect(first.csrfToken).toBe(second.csrfToken);
     expect(first.idempotencyKey).not.toBe(second.idempotencyKey);
     expect(first.idempotencyKey).toMatch(/^[A-Za-z0-9_-]{32}$/);

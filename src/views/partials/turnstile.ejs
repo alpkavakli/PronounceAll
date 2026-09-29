@@ -1,0 +1,16 @@
+<%# PronounceAll — Copyright (C) 2026 Alp Kavaklı
+    SPDX-License-Identifier: AGPL-3.0-or-later
+    See LICENSE-NOTICE.md at the repository root.
+
+    The Turnstile challenge for a form (FR-AUTH-14, FR-WORD-05).
+
+    Configured: the Cloudflare widget, which fills `cf-turnstile-response`.
+    Not configured — possible in development and test only, because the
+    configuration refuses to boot staging or production without the keys — a
+    placeholder token, so the form is usable locally. The unconfigured verifier
+    checks presence only and never claims the token was verified. %>
+<% if (locals.turnstileSiteKey) { %>
+  <div class="cf-turnstile" data-sitekey="<%= locals.turnstileSiteKey %>"></div>
+<% } else { %>
+  <input type="hidden" name="cf-turnstile-response" value="turnstile-not-configured">
+<% } %>

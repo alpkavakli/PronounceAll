@@ -84,7 +84,7 @@ describe('JSON error surface', () => {
     const res = await request(buildApp()).get('/api/auth');
 
     expect(res.status).toBe(401);
-    expect(res.body.error.message).toBe('Invalid credentials.');
+    expect(res.body.error.message).toBe('Invalid username/email or password');
     expect(JSON.stringify(res.body)).not.toMatch(/ada@example\.com|no such user/);
   });
 

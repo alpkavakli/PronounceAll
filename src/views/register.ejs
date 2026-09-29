@@ -1,0 +1,61 @@
+<%# PronounceAll — Copyright (C) 2026 Alp Kavaklı
+    SPDX-License-Identifier: AGPL-3.0-or-later
+    See LICENSE-NOTICE.md at the repository root.
+
+    Registration (FR-AUTH-04/05/07, FR-AUTH-14, FR-CONSENT-04; SDD v1.1 §5.6).
+
+    DYNAMIC (private, no-store): it carries a per-viewer CSRF token and, where
+    configured, the Turnstile widget with its per-request CSP nonce. A plain
+    POST form, so it works without JavaScript apart from the challenge itself.
+
+    This slice offers the username-and-password path without an email, which
+    requires the no-recovery acknowledgement. %>
+<!doctype html>
+<html lang="en">
+<head>
+  <%- include('partials/head', { title: title }) %>
+  <% if (locals.turnstileSiteKey) { %>
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer nonce="<%= cspNonce %>"></script>
+  <% } %>
+</head>
+<body>
+  <main class="page account">
+    <h1>Create an account</h1>
+    <p class="lede">An account keeps your saved words and sounds across devices.</p>
+
+    <% if (error) { %>
+      <p class="account__error" role="alert"><%= error %></p>
+    <% } %>
+
+    <form class="account__form" method="post" action="/register">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+      <label class="account__label" for="register-username">Username</label>
+      <input class="account__input" id="register-username" name="username" type="text"
+             value="<%= username %>" autocomplete="username" required
+             minlength="3" maxlength="20" pattern="[A-Za-z][A-Za-z0-9_\-]{2,19}"
+             aria-describedby="register-username-help">
+      <p class="account__help" id="register-username-help">3–20 letters, digits, “_” or “-”, starting with a letter. Shown publicly.</p>
+
+      <label class="account__label" for="register-password">Password</label>
+      <input class="account__input" id="register-password" name="password" type="password"
+             autocomplete="new-password" required minlength="8" maxlength="100"
+             aria-describedby="register-password-help">
+      <p class="account__help" id="register-password-help">At least 8 characters. Passwords found in known data breaches are refused.</p>
+
+      <p class="account__check">
+        <input id="register-no-recovery" name="acknowledgeNoRecovery" type="checkbox" value="yes" required>
+        <label for="register-no-recovery">Without an email, we cannot recover your account if you forget your credentials. You accept this risk.</label>
+      </p>
+
+      <%- include('partials/turnstile') %>
+      <button type="submit" class="button">Create account</button>
+    </form>
+
+    <p>Already have an account? <a href="/login">Sign in</a></p>
+  </main>
+
+  <%- include('partials/footer') %>
+  <script type="module" src="/js/bootstrap.js"></script>
+</body>
+</html>

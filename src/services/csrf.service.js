@@ -11,11 +11,11 @@
  * HMAC the application might compute:
  *
  *   csrf:v1:anon:<pa_uid>
+ *   csrf:v1:session:<pa_sid>   once signed in (Iteration 4)
  *
  * Nothing is stored and no cookie is set. Verification recomputes the token for
- * the request's own identity and compares in constant time. When sessions
- * arrive (Iteration 4) the binding becomes `csrf:v1:session:<…>`, and the token
- * rotates because the session does.
+ * the request's own identity and compares in constant time. A session-bound
+ * token rotates because the session does.
  */
 
 import { createHmac, timingSafeEqual } from 'node:crypto';
@@ -25,12 +25,50 @@ import { generateSecureToken } from '../lib/ids.js';
 const VERSION = 'v1';
 
 /**
+ * Who a token is bound to: the signed-in session, or else the anonymous
+ * identity (SDD §6.6). A session-bound token rotates with the session, so login,
+ * logout and a password change all invalidate earlier tokens.
+ *
+ * @typedef {{ sessionId: string } | { anonymousId: string|null }} CsrfSubject
+ */
+
+/** @param {CsrfSubject} subject @returns {string|null} the bound input, or null when there is no identity */
+function bindingOf(subject) {
+  if ('sessionId' in subject) return subject.sessionId ? `session:${subject.sessionId}` : null;
+  return subject.anonymousId ? `anon:${subject.anonymousId}` : null;
+}
+
+/**
  * @param {string} secret
- * @param {string} anonymousId
+ * @param {CsrfSubject} subject
  * @returns {string} base64url token
  */
+export function issueCsrfTokenFor(secret, subject) {
+  return createHmac('sha256', secret).update(`csrf:${VERSION}:${bindingOf(subject)}`).digest('base64url');
+}
+
+/**
+ * @param {string} secret
+ * @param {CsrfSubject} subject the identity the request carries
+ * @param {unknown} presented the token the client sent
+ * @returns {boolean}
+ */
+export function verifyCsrfTokenFor(secret, subject, presented) {
+  if (typeof presented !== 'string' || presented.length === 0 || bindingOf(subject) === null) return false;
+  const expected = Buffer.from(issueCsrfTokenFor(secret, subject));
+  const actual = Buffer.from(presented);
+  // timingSafeEqual requires equal lengths; a length mismatch is itself a
+  // failure and reveals nothing about the expected value.
+  return expected.length === actual.length && timingSafeEqual(expected, actual);
+}
+
+/**
+ * @param {string} secret
+ * @param {string} anonymousId
+ * @returns {string} base64url token bound to `csrf:v1:anon:<pa_uid>`
+ */
 export function issueCsrfToken(secret, anonymousId) {
-  return createHmac('sha256', secret).update(`csrf:${VERSION}:anon:${anonymousId}`).digest('base64url');
+  return issueCsrfTokenFor(secret, { anonymousId });
 }
 
 /**
@@ -40,12 +78,7 @@ export function issueCsrfToken(secret, anonymousId) {
  * @returns {boolean}
  */
 export function verifyCsrfToken(secret, anonymousId, presented) {
-  if (typeof presented !== 'string' || presented.length === 0 || !anonymousId) return false;
-  const expected = Buffer.from(issueCsrfToken(secret, anonymousId));
-  const actual = Buffer.from(presented);
-  // timingSafeEqual requires equal lengths; a length mismatch is itself a
-  // failure and reveals nothing about the expected value.
-  return expected.length === actual.length && timingSafeEqual(expected, actual);
+  return verifyCsrfTokenFor(secret, { anonymousId }, presented);
 }
 
 /**
@@ -70,9 +103,9 @@ export function isSameOrigin({ origin, fetchSite, allowedOrigins }) {
  * separate concepts and are generated separately.
  *
  * @param {string} secret
- * @param {string} anonymousId
+ * @param {CsrfSubject} subject
  * @returns {{ csrfToken: string, idempotencyKey: string }}
  */
-export function issueConfirmationCredentials(secret, anonymousId) {
-  return { csrfToken: issueCsrfToken(secret, anonymousId), idempotencyKey: generateSecureToken(24) };
+export function issueConfirmationCredentials(secret, subject) {
+  return { csrfToken: issueCsrfTokenFor(secret, subject), idempotencyKey: generateSecureToken(24) };
 }

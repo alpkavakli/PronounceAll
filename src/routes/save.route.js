@@ -24,7 +24,7 @@ import { Router } from 'express';
 import { config } from '../config/index.js';
 import { AppError } from '../errors/index.js';
 import { issueConfirmationCredentials } from '../services/csrf.service.js';
-import { jsonErrorSurface, requireCsrf } from '../middleware/index.js';
+import { csrfSubjectOf, jsonErrorSurface, requireCsrf } from '../middleware/index.js';
 import { describeTarget, getViewerState } from '../services/viewer-state.service.js';
 import { requireActiveVariant } from '../services/word-page.service.js';
 import { parseConfirmQuery, parseSaveRequest, safeReturnPath } from '../validators/progress.validator.js';
@@ -45,9 +45,9 @@ export function saveRouter({ saveRateLimit, saveStateService }) {
       if (!target) throw AppError.notFound('That word or sound does not exist.');
 
       const variant = await requireActiveVariant(target.variantCode);
-      const anonymousId = req.ensureAnonymousId();
       const state = await getViewerState({
         anonymousId: req.anonymousId,
+        userId: req.session?.userId ?? null,
         variant,
         wordIds: targetKind === 'word' ? [targetId] : [],
         phonemeIds: targetKind === 'phoneme' ? [targetId] : [],
@@ -61,7 +61,7 @@ export function saveRouter({ saveRateLimit, saveStateService }) {
         label: target.label,
         isSaved: current !== 'unsaved',
         // SDD §6.6: the token and a server-side CSPRNG idempotency key.
-        ...issueConfirmationCredentials(config.csrf.secret, anonymousId),
+        ...issueConfirmationCredentials(config.csrf.secret, csrfSubjectOf(req, { mint: true })),
         returnTo,
       });
     } catch (error) {
@@ -78,7 +78,11 @@ export function saveRouter({ saveRateLimit, saveStateService }) {
     const isForm = Boolean(req.is('application/x-www-form-urlencoded'));
     try {
       const input = parseSaveRequest(req.body);
-      const outcome = await saveStateService.applySaveAction({ ...input, anonymousId: req.anonymousId });
+      const outcome = await saveStateService.applySaveAction({
+        ...input,
+        anonymousId: req.anonymousId,
+        userId: req.session?.userId ?? null,
+      });
 
       if (isForm) {
         res.redirect(303, safeReturnPath(req.body.returnTo));

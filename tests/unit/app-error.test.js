@@ -28,7 +28,9 @@ describe('AppError (SDD v1.1 §6.1, C2)', () => {
   test('auth failures always use the generic message (Foundational Decisions §2)', () => {
     const error = AppError.auth({ cause: new Error('user not found') });
     expect(error.message).toBe(GENERIC_AUTH_MESSAGE);
-    expect(error.message).not.toMatch(/not found|password/i);
+    // FR-AUTH-13 fixes the wording; it must never name which factor failed.
+    expect(error.message).toBe('Invalid username/email or password');
+    expect(error.message).not.toMatch(/not found|wrong|incorrect|unverified|deleted/i);
     expect(error.status).toBe(401);
   });
 

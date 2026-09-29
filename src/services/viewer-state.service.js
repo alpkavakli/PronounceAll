@@ -38,16 +38,17 @@ function withDefaults(states, ids) {
 /**
  * @param {object} request
  * @param {string|null} request.anonymousId the viewer's `pa_uid`, if carried
+ * @param {number|null} [request.userId] the signed-in user, whose state this is
  * @param {{ variantId: number }} request.variant
  * @param {number[]} request.wordIds
  * @param {number[]} request.phonemeIds
  * @returns {Promise<{ words: Record<string,string>, phonemes: Record<string,string>, learned: number, total: number, recordsHistory: boolean }>}
- *   `recordsHistory` says whether this viewer's listens and word encounters are recorded (FR-SAVE-09, FR-SAVE-10: a progress profile exists), so the page need not send a request that would be a no-op
+ *   `recordsHistory` says whether this viewer's listens and word encounters are recorded (FR-SAVE-09, FR-SAVE-10: a registered user, or a progress profile exists), so the page need not send a request that would be a no-op
  */
-export async function getViewerState({ anonymousId, variant, wordIds, phonemeIds }) {
+export async function getViewerState({ anonymousId, userId = null, variant, wordIds, phonemeIds }) {
   const total = await countPhonemes(variant.variantId);
 
-  if (!anonymousId || !(await anonymousProfileExists(anonymousId))) {
+  if (userId === null && (!anonymousId || !(await anonymousProfileExists(anonymousId)))) {
     return {
       words: withDefaults(new Map(), wordIds),
       phonemes: withDefaults(new Map(), phonemeIds),
@@ -57,8 +58,8 @@ export async function getViewerState({ anonymousId, variant, wordIds, phonemeIds
     };
   }
 
-  const userId = await findBoundUserId(anonymousId);
-  const owner = userId === null ? { anonymousId } : { userId };
+  const ownerUserId = userId ?? (await findBoundUserId(anonymousId));
+  const owner = ownerUserId === null ? { anonymousId } : { userId: ownerUserId };
 
   const [words, phonemes, learned] = await Promise.all([
     findTargetStates(owner, 'word', wordIds),

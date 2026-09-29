@@ -100,6 +100,32 @@ export function diffStates(expected, live) {
 }
 
 /**
+ * Recompute one owner's derived state from the log and repair any drift,
+ * inside the caller's transaction. The owner's derived rows are locked first
+ * (the C6 per-actor claim). For a user owner the log includes every anonymous
+ * identity bound to that user, which is what makes this the FR-AUTH-18 merge
+ * recompute as well: one derivation, no second merge rule (SDD v1.1 §5.1).
+ *
+ * @param {import('../repositories/progress.repository.js').Owner} owner
+ * @param {import('../repositories/transaction.js').Executor} tx a transaction connection
+ * @param {Date} now
+ * @returns {Promise<{ entries: Array<object>, repaired: number }>}
+ */
+export async function recomputeOwnerStates(owner, tx, now) {
+  await lockOwnerStates(owner, tx);
+  const events = await listOwnerStateEvents(owner, tx);
+  const live = await listOwnerStates(owner, tx);
+  const entries = diffStates(deriveExpectedStates(events), live);
+  let repaired = 0;
+  for (const entry of entries) {
+    if (entry.kind === 'unexplained') continue;
+    await repairTargetState({ owner, ...entry.expected, updatedAt: now }, tx);
+    repaired += 1;
+  }
+  return { entries, repaired };
+}
+
+/**
  * @param {object} [options]
  * @param {boolean} [options.apply] repair drift; the default is a dry run
  * @param {() => Date} [options.clock]
@@ -118,17 +144,9 @@ export async function reconcileSaveState({ apply = false, clock = () => new Date
     }
 
     const found = await withTransaction(async (tx) => {
-      await lockOwnerStates(owner, tx);
-      const events = await listOwnerStateEvents(owner, tx);
-      const live = await listOwnerStates(owner, tx);
-      const entries = diffStates(deriveExpectedStates(events), live);
-      const now = clock();
-      for (const entry of entries) {
-        if (entry.kind === 'unexplained') continue;
-        await repairTargetState({ owner, ...entry.expected, updatedAt: now }, tx);
-        repaired += 1;
-      }
-      return entries;
+      const outcome = await recomputeOwnerStates(owner, tx, clock());
+      repaired += outcome.repaired;
+      return outcome.entries;
     });
     for (const entry of found) drift.push({ owner, ...entry });
   }
