@@ -1,0 +1,30 @@
+<%# PronounceAll — Copyright (C) 2026 Alp Kavaklı
+    SPDX-License-Identifier: AGPL-3.0-or-later
+    See LICENSE-NOTICE.md at the repository root.
+
+    A Google sign-in that did not complete (FR-AUTH-04a; SDD v1.1 §5.6). One
+    page for every cause — an expired or reused link, a refused token, an email
+    Google has not verified, or an email already used by an account — so it
+    says nothing about which, and nothing about any account. The cause is
+    logged, never shown. DYNAMIC (private, no-store). %>
+<!doctype html>
+<html lang="en">
+<head>
+  <%- include('partials/head', { title: title }) %>
+</head>
+<body>
+  <main class="page account">
+    <% if (cancelled) { %>
+      <h1>Google sign-in was not completed</h1>
+      <p class="lede" role="status">Nothing was changed. You can try again, or sign in another way.</p>
+    <% } else { %>
+      <h1>We couldn't sign you in with Google</h1>
+      <p class="lede" role="status">Nothing was changed. Please try again. If you already have a PronounceAll account, sign in with your username or email.</p>
+    <% } %>
+    <p><a class="button" href="/login">Back to sign in</a></p>
+  </main>
+
+  <%- include('partials/footer') %>
+  <script type="module" src="/js/bootstrap.js"></script>
+</body>
+</html>

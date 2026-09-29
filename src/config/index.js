@@ -89,6 +89,17 @@ const schema = z.object({
   SMTP_USER: z.string().default(''),
   SMTP_PASSWORD: z.string().default(''),
   MAIL_FROM: z.string().min(3).default('PronounceAll <no-reply@pronounceall.localhost>'),
+
+  /**
+   * Google sign-in (FR-AUTH-04a, FR-AUTH-16). A confidential OAuth client: the
+   * secret stays on the server. Empty locally means the Google path is simply
+   * not offered; staging and production refuse to boot without the pair. The
+   * redirect URI must match the one registered with Google exactly; it
+   * defaults to APP_BASE_URL + /auth/google/callback.
+   */
+  GOOGLE_CLIENT_ID: z.string().default(''),
+  GOOGLE_CLIENT_SECRET: z.string().default(''),
+  GOOGLE_REDIRECT_URI: z.string().default(''),
 });
 
 /**
@@ -117,6 +128,10 @@ const REQUIRED_IN_STRICT_ENVIRONMENTS = [
   'SMTP_USER',
   'SMTP_PASSWORD',
   'MAIL_FROM',
+  // FR-AUTH-04a: Google is one of the three registration paths; a real
+  // deployment never runs it with fake or missing credentials.
+  'GOOGLE_CLIENT_ID',
+  'GOOGLE_CLIENT_SECRET',
 ];
 
 /**
@@ -245,6 +260,17 @@ export function loadConfig(env) {
       secure: isProductionLike,
       sameSite: 'lax',
       path: '/',
+    }),
+
+    /**
+     * Google sign-in (FR-AUTH-04a, FR-AUTH-16). `isConfigured` decides whether
+     * the path is offered at all.
+     */
+    google: Object.freeze({
+      clientId: value.GOOGLE_CLIENT_ID,
+      clientSecret: value.GOOGLE_CLIENT_SECRET,
+      redirectUri: value.GOOGLE_REDIRECT_URI || `${value.APP_BASE_URL.replace(/\/+$/, '')}/auth/google/callback`,
+      isConfigured: value.GOOGLE_CLIENT_ID !== '' && value.GOOGLE_CLIENT_SECRET !== '',
     }),
 
     /** Outgoing SMTP (FR-AUTH-09/11); development defaults to Mailpit. */

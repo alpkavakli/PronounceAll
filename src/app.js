@@ -29,6 +29,8 @@ import {
   createUnconfiguredTurnstileVerifier,
 } from './lib/turnstile.js';
 import { createHibpChecker } from './lib/hibp.js';
+import { createFlowSecretStore } from './lib/flow-secret-store.js';
+import { createGoogleOidcClient } from './lib/google-oidc.js';
 import { createSmtpMailer } from './lib/mailer.js';
 import { hashPassword, verifyPassword } from './lib/passwords.js';
 import { createSessionStore } from './lib/session-store.js';
@@ -64,6 +66,7 @@ import {
   rateKeyForVerificationResend,
 } from './services/account-email.service.js';
 import { createAccountService, isRetiredAnonymousId } from './services/account.service.js';
+import { createGoogleSignInService } from './services/google-sign-in.service.js';
 import { createPasswordPolicy } from './services/password-policy.service.js';
 import { createEncounterService } from './services/encounter.service.js';
 import { createSessionService } from './services/session.service.js';
@@ -82,9 +85,15 @@ const here = path.dirname(fileURLToPath(import.meta.url));
  *   replaces the HIBP range client (FR-AUTH-07)
  * @param {import('./lib/mailer.js').SendMail} [overrides.sendMail] replaces the
  *   SMTP adapter (FR-AUTH-09/11)
+ * @param {import('./lib/google-oidc.js').GoogleOidcClient | null} [overrides.googleOidc]
+ *   replaces the Google provider boundary (FR-AUTH-04a); null means not offered
  * @returns {import('express').Express}
  */
-export function createApp({ isBreachedPassword = createHibpChecker(), sendMail = createSmtpMailer(config.mail) } = {}) {
+export function createApp({
+  isBreachedPassword = createHibpChecker(),
+  sendMail = createSmtpMailer(config.mail),
+  googleOidc = config.google.isConfigured ? createGoogleOidcClient(config.google) : null,
+} = {}) {
   const app = express();
 
   // Cloudflare and Nginx sit in front in production; the hop count is
@@ -146,6 +155,9 @@ export function createApp({ isBreachedPassword = createHibpChecker(), sendMail =
     sessionService,
     accountEmailService,
   });
+  const googleSignInService = googleOidc
+    ? createGoogleSignInService({ google: googleOidc, secrets: createFlowSecretStore(), verifyTurnstile })
+    : null;
 
   // 1. Observability first, so every later failure carries a correlation id.
   app.use(requestContextMiddleware());
@@ -236,6 +248,7 @@ export function createApp({ isBreachedPassword = createHibpChecker(), sendMail =
     accountRouter({
       accountService,
       sessionService,
+      googleSignInService,
       // Appendix C: 5 per 15 minutes per UUID + IP; 3 per hour per IP.
       loginRateLimit: rateLimitMiddleware({
         store: rateLimitStore,

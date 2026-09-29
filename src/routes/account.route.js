@@ -47,13 +47,48 @@ const POST_SIGN_IN_DESTINATION = '/login';
  * @param {ReturnType<import('../services/session.service.js').createSessionService>} dependencies.sessionService
  * @param {import('express').RequestHandler} dependencies.loginRateLimit
  * @param {import('express').RequestHandler} dependencies.registerRateLimit
+ * @param {ReturnType<import('../services/google-sign-in.service.js').createGoogleSignInService> | null} [dependencies.googleSignInService]
+ *   null when Google is not configured (development only): the path is not offered
  * @returns {import('express').Router}
  */
-export function accountRouter({ accountService, sessionService, loginRateLimit, registerRateLimit }) {
+export function accountRouter({
+  accountService,
+  sessionService,
+  loginRateLimit,
+  registerRateLimit,
+  googleSignInService = null,
+}) {
   const router = Router();
+  const googleOffered = googleSignInService !== null;
 
   const renderRegister = (req, res, { error = null, username = '', email = '' } = {}) =>
-    res.render('register', { title: 'Create an account', csrfToken: csrfTokenFor(req), error, username, email });
+    res.render('register', {
+      title: 'Create an account',
+      csrfToken: csrfTokenFor(req),
+      error,
+      username,
+      email,
+      googleOffered,
+    });
+
+  /** The Google username step. Its form carries the pending nonce, never the identity. */
+  const renderGoogleUsername = (req, res, { pendingNonce, email, error = null, username = '' }) => {
+    res.setHeader('Referrer-Policy', 'strict-origin');
+    res.render('register-google', {
+      title: 'Choose a username',
+      csrfToken: csrfTokenFor(req),
+      pendingNonce,
+      email,
+      error,
+      username,
+    });
+  };
+
+  /** Every failed Google attempt looks the same; the reason is only logged. */
+  const renderGoogleFailed = (res, { cancelled = false } = {}) => {
+    res.status(400);
+    res.render('google-failed', { title: 'Google sign-in', cancelled });
+  };
 
   const renderLogin = (req, res, { error = null, identifier = '', pendingEmail = null } = {}) =>
     res.render('login', {
@@ -64,6 +99,7 @@ export function accountRouter({ accountService, sessionService, loginRateLimit, 
       pendingEmail,
       passwordWasReset: req.query['password-reset'] === '1',
       signedInAs: req.session?.username ?? null,
+      googleOffered,
     });
 
   /**
@@ -90,6 +126,39 @@ export function accountRouter({ accountService, sessionService, loginRateLimit, 
   router.post('/register', registerRateLimit, requireCsrf(), async (req, res, next) => {
     const username = typeof req.body.username === 'string' ? req.body.username : '';
     const email = typeof req.body.email === 'string' ? req.body.email : '';
+
+    // Path A (SDD §5.6): the same endpoint, gates and rate limit; the form
+    // carries only the pending nonce.
+    if (req.body.googlePending !== undefined) {
+      if (!googleOffered) {
+        next(AppError.notFound());
+        return;
+      }
+      const pendingNonce = req.body.googlePending;
+      try {
+        const registered = await googleSignInService.register({
+          pendingNonce,
+          username: req.body.username,
+          anonymousId: req.anonymousId,
+          turnstileToken: req.body['cf-turnstile-response'],
+          remoteIp: req.ip,
+        });
+        await finishSignIn(req, res, registered);
+      } catch (error) {
+        if (AppError.isAppError(error) && error.meta?.restart) {
+          renderGoogleFailed(res);
+          return;
+        }
+        if (AppError.isAppError(error) && FORM_ERRORS.has(error.code)) {
+          res.status(error.status);
+          renderGoogleUsername(req, res, { pendingNonce, email: null, error: error.message, username });
+          return;
+        }
+        next(error);
+      }
+      return;
+    }
+
     try {
       const registered = await accountService.register({
         username: req.body.username,
@@ -139,6 +208,54 @@ export function accountRouter({ accountService, sessionService, loginRateLimit, 
         renderLogin(req, res, { error: error.message, identifier });
         return;
       }
+      next(error);
+    }
+  });
+
+  /**
+   * FR-AUTH-04a: start Google sign-in. Only this request, made when the person
+   * chooses "Continue with Google", sends anyone to Google (NFR-PRIV-05).
+   */
+  router.get('/auth/google', async (req, res, next) => {
+    if (!googleOffered) {
+      next(AppError.notFound());
+      return;
+    }
+    try {
+      const url = await googleSignInService.begin({ anonymousId: req.ensureAnonymousId() });
+      res.redirect(303, url);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  /**
+   * The OAuth callback. A signed-in outcome goes through the same auth
+   * transition as a password sign-in; anything else creates, links and merges
+   * nothing.
+   */
+  router.get('/auth/google/callback', async (req, res, next) => {
+    if (!googleOffered) {
+      next(AppError.notFound());
+      return;
+    }
+    // The URL carries the code and state; never let it leave in a Referer.
+    res.setHeader('Referrer-Policy', 'strict-origin');
+    try {
+      const outcome = await googleSignInService.complete({
+        state: req.query.state,
+        code: req.query.code,
+        error: req.query.error,
+        anonymousId: req.anonymousId,
+      });
+      if (outcome.kind === 'signed-in') {
+        await finishSignIn(req, res, outcome);
+      } else if (outcome.kind === 'needs-username') {
+        renderGoogleUsername(req, res, { pendingNonce: outcome.pendingNonce, email: outcome.email });
+      } else {
+        renderGoogleFailed(res, { cancelled: outcome.kind === 'cancelled' });
+      }
+    } catch (error) {
       next(error);
     }
   });

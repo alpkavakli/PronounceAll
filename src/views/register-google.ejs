@@ -1,0 +1,50 @@
+<%# PronounceAll — Copyright (C) 2026 Alp Kavaklı
+    SPDX-License-Identifier: AGPL-3.0-or-later
+    See LICENSE-NOTICE.md at the repository root.
+
+    The username step of Google registration (FR-AUTH-04a, FR-AUTH-05; SDD v1.1
+    §5.6). The Google identity stays on the server; this form carries only the
+    single-use pending nonce, and posts to /register like every other path
+    (CSRF, Turnstile, the rate limit). DYNAMIC (private, no-store), sent with
+    `Referrer-Policy: strict-origin`. %>
+<!doctype html>
+<html lang="en">
+<head>
+  <%- include('partials/head', { title: title }) %>
+  <% if (locals.turnstileSiteKey) { %>
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer nonce="<%= cspNonce %>"></script>
+  <% } %>
+</head>
+<body>
+  <main class="page account">
+    <h1>Choose a username</h1>
+    <p class="lede">
+      One last step to create your account with Google<% if (email) { %> (<strong><%= email %></strong>)<% } %>.
+    </p>
+
+    <% if (error) { %>
+      <p class="account__error" role="alert"><%= error %></p>
+    <% } %>
+
+    <form class="account__form" method="post" action="/register">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <input type="hidden" name="googlePending" value="<%= pendingNonce %>">
+
+      <label class="account__label" for="google-username">Username</label>
+      <input class="account__input" id="google-username" name="username" type="text"
+             value="<%= username %>" autocomplete="username" required
+             minlength="3" maxlength="20" pattern="[A-Za-z][A-Za-z0-9_\-]{2,19}"
+             aria-describedby="google-username-help">
+      <p class="account__help" id="google-username-help">3–20 letters, digits, “_” or “-”, starting with a letter. Shown publicly.</p>
+
+      <%- include('partials/turnstile') %>
+      <button type="submit" class="button">Create account</button>
+    </form>
+
+    <p><a href="/login">Cancel</a></p>
+  </main>
+
+  <%- include('partials/footer') %>
+  <script type="module" src="/js/bootstrap.js"></script>
+</body>
+</html>

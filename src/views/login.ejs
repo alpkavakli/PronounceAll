@@ -64,6 +64,11 @@
         <button type="submit" class="button">Sign in</button>
       </form>
 
+      <% if (googleOffered) { %>
+        <%# NFR-A11Y-14: a path that needs no remembered password. Nothing is
+            sent to Google until this is chosen (NFR-PRIV-05). %>
+        <p><a class="button button--secondary" href="/auth/google">Continue with Google</a></p>
+      <% } %>
       <p><a href="/reset-password">Forgot your password?</a></p>
       <p>New here? <a href="/register">Create an account</a></p>
     <% } %>

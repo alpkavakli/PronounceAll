@@ -23,7 +23,7 @@ export const RESERVED_USERNAMES = Object.freeze([
   'settings', 'account', 'profile', 'login', 'logout', 'register', 'signup', 'signin', 'reset-password',
   'verify-email', 'privacy', 'kvkk', 'about', 'contact', 'terms', 'legal', 'cookies', 'learnipa', 'practice',
   'search', 'word', 'words', 'phoneme', 'phonemes', 'ipa', 'save', 'listen', 'encounter', 'request-word',
-  'viewer-state', 'health',
+  'viewer-state', 'health', 'auth',
   // Abuse / impersonation deterrents
   'pronounceall', 'anthropic', 'claude', 'google', 'cloudflare', 'system', 'null', 'undefined', 'anonymous',
   'deleted', 'user',

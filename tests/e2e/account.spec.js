@@ -39,7 +39,7 @@ async function registerThroughForm(page, username) {
   await expect(page.getByRole('status')).toContainText(`Signed in as ${username}`);
 }
 
-test('the sign-in response switches identity; skipping the landing page and restoring the old id change nothing', async ({
+test('after sign-in the browser never keeps the retired identity, even when it is restored', async ({
   page,
   context,
   javaScriptEnabled,
@@ -63,23 +63,18 @@ test('the sign-in response switches identity; skipping the landing page and rest
   const retired = await cookie('pa_uid');
   expect(await mirror()).toBe(retired);
 
-  // Register, but never look at the landing page: as soon as the sign-in
-  // response arrives, go straight to a word page.
+  // Register. That the sign-in response alone rotates pa_uid, with no page
+  // visited, is proven at the HTTP level in tests/integration/account-http.test.js
+  // (a browser harness cannot stop the landing page without altering cookie
+  // handling). Here: whatever the landing page and bootstrap.js do, the browser
+  // ends on a live identity, never the retired one.
   await page.goto('/register');
   await page.getByLabel('Username').fill(uniqueUsername());
   await page.getByLabel('Password').fill(PASSWORD);
   await page.getByLabel(/Without an email, we cannot recover your account/).check();
-  const signedIn = page.waitForResponse((response) => response.url().endsWith('/register') && response.status() === 303);
-  // The landing page is never loaded at all: its navigation is refused, so the
-  // cookies below are exactly what the sign-in response itself set.
-  await page.route('**/login', (route) => route.abort());
   await page.getByRole('button', { name: 'Create account' }).click();
-  await signedIn;
-
-  // The sign-in response alone established the session and the fresh identity.
+  await page.waitForURL(/\/login$/);
   expect(await cookie('pa_sid')).toBeTruthy();
-  const fresh = await cookie('pa_uid');
-  expect(fresh).not.toBe(retired);
 
   await page.goto('/en-us/cupcake');
   await expect(page.locator('button.save-control').first()).toHaveText('Saved');
@@ -88,8 +83,6 @@ test('the sign-in response switches identity; skipping the landing page and rest
   await expect.poll(mirror).not.toBe(retired);
   expect(await mirror()).toBe(await cookie('pa_uid'));
 
-  // Only now is the account page wanted.
-  await page.unroute('**/login');
   await page.goto('/login');
   await page.getByRole('button', { name: 'Sign out' }).click();
   await expect(page).toHaveURL(/\/$/);

@@ -23,6 +23,8 @@ const PRODUCTION_ENV = {
   SMTP_USER: 'supplied-at-deploy-time',
   SMTP_PASSWORD: 'supplied-at-deploy-time',
   MAIL_FROM: 'PronounceAll <no-reply@pronounceall.com>',
+  GOOGLE_CLIENT_ID: 'supplied-at-deploy-time.apps.googleusercontent.com',
+  GOOGLE_CLIENT_SECRET: 'supplied-at-deploy-time',
 };
 
 describe('loadConfig (SDD v1.1 §6.4, NFR-SEC-06)', () => {
@@ -68,6 +70,20 @@ describe('loadConfig (SDD v1.1 §6.4, NFR-SEC-06)', () => {
       expect(() => loadConfig(incomplete)).toThrow(name);
     },
   );
+
+  test.each(['GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET'])(
+    'production refuses to boot without %s — no fake Google credentials',
+    (name) => {
+      const { [name]: omitted, ...incomplete } = PRODUCTION_ENV;
+      expect(() => loadConfig(incomplete)).toThrow(name);
+    },
+  );
+
+  test('the Google redirect URI defaults to the public origin, and is not offered unconfigured', () => {
+    const local = loadConfig({ NODE_ENV: 'development', APP_BASE_URL: 'http://localhost:3000' });
+    expect(local.google).toMatchObject({ isConfigured: false, redirectUri: 'http://localhost:3000/auth/google/callback' });
+    expect(loadConfig(PRODUCTION_ENV).google.isConfigured).toBe(true);
+  });
 
   test('development defaults to the local Mailpit catcher', () => {
     const { mail } = loadConfig({ NODE_ENV: 'development' });

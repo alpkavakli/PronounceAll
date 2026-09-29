@@ -48,7 +48,14 @@ export default defineConfig({
     ? undefined
     : {
         command: 'node src/server.js',
-        env: { TRUST_PROXY_HOPS: '1' },
+        // Placeholder Google credentials (development only) so the Google
+        // entry point is rendered and its redirect can be checked; no test
+        // follows the redirect, so nothing ever reaches Google.
+        env: {
+          TRUST_PROXY_HOPS: '1',
+          GOOGLE_CLIENT_ID: 'e2e-placeholder.apps.googleusercontent.com',
+          GOOGLE_CLIENT_SECRET: 'e2e-placeholder-not-a-secret',
+        },
         url: `${BASE_URL}/health`,
         reuseExistingServer: !process.env.CI,
         timeout: 60_000,

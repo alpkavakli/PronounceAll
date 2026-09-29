@@ -29,8 +29,65 @@ function rethrowDuplicate(error) {
     const message = String(error.message);
     if (message.includes('uq_users_username_lower')) throw new DuplicateIdentityError('username');
     if (message.includes('uq_user_accounts_email_lower')) throw new DuplicateIdentityError('email');
+    if (message.includes('uq_user_accounts_google_sub')) throw new DuplicateIdentityError('google');
   }
   throw error;
+}
+
+/**
+ * A Google credential (FR-AUTH-04a). Keyed by Google's stable subject; the
+ * email Google verified is recorded as verified, and takes part in the same
+ * `email_lower` uniqueness as every other account (FR-AUTH-06).
+ *
+ * @param {object} account
+ * @param {number} account.userId
+ * @param {string} account.googleSub
+ * @param {string} account.email
+ * @param {string|null} account.pictureUrl
+ * @param {Date} account.now
+ * @param {import('./transaction.js').Executor} [executor]
+ */
+export async function insertGoogleAccount({ userId, googleSub, email, pictureUrl, now }, executor = defaultExecutor()) {
+  try {
+    await executor.execute(
+      `INSERT INTO user_accounts
+              (user_id, provider, email, email_lower, email_verified_at, google_sub, profile_picture_url, created_at, updated_at)
+            VALUES (?, 'google', ?, ?, ?, ?, ?, ?, ?)`,
+      [userId, email, email.toLowerCase(), now, googleSub, pictureUrl, now, now],
+    );
+  } catch (error) {
+    rethrowDuplicate(error);
+  }
+}
+
+/**
+ * The account behind a Google subject, for sign-in.
+ *
+ * @param {string} googleSub
+ * @param {import('./transaction.js').Executor} [executor]
+ * @returns {Promise<{ userId: number, sessionEpoch: number, deletionState: string } | null>}
+ */
+export async function findGoogleAccount(googleSub, executor = defaultExecutor()) {
+  const [rows] = await executor.execute(
+    `SELECT u.user_id, u.session_epoch, u.deletion_state
+       FROM user_accounts a JOIN users u ON u.user_id = a.user_id
+      WHERE a.google_sub = ? AND a.provider = 'google'`,
+    [googleSub],
+  );
+  if (rows.length === 0) return null;
+  return { userId: Number(rows[0].user_id), sessionEpoch: Number(rows[0].session_epoch), deletionState: rows[0].deletion_state };
+}
+
+/**
+ * Whether any account, of any sign-in method, holds this email (FR-AUTH-06).
+ *
+ * @param {string} email
+ * @param {import('./transaction.js').Executor} [executor]
+ * @returns {Promise<boolean>}
+ */
+export async function emailIsTaken(email, executor = defaultExecutor()) {
+  const [rows] = await executor.execute('SELECT 1 FROM user_accounts WHERE email_lower = ?', [email.toLowerCase()]);
+  return rows.length > 0;
 }
 
 /**

@@ -62,6 +62,9 @@
       <button type="submit" class="button">Create account</button>
     </form>
 
+    <% if (googleOffered) { %>
+      <p><a class="button button--secondary" href="/auth/google">Continue with Google</a></p>
+    <% } %>
     <p>Already have an account? <a href="/login">Sign in</a></p>
   </main>
 
