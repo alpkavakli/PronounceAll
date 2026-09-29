@@ -1,0 +1,80 @@
+<%# PronounceAll — Copyright (C) 2026 Alp Kavaklı
+    SPDX-License-Identifier: AGPL-3.0-or-later
+    See LICENSE-NOTICE.md at the repository root.
+
+    "Practice my saved words" (FR-PRACTICE-01/03/05/06; SDD v1.1 §5.4;
+    Frontend Design Baseline §15: one dominant task, progress visible but
+    secondary, no dashboard around the question).
+
+    Three entry states, of which only the third serves a word. One turn per
+    page: the answer is a plain form POST, so practice works without
+    JavaScript. The word's audio and phoneme controls are the word page's own
+    partial, enhanced by the same scripts. No microphone is ever requested
+    (FR-PRACTICE-03). DYNAMIC (private, no-store). %>
+<!doctype html>
+<html lang="en">
+<head>
+  <%- include('partials/head', { title: title }) %>
+</head>
+<body>
+  <main class="page practice"<% if (turn) { %> data-viewer-variant="<%= turn.variant.code %>"<% } %>>
+    <% if (summary) { %>
+      <p class="notice" role="status">Session complete: <%= summary.correctCount %> of <%= summary.totalAttempts %> answers right.</p>
+    <% } %>
+
+    <% if (state.kind === 'empty') { %>
+      <h1>Practice my saved words</h1>
+      <p class="lede">You have not saved any words yet. Save a word from its page, and it will appear here for practice.</p>
+      <p><a class="button" href="/">Browse words</a></p>
+
+    <% } else if (state.kind === 'none-due') { %>
+      <h1>Practice my saved words</h1>
+      <p class="lede">You have no words due right now.</p>
+      <% if (!upcoming) { %>
+        <p><a href="/practice?upcoming=1">Want to see what's coming up?</a></p>
+      <% } else if (upcoming.length === 0) { %>
+        <p>Nothing is scheduled yet.</p>
+      <% } else { %>
+        <h2 class="section-heading">Coming up</h2>
+        <%# FR-PRACTICE-01: informational only — no session, no SM-2 change. %>
+        <ol class="practice__upcoming">
+          <% upcoming.forEach(function (item) { %>
+            <li>
+              <a href="/<%= item.variantCode %>/<%= encodeURIComponent(item.slug) %>"><%= item.displayHeadword %></a>
+              <span class="practice__due">due <time datetime="<%= item.nextDueAt.toISOString() %>"><%= item.nextDueAt.toISOString().slice(0, 10) %></time></span>
+            </li>
+          <% }); %>
+        </ol>
+      <% } %>
+
+    <% } else { %>
+      <p class="practice__progress">Word <%= turn.number %> of <%= turn.total %></p>
+      <article class="word practice__card">
+        <h1 class="word__headword"><%= turn.word.displayHeadword %></h1>
+        <p class="lede">Say it aloud, then check yourself against the recording.</p>
+
+        <section class="pronunciations" aria-label="Pronunciation">
+          <%- include('partials/pronunciation-list', { pronunciations: turn.pronunciations, word: turn.word, variant: turn.variant, audioPublicPrefix: audioPublicPrefix }) %>
+        </section>
+
+        <form class="practice__answer" method="post" action="/practice/attempt">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+          <input type="hidden" name="sessionId" value="<%= turn.sessionId %>">
+          <input type="hidden" name="turnSeq" value="<%= turn.turnSeq %>">
+          <button type="submit" class="button" name="rating" value="right">I got it right</button>
+          <button type="submit" class="button button--secondary" name="rating" value="wrong">I got it wrong</button>
+        </form>
+      </article>
+    <% } %>
+  </main>
+
+  <%- include('partials/footer') %>
+  <script type="module" src="/js/bootstrap.js"></script>
+  <% if (turn) { %>
+    <script type="module" src="/js/save-control.js"></script>
+    <script type="module" src="/js/learner-state.js"></script>
+    <script type="module" src="/js/phoneme-popover.js"></script>
+    <script type="module" src="/js/whole-word-audio.js"></script>
+  <% } %>
+</body>
+</html>

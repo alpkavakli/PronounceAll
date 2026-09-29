@@ -1,0 +1,121 @@
+<%# PronounceAll — Copyright (C) 2026 Alp Kavaklı
+    SPDX-License-Identifier: AGPL-3.0-or-later
+    See LICENSE-NOTICE.md at the repository root.
+
+    The pronunciation list: every pronunciation of a word with its clickable
+    phonemes, its audio control and its syllable breakdown (FR-WORD-03,
+    FR-IPA-02, FR-IPA-05, D-R3-08). Shared by the word page and the practice
+    page (FR-PRACTICE-03), so both offer exactly the same controls.
+
+    Expects: pronunciations, word, variant, audioPublicPrefix. Carries no
+    per-viewer content, so it is safe on the cacheable word shell. %>
+<ul class="pronunciation-list">
+  <% pronunciations.forEach(function (pronunciation) { %>
+    <li class="pronunciation<%= pronunciation.isPrimary ? ' pronunciation--primary' : '' %>">
+      <% if (pronunciation.gloss) { %>
+        <p class="pronunciation__gloss"><%= pronunciation.gloss %></p>
+      <% } %>
+
+      <%# FR-IPA-02: every phoneme is a clickable element carrying a
+          stable `data-phoneme-id`, composed from the stored
+          `pronunciation_phonemes` occurrences. No IPA is parsed here —
+          tokenisation happened once, server-side, at seed time.
+
+          Each unit is a <button> rather than a <span> with a handler:
+          that gives keyboard focus and Enter/Space activation for free
+          (NFR-A11Y-08 wants every control operable by at least two of
+          pointer, touch, keyboard), and without JavaScript it is simply
+          an inert button whose text still reads as the transcription
+          (FR-WORD-08).
+
+          Where the seed has not produced occurrences the static string
+          is rendered instead, so the page never loses its IPA. %>
+      <p class="pronunciation__ipa">
+        <span class="visually-hidden">IPA transcription: </span>
+        <% if (pronunciation.occurrences.length > 0) { %>
+          <%# Stress and syllable marks sit inline with the units they
+              belong to (D4 §3.8, baseline §8.3), so the line reads
+              `/ˈoʊ.pən/` rather than `oʊpən`. `displaySegments` is
+              null when the marks could not be aligned exactly; the
+              transcription then renders as the bare unit sequence, the
+              output this page produced before. %>
+          <% const segments = pronunciation.displaySegments
+               || pronunciation.occurrences.map(function (occurrence) {
+                    return { type: 'phoneme', occurrence };
+                  }); %>
+          <span class="ipa" lang="und-fonipa"><span class="ipa__slash" aria-hidden="true">/</span><% segments.forEach(function (segment) { if (segment.type === 'mark') { %><span class="ipa__mark"><%= segment.text %></span><% } else { const occurrence = segment.occurrence; %><button
+              type="button"
+              class="phoneme"
+              data-phoneme-id="<%= occurrence.phonemeId %>"
+              data-symbol="<%= occurrence.ipaSymbol %>"
+              aria-label="phoneme /<%= occurrence.ipaSymbol %>/"
+              <% if (occurrence.detail && occurrence.detail.exampleWord) { %>data-example-word="<%= occurrence.detail.exampleWord %>"<% } %>
+              <% if (occurrence.detail && occurrence.detail.examplePhonemicTranscription) { %>data-example-ipa="<%= occurrence.detail.examplePhonemicTranscription %>"<% } %>
+              <% if (occurrence.detail && occurrence.detail.audioStorageKey) { %>data-audio="<%= audioPublicPrefix %>/<%= occurrence.detail.audioStorageKey %>"<% } %>
+            ><%= occurrence.ipaSymbol %></button><% } }); %><span class="ipa__slash" aria-hidden="true">/</span></span>
+        <% } else { %>
+          <span class="ipa" lang="und-fonipa"><span class="ipa__slash" aria-hidden="true">/</span><%= pronunciation.ipaTranscription %><span class="ipa__slash" aria-hidden="true">/</span></span>
+        <% } %>
+        <% if (!pronunciation.isPrimary) { %>
+          <span class="pronunciation__badge">also</span>
+        <% } %>
+      </p>
+
+      <%# SDD §4.12, D-R3-08: a pronunciation gets an audio control ONLY
+          when an asset is known to correspond to THAT pronunciation.
+          Primary audio is never reused for a secondary pronunciation,
+          and a runtime Web Speech fallback is never presented as though
+          it were a specific secondary pronunciation. With no asset the
+          control is simply absent.
+
+          The native <audio controls> element is the FR-IPA-05 no-
+          JavaScript fallback: it plays without any script at all. %>
+      <% if (pronunciation.audioStorageKey) { %>
+        <p class="pronunciation__audio">
+          <audio controls preload="none" src="<%= audioPublicPrefix %>/<%= pronunciation.audioStorageKey %>"
+                 data-listen-kind="word" data-listen-id="<%= word.wordId %>">
+            Your browser cannot play this recording.
+          </audio>
+        </p>
+      <% } else if (pronunciation.isPrimary) { %>
+        <%# FR-IPA-05 tier 3: with no server-side asset for the PRIMARY
+            pronunciation, the last resort is the visitor's own Web
+            Speech API. It is offered only here — D-R3-08 forbids
+            presenting an uncontrolled synthesis as though it were a
+            specific secondary pronunciation.
+
+            Rendered hidden and unhidden by the script only where
+            speechSynthesis actually exists, so a no-JS or unsupported
+            browser is never shown a control that cannot speak. The
+            failure message is a live region: FR-IPA-05 requires a
+            visible error rather than a silent failure. %>
+        <p class="pronunciation__audio">
+          <button type="button" class="pronunciation__speak" hidden
+                  data-speak="<%= word.displayHeadword %>"
+                  data-lang="<%= variant.code %>"
+                  data-word-id="<%= word.wordId %>">
+            Play <span class="visually-hidden"><%= word.displayHeadword %></span>
+          </button>
+          <span class="pronunciation__audio-status" role="status" hidden></span>
+        </p>
+      <% } %>
+
+      <%# FR-WORD-03: the written syllable and stress breakdown, marking
+          primary stress with ˈ and secondary stress with ˌ. %>
+      <p class="pronunciation__syllables">
+        <span class="visually-hidden">Syllables and stress: </span>
+        <span class="syllables" lang="und-fonipa"><%= pronunciation.syllableBreakdown %></span>
+      </p>
+
+      <%# SDD §4.2: a pronunciation that does not come from the word's
+          Wiktionary entry names its own source. A Wiktionary row
+          inherits the footer attribution and gets no label. %>
+      <% if (pronunciation.sourceKind === 'cmudict') { %>
+        <p class="pronunciation__source">
+          Pronunciation source:
+          <a href="<%= pronunciation.sourceReference %>" rel="noopener noreferrer">CMU Pronouncing Dictionary</a>
+        </p>
+      <% } %>
+    </li>
+  <% }); %>
+</ul>

@@ -11,6 +11,7 @@
  * imports across a layer boundary it is not allowed to cross.
  */
 
+import { randomInt } from 'node:crypto';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -30,6 +31,7 @@ import {
 } from './lib/turnstile.js';
 import { createHibpChecker } from './lib/hibp.js';
 import { createFlowSecretStore } from './lib/flow-secret-store.js';
+import { createPracticeQueueStore } from './lib/practice-queue-store.js';
 import { createGoogleOidcClient } from './lib/google-oidc.js';
 import { createSmtpMailer } from './lib/mailer.js';
 import { hashPassword, verifyPassword } from './lib/passwords.js';
@@ -52,6 +54,7 @@ import {
 } from './middleware/index.js';
 import { accountEmailRouter } from './routes/account-email.route.js';
 import { accountRouter } from './routes/account.route.js';
+import { practiceRouter } from './routes/practice.route.js';
 import { healthRouter } from './routes/health.route.js';
 import { homeRouter } from './routes/home.route.js';
 import { learnIpaRouter } from './routes/learn-ipa.route.js';
@@ -67,6 +70,7 @@ import {
 } from './services/account-email.service.js';
 import { createAccountService, isRetiredAnonymousId } from './services/account.service.js';
 import { createGoogleSignInService } from './services/google-sign-in.service.js';
+import { createPracticeService } from './services/practice.service.js';
 import { createPasswordPolicy } from './services/password-policy.service.js';
 import { createEncounterService } from './services/encounter.service.js';
 import { createSessionService } from './services/session.service.js';
@@ -87,12 +91,15 @@ const here = path.dirname(fileURLToPath(import.meta.url));
  *   SMTP adapter (FR-AUTH-09/11)
  * @param {import('./lib/google-oidc.js').GoogleOidcClient | null} [overrides.googleOidc]
  *   replaces the Google provider boundary (FR-AUTH-04a); null means not offered
+ * @param {() => number} [overrides.practiceRng] replaces the practice queue's
+ *   CSPRNG-backed generator, so tests can seed it (FR-PRACTICE-02/05)
  * @returns {import('express').Express}
  */
 export function createApp({
   isBreachedPassword = createHibpChecker(),
   sendMail = createSmtpMailer(config.mail),
   googleOidc = config.google.isConfigured ? createGoogleOidcClient(config.google) : null,
+  practiceRng = () => randomInt(0, 2 ** 32) / 2 ** 32,
 } = {}) {
   const app = express();
 
@@ -155,6 +162,9 @@ export function createApp({
     sessionService,
     accountEmailService,
   });
+  // FR-PRACTICE-02/05: the queue's random choices, from the CSPRNG
+  // (Math.random is banned outright, NFR-SEC-12).
+  const practiceService = createPracticeService({ queueStore: createPracticeQueueStore(), rng: practiceRng });
   const googleSignInService = googleOidc
     ? createGoogleSignInService({ google: googleOidc, secrets: createFlowSecretStore(), verifyTurnstile })
     : null;
@@ -264,6 +274,8 @@ export function createApp({
       }),
     }),
   );
+  // FR-PRACTICE-*. Before the word router, whose `/:variant` would match it.
+  app.use(practiceRouter({ practiceService }));
   // Email verification and password reset. Before the word router.
   app.use(
     accountEmailRouter({
