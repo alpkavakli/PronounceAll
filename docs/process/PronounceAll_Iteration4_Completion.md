@@ -1,8 +1,8 @@
 # PronounceAll — Iteration 4 Completion
 
 **Date:** 2026-09-30
-**Status:** Iteration 4 (authentication) — all four slices built and gated; closure
-pending the maintainer's review. Next is Iteration 5 (practice / SM-2), not started.
+**Status:** Iteration 4 (authentication) **CLOSED** 2026-09-30 at `afad53a`, approved by the
+maintainer. Next is Iteration 5 (practice / SM-2).
 **Not specification authority.** Consult `DOC_INDEX.md` first.
 
 ---
