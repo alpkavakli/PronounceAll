@@ -1,6 +1,6 @@
 # PronounceAll — Session Handoff, 2026-09-16
 
-**Status:** Resume point. Supersedes `PronounceAll_Session_Handoff_2026-09-11.md`
+**Status:** SUPERSEDED for current state by `PronounceAll_Session_Handoff_2026-09-29.md`; accurate as the record of the IPA-quality work it describes. Resume point when written. Supersedes `PronounceAll_Session_Handoff_2026-09-11.md`
 for current state; that document remains accurate for Iteration 0–2 history.
 **Head:** `e530a8b`, `main`, 6 ahead of `origin/main`, working tree clean.
 **Not specification authority.** Consult `DOC_INDEX.md` first, as always.
