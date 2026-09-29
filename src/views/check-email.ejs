@@ -1,0 +1,32 @@
+<%# PronounceAll — Copyright (C) 2026 Alp Kavaklı
+    SPDX-License-Identifier: AGPL-3.0-or-later
+    See LICENSE-NOTICE.md at the repository root.
+
+    "Check your email" (FR-AUTH-09/10/11). The wording for a resend or a reset
+    request is the same whether or not an account matched, so this page is not
+    an account-enumeration oracle. DYNAMIC (private, no-store). %>
+<!doctype html>
+<html lang="en">
+<head>
+  <%- include('partials/head', { title: title }) %>
+</head>
+<body>
+  <main class="page account">
+    <h1>Check your email</h1>
+    <% if (reason === 'verification') { %>
+      <p class="lede" role="status">We have sent you a link to confirm your email address.</p>
+      <p>Open it within 24 hours to finish creating your account; then sign in. Until then you cannot sign in.</p>
+    <% } else if (reason === 'resend') { %>
+      <p class="lede" role="status">If that address belongs to an account waiting for confirmation, a new link is on its way.</p>
+      <p>Only the newest link works. It expires in 24 hours.</p>
+    <% } else { %>
+      <p class="lede" role="status">If that address belongs to an account with a confirmed email, a reset link is on its way.</p>
+      <p>The link works once and expires in 1 hour.</p>
+    <% } %>
+    <p><a href="/login">Back to sign in</a></p>
+  </main>
+
+  <%- include('partials/footer') %>
+  <script type="module" src="/js/bootstrap.js"></script>
+</body>
+</html>

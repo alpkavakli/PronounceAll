@@ -29,6 +29,7 @@ import {
   createUnconfiguredTurnstileVerifier,
 } from './lib/turnstile.js';
 import { createHibpChecker } from './lib/hibp.js';
+import { createSmtpMailer } from './lib/mailer.js';
 import { hashPassword, verifyPassword } from './lib/passwords.js';
 import { createSessionStore } from './lib/session-store.js';
 import {
@@ -47,6 +48,7 @@ import {
   securityHeadersMiddleware,
   sessionMiddleware,
 } from './middleware/index.js';
+import { accountEmailRouter } from './routes/account-email.route.js';
 import { accountRouter } from './routes/account.route.js';
 import { healthRouter } from './routes/health.route.js';
 import { homeRouter } from './routes/home.route.js';
@@ -56,7 +58,13 @@ import { viewerStateRouter } from './routes/viewer-state.route.js';
 import { encounterRouter } from './routes/encounter.route.js';
 import { listenRouter } from './routes/listen.route.js';
 import { saveRouter } from './routes/save.route.js';
+import {
+  createAccountEmailService,
+  rateKeyForEmail,
+  rateKeyForVerificationResend,
+} from './services/account-email.service.js';
 import { createAccountService, isRetiredAnonymousId } from './services/account.service.js';
+import { createPasswordPolicy } from './services/password-policy.service.js';
 import { createEncounterService } from './services/encounter.service.js';
 import { createSessionService } from './services/session.service.js';
 import { createSaveStateService } from './services/save-state.service.js';
@@ -72,9 +80,11 @@ const here = path.dirname(fileURLToPath(import.meta.url));
  * @param {object} [overrides] test seams for third parties; production passes none
  * @param {(password: string) => Promise<boolean>} [overrides.isBreachedPassword]
  *   replaces the HIBP range client (FR-AUTH-07)
+ * @param {import('./lib/mailer.js').SendMail} [overrides.sendMail] replaces the
+ *   SMTP adapter (FR-AUTH-09/11)
  * @returns {import('express').Express}
  */
-export function createApp({ isBreachedPassword = createHibpChecker() } = {}) {
+export function createApp({ isBreachedPassword = createHibpChecker(), sendMail = createSmtpMailer(config.mail) } = {}) {
   const app = express();
 
   // Cloudflare and Nginx sit in front in production; the hop count is
@@ -115,11 +125,26 @@ export function createApp({ isBreachedPassword = createHibpChecker() } = {}) {
 
   // Registered sessions are Redis-backed in every environment (V3).
   const sessionService = createSessionService({ store: createSessionStore() });
+  const passwords = { hashPassword, verifyPassword };
+  const passwordPolicy = createPasswordPolicy({ isBreachedPassword });
+  const accountEmailService = createAccountEmailService({
+    sendMail,
+    // Links are absolute, on the configured public origin.
+    links: {
+      verification: (token) => `${config.baseUrl}/verify-email?token=${token}`,
+      reset: (token) => `${config.baseUrl}/reset-password/confirm?token=${token}`,
+    },
+    passwords,
+    passwordPolicy,
+    sessionService,
+    verifyTurnstile,
+  });
   const accountService = createAccountService({
     verifyTurnstile,
-    isBreachedPassword,
-    passwords: { hashPassword, verifyPassword },
+    passwordPolicy,
+    passwords,
     sessionService,
+    accountEmailService,
   });
 
   // 1. Observability first, so every later failure carries a correlation id.
@@ -223,6 +248,25 @@ export function createApp({ isBreachedPassword = createHibpChecker() } = {}) {
         bucket: 'register',
         ...RATE_LIMITS.REGISTER,
         keyOf: byIp,
+      }),
+    }),
+  );
+  // Email verification and password reset. Before the word router.
+  app.use(
+    accountEmailRouter({
+      accountEmailService,
+      // Appendix C: 3 per hour per account ID; 3 per hour per email address.
+      resendRateLimit: rateLimitMiddleware({
+        store: rateLimitStore,
+        bucket: 'verify-resend',
+        ...RATE_LIMITS.VERIFICATION_RESEND,
+        keyOf: (req) => rateKeyForVerificationResend(req.body?.email),
+      }),
+      resetRateLimit: rateLimitMiddleware({
+        store: rateLimitStore,
+        bucket: 'password-reset',
+        ...RATE_LIMITS.PASSWORD_RESET,
+        keyOf: (req) => rateKeyForEmail(req.body?.email),
       }),
     }),
   );

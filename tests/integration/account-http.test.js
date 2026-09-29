@@ -43,7 +43,9 @@ async function fakeHibp(password) {
   return BREACHED_SET.has(password);
 }
 
-const newApp = () => createApp({ isBreachedPassword: fakeHibp });
+/** Everything the app would have emailed, instead of SMTP. */
+const outbox = [];
+const newApp = () => createApp({ isBreachedPassword: fakeHibp, sendMail: async (message) => void outbox.push(message) });
 
 const createdUsernames = [];
 const anonymousIds = [];

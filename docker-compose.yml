@@ -64,6 +64,17 @@ services:
       mysql:
         condition: service_healthy
 
+  mailpit:
+    # DEVELOPMENT ONLY. A local SMTP catcher: verification and reset emails land
+    # in its web inbox at http://localhost:8025 instead of being delivered. The
+    # application sends through its SMTP adapter, so production points the same
+    # code at a real relay; staging and production refuse to boot without SMTP
+    # credentials (src/config). The production provider is not chosen here.
+    image: axllent/mailpit:v1.27
+    ports:
+      - '1025:1025'
+      - '8025:8025'
+
   app:
     build: .
     environment:

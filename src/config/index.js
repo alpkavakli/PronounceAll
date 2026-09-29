@@ -76,6 +76,19 @@ const schema = z.object({
    */
   CSRF_SECRET: z.string().default(''),
   CLOUDFLARE_CACHE_PURGE_TOKEN: z.string().default(''),
+
+  /**
+   * Outgoing transactional email over SMTP (FR-AUTH-09/11). The defaults point
+   * at the development-only Mailpit catcher in docker-compose. Staging and
+   * production must name a real relay with credentials; the provider itself is
+   * not fixed in code (V5 is provisional).
+   */
+  SMTP_HOST: z.string().min(1).default('127.0.0.1'),
+  SMTP_PORT: port.default(1025),
+  SMTP_SECURE: z.enum(['true', 'false']).default('false'),
+  SMTP_USER: z.string().default(''),
+  SMTP_PASSWORD: z.string().default(''),
+  MAIL_FROM: z.string().min(3).default('PronounceAll <no-reply@pronounceall.localhost>'),
 });
 
 /**
@@ -98,6 +111,12 @@ const REQUIRED_IN_STRICT_ENVIRONMENTS = [
   // SDD §6.6: a fixed secret shared by every process, or tokens issued by one
   // process would not verify on another.
   'CSRF_SECRET',
+  // FR-AUTH-09/11: verification and reset mail must reach a real relay. The
+  // development defaults (Mailpit, no credentials) can never be used here.
+  'SMTP_HOST',
+  'SMTP_USER',
+  'SMTP_PASSWORD',
+  'MAIL_FROM',
 ];
 
 /**
@@ -226,6 +245,16 @@ export function loadConfig(env) {
       secure: isProductionLike,
       sameSite: 'lax',
       path: '/',
+    }),
+
+    /** Outgoing SMTP (FR-AUTH-09/11); development defaults to Mailpit. */
+    mail: Object.freeze({
+      host: value.SMTP_HOST,
+      port: value.SMTP_PORT,
+      secure: value.SMTP_SECURE === 'true',
+      user: value.SMTP_USER,
+      password: value.SMTP_PASSWORD,
+      from: value.MAIL_FROM,
     }),
 
     /**

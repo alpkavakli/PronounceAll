@@ -1019,3 +1019,12 @@ a:focus-visible,
   background: var(--color-surface);
   color: var(--color-ink);
 }
+
+.account__optional {
+  font-weight: 400;
+  color: var(--color-muted);
+}
+
+.account__error p {
+  margin: 0 0 var(--space-3);
+}

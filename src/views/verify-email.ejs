@@ -1,0 +1,37 @@
+<%# PronounceAll — Copyright (C) 2026 Alp Kavaklı
+    SPDX-License-Identifier: AGPL-3.0-or-later
+    See LICENSE-NOTICE.md at the repository root.
+
+    The result of following a verification link (FR-AUTH-09/10). Reached by a
+    redirect, so the token is not in this page's URL. Verifying does not sign
+    anyone in. DYNAMIC (private, no-store). %>
+<!doctype html>
+<html lang="en">
+<head>
+  <%- include('partials/head', { title: title }) %>
+</head>
+<body>
+  <main class="page account">
+    <% if (status === 'verified' || status === 'already-verified') { %>
+      <h1>Email confirmed</h1>
+      <p class="lede" role="status"><%= status === 'verified' ? 'Thanks — your email address is confirmed.' : 'Your email address was already confirmed.' %></p>
+      <p><a class="button" href="/login">Sign in</a></p>
+    <% } else { %>
+      <h1><%= status === 'expired' ? 'This link has expired' : 'This link cannot be used' %></h1>
+      <p class="lede" role="status">
+        <%= status === 'expired' ? 'Confirmation links last 24 hours.' : 'It may have been used already, or replaced by a newer link.' %>
+        Request a new one below.
+      </p>
+      <form class="account__form" method="post" action="/verify-email/resend">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <label class="account__label" for="resend-email">Email address</label>
+        <input class="account__input" id="resend-email" name="email" type="email" autocomplete="email" required maxlength="320">
+        <button type="submit" class="button">Send a new link</button>
+      </form>
+    <% } %>
+  </main>
+
+  <%- include('partials/footer') %>
+  <script type="module" src="/js/bootstrap.js"></script>
+</body>
+</html>

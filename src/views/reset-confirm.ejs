@@ -1,0 +1,45 @@
+<%# PronounceAll — Copyright (C) 2026 Alp Kavaklı
+    SPDX-License-Identifier: AGPL-3.0-or-later
+    See LICENSE-NOTICE.md at the repository root.
+
+    Choosing a new password from a reset link (FR-AUTH-07, FR-AUTH-11). The
+    token travels in a hidden field; the response is sent with
+    `Referrer-Policy: strict-origin`. A successful change signs every device out.
+    DYNAMIC (private, no-store). %>
+<!doctype html>
+<html lang="en">
+<head>
+  <%- include('partials/head', { title: title }) %>
+</head>
+<body>
+  <main class="page account">
+    <% if (status === 'valid') { %>
+      <h1>Choose a new password</h1>
+
+      <% if (error) { %>
+        <p class="account__error" role="alert"><%= error %></p>
+      <% } %>
+
+      <form class="account__form" method="post" action="/reset-password/confirm">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <input type="hidden" name="token" value="<%= token %>">
+        <label class="account__label" for="reset-new-password">New password</label>
+        <input class="account__input" id="reset-new-password" name="password" type="password"
+               autocomplete="new-password" required minlength="8" maxlength="100"
+               aria-describedby="reset-new-password-help">
+        <p class="account__help" id="reset-new-password-help">At least 8 characters. Passwords found in known data breaches are refused. Every device will be signed out.</p>
+        <button type="submit" class="button">Set new password</button>
+      </form>
+    <% } else { %>
+      <h1><%= status === 'expired' ? 'This reset link has expired' : 'This reset link cannot be used' %></h1>
+      <p class="lede" role="status">
+        <%= status === 'expired' ? 'Reset links last 1 hour.' : 'It may have been used already, or replaced by a newer link.' %>
+      </p>
+      <p><a class="button" href="/reset-password">Request a new link</a></p>
+    <% } %>
+  </main>
+
+  <%- include('partials/footer') %>
+  <script type="module" src="/js/bootstrap.js"></script>
+</body>
+</html>

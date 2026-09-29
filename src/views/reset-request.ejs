@@ -1,0 +1,39 @@
+<%# PronounceAll — Copyright (C) 2026 Alp Kavaklı
+    SPDX-License-Identifier: AGPL-3.0-or-later
+    See LICENSE-NOTICE.md at the repository root.
+
+    Password reset request (FR-AUTH-11, FR-AUTH-14). The answer is the same for
+    every address. DYNAMIC (private, no-store); Turnstile where configured. %>
+<!doctype html>
+<html lang="en">
+<head>
+  <%- include('partials/head', { title: title }) %>
+  <% if (locals.turnstileSiteKey) { %>
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer nonce="<%= cspNonce %>"></script>
+  <% } %>
+</head>
+<body>
+  <main class="page account">
+    <h1>Reset your password</h1>
+    <p class="lede">We will email a reset link to the address on your account, if it has been confirmed.</p>
+
+    <% if (error) { %>
+      <p class="account__error" role="alert"><%= error %></p>
+    <% } %>
+
+    <form class="account__form" method="post" action="/reset-password">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <label class="account__label" for="reset-email">Email address</label>
+      <input class="account__input" id="reset-email" name="email" type="email" value="<%= email %>"
+             autocomplete="email" required maxlength="320">
+      <%- include('partials/turnstile') %>
+      <button type="submit" class="button">Send reset link</button>
+    </form>
+
+    <p>Accounts created without an email cannot be reset. <a href="/login">Back to sign in</a></p>
+  </main>
+
+  <%- include('partials/footer') %>
+  <script type="module" src="/js/bootstrap.js"></script>
+</body>
+</html>

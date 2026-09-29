@@ -3,20 +3,26 @@
  * See LICENSE-NOTICE.md at the repository root. */
 
 /**
- * Registration, login, and the merge that follows either (FR-AUTH-04/05/07/08/
- * 13/14/18/19, FR-CONSENT-04; SDD v1.1 §5.1, §5.6, V3).
+ * Registration, login, and the merge that follows either (FR-AUTH-04/05/06/07/
+ * 08/09/13/14/18/19, FR-CONSENT-04; SDD v1.1 §5.1, §5.6, V3).
  *
- * Registration (§5.6): Turnstile, then the password and username rules, then
- * the breached-password check, then one transaction that inserts the user, the
- * credential and — for a username-only account — the no-recovery
- * acknowledgement. Uniqueness is the database's; the checks only shape the
- * message. A duplicate username is reported plainly (usernames are public).
+ * Registration (§5.6): Turnstile, then the username rules, the email or the
+ * no-recovery acknowledgement, the password policy, then one transaction that
+ * inserts the user and the credential — and either the no-recovery
+ * acknowledgement (no email) or a verification token (email), whose email is
+ * sent only after commit. Uniqueness is the database's; the checks only shape
+ * the message. A duplicate username is reported plainly (usernames are
+ * public); an unusable or already-used email gets one generic message, the same
+ * for both, so registration is not an account-enumeration oracle (FR-AUTH-06).
+ * An account with an email is not signed in until the email is verified
+ * (FR-AUTH-09).
  *
- * Login: every failure is the one generic message (FR-AUTH-13), and a bcrypt
- * comparison always runs, so an unknown username costs the same as a wrong
- * password.
+ * Login, by username or by email: every failure is the one generic message
+ * (FR-AUTH-13), and a bcrypt comparison always runs. Only once a correct
+ * credential pair is presented may the answer say that the email is still
+ * unverified — the explicit affordance FR-AUTH-13 allows.
  *
- * Merge (§5.1): after either, the carried `pa_uid` is bound to the account if a
+ * Merge (§5.1): after sign-in, the carried `pa_uid` is bound to the account if a
  * progress profile exists for it and it is not already bound, and the derived
  * state is recomputed across the account's identities in the same transaction —
  * latest event wins, by the same derivation reconciliation uses. The carried
@@ -25,9 +31,9 @@
  */
 
 import { AppError } from '../errors/index.js';
-import { logger } from '../lib/logger.js';
 import {
   DuplicateIdentityError,
+  findPasswordCredentialByEmail,
   findPasswordCredentialByUsername,
   insertPasswordAccount,
   insertUser,
@@ -36,6 +42,8 @@ import {
 import { insertLinkBinding } from '../repositories/identity-bindings.repository.js';
 import { anonymousProfileExists, findBoundUserId } from '../repositories/progress.repository.js';
 import { withTransaction } from '../repositories/transaction.js';
+import { normaliseEmail } from './account-email.service.js';
+import { PASSWORD_MAX_LENGTH } from './password-policy.service.js';
 import { recomputeOwnerStates } from './state-reconciliation.service.js';
 import { requireAcceptableUsername } from './username-policy.service.js';
 
@@ -50,31 +58,26 @@ export async function isRetiredAnonymousId(anonymousId) {
   return (await findBoundUserId(anonymousId)) !== null;
 }
 
-/** FR-AUTH-07. */
-export const PASSWORD_MIN_LENGTH = 8;
-export const PASSWORD_MAX_LENGTH = 100;
-
-export const BREACHED_PASSWORD_MESSAGE =
-  'This password has appeared in a known breach; please choose another.';
-
-export const PASSWORD_CHECK_UNAVAILABLE_MESSAGE =
-  "We couldn't verify this password right now. Please try again shortly.";
+/** FR-AUTH-06: one message for an unusable and for an already-used email. */
+export const EMAIL_REJECTED_MESSAGE = 'This email cannot be used for registration.';
 
 /**
  * @param {object} dependencies
  * @param {(token: string, remoteIp?: string) => Promise<{ success: boolean }>} dependencies.verifyTurnstile
- * @param {(password: string) => Promise<boolean>} dependencies.isBreachedPassword
+ * @param {{ requireAcceptablePassword: (p: unknown) => Promise<string> }} dependencies.passwordPolicy
  * @param {{ hashPassword: (p: string) => Promise<string>, verifyPassword: (p: string, h?: string|null) => Promise<boolean> }}
  *   dependencies.passwords bcrypt cost 12 (FR-AUTH-08); `verifyPassword` always
  *   runs one comparison, even with no hash (FR-AUTH-13)
  * @param {ReturnType<import('./session.service.js').createSessionService>} dependencies.sessionService
+ * @param {ReturnType<import('./account-email.service.js').createAccountEmailService>} dependencies.accountEmailService
  * @param {() => Date} [dependencies.clock]
  */
 export function createAccountService({
   verifyTurnstile,
-  isBreachedPassword,
+  passwordPolicy,
   passwords,
   sessionService,
+  accountEmailService,
   clock = () => new Date(),
 }) {
   const { hashPassword, verifyPassword } = passwords;
@@ -87,62 +90,56 @@ export function createAccountService({
     }
   }
 
-  /** FR-AUTH-07: length only, no composition rules, then the breach check. */
-  async function requireAcceptablePassword(password) {
-    if (typeof password !== 'string' || password.length < PASSWORD_MIN_LENGTH) {
-      throw AppError.validation(`Passwords are at least ${PASSWORD_MIN_LENGTH} characters long.`);
-    }
-    if (password.length > PASSWORD_MAX_LENGTH) {
-      throw AppError.validation(`Passwords are at most ${PASSWORD_MAX_LENGTH} characters long.`);
-    }
-    let breached;
-    try {
-      breached = await isBreachedPassword(password);
-    } catch (cause) {
-      // Fail closed: an unchecked password is never accepted. The failure is
-      // the service's, not the password's, and the message says so. Only the
-      // error's kind is logged — never the password, its hash or the response.
-      logger.warn({ reason: cause?.name ?? 'Error' }, 'Breached-password check unavailable; registration refused');
-      throw AppError.unavailable(PASSWORD_CHECK_UNAVAILABLE_MESSAGE);
-    }
-    if (breached) throw AppError.validation(BREACHED_PASSWORD_MESSAGE);
-  }
-
   /**
-   * Path C without an email (FR-AUTH-04c, FR-CONSENT-04).
+   * Paths B and C of FR-AUTH-04: a username and password, with an email (which
+   * must then be verified before sign-in) or without one (which needs the
+   * no-recovery acknowledgement).
    *
    * @param {object} request
    * @param {unknown} request.username
+   * @param {unknown} [request.email] empty or absent for no email
    * @param {unknown} request.password
    * @param {boolean} request.acknowledgedNoRecovery
    * @param {string|undefined} request.turnstileToken
    * @param {string} [request.remoteIp]
-   * @returns {Promise<{ userId: number, sessionEpoch: number }>}
+   * @returns {Promise<{ userId: number, sessionEpoch: number, verificationRequired: boolean }>}
    */
-  async function registerWithUsername({ username, password, acknowledgedNoRecovery, turnstileToken, remoteIp }) {
+  async function register({ username, email: emailInput, password, acknowledgedNoRecovery, turnstileToken, remoteIp }) {
     await requireTurnstile(turnstileToken, remoteIp);
     const acceptedUsername = requireAcceptableUsername(username);
-    if (!acknowledgedNoRecovery) {
+
+    const wantsEmail = typeof emailInput === 'string' && emailInput.trim().length > 0;
+    const email = wantsEmail ? normaliseEmail(emailInput) : null;
+    if (wantsEmail && !email) throw AppError.validation(EMAIL_REJECTED_MESSAGE);
+    if (!email && !acknowledgedNoRecovery) {
       throw AppError.validation('Please confirm that you accept an account without email recovery.');
     }
-    await requireAcceptablePassword(password);
 
-    const passwordHash = await hashPassword(/** @type {string} */ (password));
+    const accepted = await passwordPolicy.requireAcceptablePassword(password);
+    const passwordHash = await hashPassword(accepted);
     const now = clock();
     try {
-      const userId = await withTransaction(async (tx) => {
+      const { userId, verificationToken } = await withTransaction(async (tx) => {
         const id = await insertUser({ username: acceptedUsername, now }, tx);
-        await insertPasswordAccount({ userId: id, passwordHash, now }, tx);
-        await insertUserConsent(
-          { userId: id, consentType: 'no_recovery_ack', consentValue: 'acknowledged', now },
-          tx,
-        );
-        return id;
+        await insertPasswordAccount({ userId: id, passwordHash, email, now }, tx);
+        if (!email) {
+          await insertUserConsent(
+            { userId: id, consentType: 'no_recovery_ack', consentValue: 'acknowledged', now },
+            tx,
+          );
+          return { userId: id, verificationToken: null };
+        }
+        return { userId: id, verificationToken: await accountEmailService.issueVerificationToken(id, tx, now) };
       });
-      return { userId, sessionEpoch: 0 };
+      // After commit, never inside the transaction (§5.6).
+      if (email) accountEmailService.sendVerificationEmail(email, verificationToken);
+      return { userId, sessionEpoch: 0, verificationRequired: Boolean(email) };
     } catch (error) {
       if (error instanceof DuplicateIdentityError && error.field === 'username') {
         throw AppError.conflict('That username is already taken.');
+      }
+      if (error instanceof DuplicateIdentityError && error.field === 'email') {
+        throw AppError.validation(EMAIL_REJECTED_MESSAGE);
       }
       throw error;
     }
@@ -150,23 +147,32 @@ export function createAccountService({
 
   /**
    * @param {object} request
-   * @param {unknown} request.identifier the username
+   * @param {unknown} request.identifier a username, or an email address
    * @param {unknown} request.password
    * @param {string|undefined} request.turnstileToken
    * @param {string} [request.remoteIp]
-   * @returns {Promise<{ userId: number, sessionEpoch: number }>}
+   * @returns {Promise<{ userId: number, sessionEpoch: number, verificationPending: false } | { verificationPending: true, email: string }>}
    */
   async function login({ identifier, password, turnstileToken, remoteIp }) {
     await requireTurnstile(turnstileToken, remoteIp);
     const name = typeof identifier === 'string' ? identifier.trim() : '';
     const secret = typeof password === 'string' ? password : '';
 
-    const credential = name.length > 0 && name.length <= 320 ? await findPasswordCredentialByUsername(name) : null;
+    let credential = null;
+    if (name.length > 0 && name.length <= 320) {
+      credential = name.includes('@')
+        ? await findPasswordCredentialByEmail(name)
+        : await findPasswordCredentialByUsername(name);
+    }
     // Always one bcrypt comparison (FR-AUTH-13).
     const matched = await verifyPassword(secret.slice(0, PASSWORD_MAX_LENGTH), credential?.passwordHash);
     if (!credential || !matched || credential.deletionState !== 'none') throw AppError.auth();
 
-    return { userId: credential.userId, sessionEpoch: credential.sessionEpoch };
+    // FR-AUTH-09: blocked until verified — said only now, after a correct pair.
+    if (credential.email && !credential.emailVerifiedAt) {
+      return { verificationPending: true, email: credential.email };
+    }
+    return { userId: credential.userId, sessionEpoch: credential.sessionEpoch, verificationPending: false };
   }
 
   /**
@@ -210,5 +216,5 @@ export function createAccountService({
     return { sessionId, retireAnonymousId: merge.retireAnonymousId };
   }
 
-  return { registerWithUsername, login, mergeAnonymousIdentity, completeSignIn };
+  return { register, login, mergeAnonymousIdentity, completeSignIn };
 }

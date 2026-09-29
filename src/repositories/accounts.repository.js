@@ -119,6 +119,87 @@ export async function findPasswordCredentialByUsername(username, executor = defa
 }
 
 /**
+ * The password credential behind an email address, for login by email and for
+ * the verification and reset flows.
+ *
+ * @param {string} email compared lower-cased (FR-AUTH-06)
+ * @param {import('./transaction.js').Executor} [executor]
+ * @returns {Promise<{ userId: number, username: string, passwordHash: string, email: string|null, emailVerifiedAt: Date|null, sessionEpoch: number, deletionState: string } | null>}
+ */
+export async function findPasswordCredentialByEmail(email, executor = defaultExecutor()) {
+  const [rows] = await executor.execute(
+    `SELECT u.user_id, u.username, u.session_epoch, u.deletion_state,
+            a.password_hash, a.email, a.email_verified_at
+       FROM user_accounts a
+       JOIN users u ON u.user_id = a.user_id
+      WHERE a.email_lower = ? AND a.provider = 'password'`,
+    [email.toLowerCase()],
+  );
+  if (rows.length === 0) return null;
+  const row = rows[0];
+  return {
+    userId: Number(row.user_id),
+    username: row.username,
+    passwordHash: row.password_hash,
+    email: row.email,
+    emailVerifiedAt: row.email_verified_at,
+    sessionEpoch: Number(row.session_epoch),
+    deletionState: row.deletion_state,
+  };
+}
+
+/**
+ * The email address and its verification state for a user's password account.
+ *
+ * @param {number} userId
+ * @param {import('./transaction.js').Executor} [executor]
+ * @returns {Promise<{ email: string|null, emailVerifiedAt: Date|null } | null>}
+ */
+export async function findAccountEmail(userId, executor = defaultExecutor()) {
+  const [rows] = await executor.execute(
+    "SELECT email, email_verified_at FROM user_accounts WHERE user_id = ? AND provider = 'password'",
+    [userId],
+  );
+  return rows.length === 0 ? null : { email: rows[0].email, emailVerifiedAt: rows[0].email_verified_at };
+}
+
+/**
+ * Mark the email verified, once; a later call leaves the first time in place.
+ *
+ * @param {number} userId
+ * @param {Date} now
+ * @param {import('./transaction.js').Executor} [executor]
+ */
+export async function markEmailVerified(userId, now, executor = defaultExecutor()) {
+  await executor.execute(
+    `UPDATE user_accounts SET email_verified_at = COALESCE(email_verified_at, ?), updated_at = ?
+      WHERE user_id = ? AND provider = 'password' AND email IS NOT NULL`,
+    [now, now, userId],
+  );
+}
+
+/**
+ * A password change: the new hash and `session_epoch + 1` in the caller's
+ * transaction, so every existing session stops authorising at once (V3).
+ *
+ * @param {object} change
+ * @param {number} change.userId
+ * @param {string} change.passwordHash
+ * @param {Date} change.now
+ * @param {import('./transaction.js').Executor} executor a transaction connection
+ */
+export async function replacePasswordAndEndSessions({ userId, passwordHash, now }, executor) {
+  await executor.execute(
+    "UPDATE user_accounts SET password_hash = ?, updated_at = ? WHERE user_id = ? AND provider = 'password'",
+    [passwordHash, now, userId],
+  );
+  await executor.execute('UPDATE users SET session_epoch = session_epoch + 1, updated_at = ? WHERE user_id = ?', [
+    now,
+    userId,
+  ]);
+}
+
+/**
  * The per-request session check's one primary-key read (V3).
  *
  * @param {number} userId

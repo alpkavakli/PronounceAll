@@ -31,14 +31,28 @@
     <% } else { %>
       <h1>Sign in</h1>
 
+      <% if (passwordWasReset) { %>
+        <p class="notice" role="status">Your password was changed and every device was signed out. Sign in with the new password.</p>
+      <% } %>
       <% if (error) { %>
         <p class="account__error" role="alert"><%= error %></p>
+      <% } %>
+      <% if (pendingEmail) { %>
+        <%# FR-AUTH-09 / FR-AUTH-13: shown only after a correct credential pair. %>
+        <div class="account__error" role="alert">
+          <p>Please confirm your email address before signing in. We sent a link to <strong><%= pendingEmail %></strong>.</p>
+          <form method="post" action="/verify-email/resend">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            <input type="hidden" name="email" value="<%= pendingEmail %>">
+            <button type="submit" class="button button--secondary">Send a new link</button>
+          </form>
+        </div>
       <% } %>
 
       <form class="account__form" method="post" action="/login">
         <input type="hidden" name="_csrf" value="<%= csrfToken %>">
 
-        <label class="account__label" for="login-identifier">Username</label>
+        <label class="account__label" for="login-identifier">Username or email</label>
         <input class="account__input" id="login-identifier" name="identifier" type="text"
                value="<%= identifier %>" autocomplete="username" required maxlength="320">
 
@@ -50,6 +64,7 @@
         <button type="submit" class="button">Sign in</button>
       </form>
 
+      <p><a href="/reset-password">Forgot your password?</a></p>
       <p>New here? <a href="/register">Create an account</a></p>
     <% } %>
   </main>

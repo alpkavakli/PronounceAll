@@ -19,6 +19,10 @@ const PRODUCTION_ENV = {
   TURNSTILE_SITE_KEY: 'supplied-at-deploy-time',
   TURNSTILE_SECRET_KEY: 'supplied-at-deploy-time',
   CSRF_SECRET: 'supplied-at-deploy-time-and-at-least-32-chars',
+  SMTP_HOST: 'smtp.relay.example',
+  SMTP_USER: 'supplied-at-deploy-time',
+  SMTP_PASSWORD: 'supplied-at-deploy-time',
+  MAIL_FROM: 'PronounceAll <no-reply@pronounceall.com>',
 };
 
 describe('loadConfig (SDD v1.1 §6.4, NFR-SEC-06)', () => {
@@ -55,6 +59,19 @@ describe('loadConfig (SDD v1.1 §6.4, NFR-SEC-06)', () => {
     // the requirement mandates would exist in name only.
     const { TURNSTILE_SECRET_KEY, ...incomplete } = PRODUCTION_ENV;
     expect(() => loadConfig(incomplete)).toThrow(/TURNSTILE_SECRET_KEY/);
+  });
+
+  test.each(['SMTP_HOST', 'SMTP_USER', 'SMTP_PASSWORD', 'MAIL_FROM'])(
+    'production refuses to boot without %s — the Mailpit defaults are development-only',
+    (name) => {
+      const { [name]: omitted, ...incomplete } = PRODUCTION_ENV;
+      expect(() => loadConfig(incomplete)).toThrow(name);
+    },
+  );
+
+  test('development defaults to the local Mailpit catcher', () => {
+    const { mail } = loadConfig({ NODE_ENV: 'development' });
+    expect(mail).toMatchObject({ host: '127.0.0.1', port: 1025, secure: false });
   });
 
   test('in-memory rate limiting is refused outside development (NFR-SEC-11)', () => {

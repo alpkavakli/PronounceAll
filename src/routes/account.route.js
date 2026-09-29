@@ -52,15 +52,17 @@ const POST_SIGN_IN_DESTINATION = '/login';
 export function accountRouter({ accountService, sessionService, loginRateLimit, registerRateLimit }) {
   const router = Router();
 
-  const renderRegister = (req, res, { error = null, username = '' } = {}) =>
-    res.render('register', { title: 'Create an account', csrfToken: csrfTokenFor(req), error, username });
+  const renderRegister = (req, res, { error = null, username = '', email = '' } = {}) =>
+    res.render('register', { title: 'Create an account', csrfToken: csrfTokenFor(req), error, username, email });
 
-  const renderLogin = (req, res, { error = null, identifier = '' } = {}) =>
+  const renderLogin = (req, res, { error = null, identifier = '', pendingEmail = null } = {}) =>
     res.render('login', {
       title: req.session ? 'Your account' : 'Sign in',
       csrfToken: csrfTokenFor(req),
       error,
       identifier,
+      pendingEmail,
+      passwordWasReset: req.query['password-reset'] === '1',
       signedInAs: req.session?.username ?? null,
     });
 
@@ -87,19 +89,26 @@ export function accountRouter({ accountService, sessionService, loginRateLimit, 
 
   router.post('/register', registerRateLimit, requireCsrf(), async (req, res, next) => {
     const username = typeof req.body.username === 'string' ? req.body.username : '';
+    const email = typeof req.body.email === 'string' ? req.body.email : '';
     try {
-      const authenticated = await accountService.registerWithUsername({
+      const registered = await accountService.register({
         username: req.body.username,
+        email: req.body.email,
         password: req.body.password,
         acknowledgedNoRecovery: req.body.acknowledgeNoRecovery === 'yes',
         turnstileToken: req.body['cf-turnstile-response'],
         remoteIp: req.ip,
       });
-      await finishSignIn(req, res, authenticated);
+      if (registered.verificationRequired) {
+        // FR-AUTH-09: no sign-in until the email is verified.
+        res.render('check-email', { title: 'Check your email', reason: 'verification' });
+        return;
+      }
+      await finishSignIn(req, res, registered);
     } catch (error) {
       if (AppError.isAppError(error) && FORM_ERRORS.has(error.code)) {
         res.status(error.status);
-        renderRegister(req, res, { error: error.message, username });
+        renderRegister(req, res, { error: error.message, username, email });
         return;
       }
       next(error);
@@ -111,13 +120,19 @@ export function accountRouter({ accountService, sessionService, loginRateLimit, 
   router.post('/login', loginRateLimit, requireCsrf(), async (req, res, next) => {
     const identifier = typeof req.body.identifier === 'string' ? req.body.identifier : '';
     try {
-      const authenticated = await accountService.login({
+      const outcome = await accountService.login({
         identifier: req.body.identifier,
         password: req.body.password,
         turnstileToken: req.body['cf-turnstile-response'],
         remoteIp: req.ip,
       });
-      await finishSignIn(req, res, authenticated);
+      if (outcome.verificationPending) {
+        // FR-AUTH-09 / FR-AUTH-13: said only after a correct credential pair.
+        res.status(403);
+        renderLogin(req, res, { identifier, pendingEmail: outcome.email });
+        return;
+      }
+      await finishSignIn(req, res, outcome);
     } catch (error) {
       if (AppError.isAppError(error) && FORM_ERRORS.has(error.code)) {
         res.status(error.status);

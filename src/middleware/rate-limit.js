@@ -32,6 +32,10 @@ export const RATE_LIMITS = Object.freeze({
   LOGIN: Object.freeze({ limit: 5, windowSeconds: 900 }),
   /** `POST /register`: 3 per hour, keyed by IP (FR-AUTH-15). */
   REGISTER: Object.freeze({ limit: 3, windowSeconds: 3600 }),
+  /** `POST /reset-password`: 3 per hour, keyed by email address (FR-AUTH-15). */
+  PASSWORD_RESET: Object.freeze({ limit: 3, windowSeconds: 3600 }),
+  /** `POST /verify-email/resend`: 3 per hour, keyed by account ID (FR-AUTH-10, FR-AUTH-15). */
+  VERIFICATION_RESEND: Object.freeze({ limit: 3, windowSeconds: 3600 }),
 });
 
 /**
@@ -60,14 +64,14 @@ export const byAnonymousIdAndIp = (req) => `${req.ensureAnonymousId()}:ip:${req.
  * @param {string} options.bucket a stable name for this limit's key space
  * @param {number} options.limit
  * @param {number} options.windowSeconds
- * @param {(req: import('express').Request) => string} [options.keyOf] the
- *   Appendix C identity key; the anonymous UUID unless the table says otherwise
+ * @param {(req: import('express').Request) => string | Promise<string>} [options.keyOf]
+ *   the Appendix C identity key; the anonymous UUID unless the table says otherwise
  * @returns {import('express').RequestHandler}
  */
 export function rateLimitMiddleware({ store, bucket, limit, windowSeconds, keyOf = byAnonymousId }) {
   return async function enforceRateLimit(req, res, next) {
     try {
-      const identity = keyOf(req);
+      const identity = await keyOf(req);
       const decision = await store.consume(`${bucket}:${identity}`, limit, windowSeconds);
 
       if (!decision.allowed) {

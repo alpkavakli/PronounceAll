@@ -70,6 +70,9 @@ test('the sign-in response switches identity; skipping the landing page and rest
   await page.getByLabel('Password').fill(PASSWORD);
   await page.getByLabel(/Without an email, we cannot recover your account/).check();
   const signedIn = page.waitForResponse((response) => response.url().endsWith('/register') && response.status() === 303);
+  // The landing page is never loaded at all: its navigation is refused, so the
+  // cookies below are exactly what the sign-in response itself set.
+  await page.route('**/login', (route) => route.abort());
   await page.getByRole('button', { name: 'Create account' }).click();
   await signedIn;
 
@@ -85,6 +88,8 @@ test('the sign-in response switches identity; skipping the landing page and rest
   await expect.poll(mirror).not.toBe(retired);
   expect(await mirror()).toBe(await cookie('pa_uid'));
 
+  // Only now is the account page wanted.
+  await page.unroute('**/login');
   await page.goto('/login');
   await page.getByRole('button', { name: 'Sign out' }).click();
   await expect(page).toHaveURL(/\/$/);

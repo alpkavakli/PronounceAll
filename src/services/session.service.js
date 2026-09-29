@@ -94,5 +94,15 @@ export function createSessionService({ store, now = Date.now }) {
     await store.destroy(session.sessionId, session.userId);
   }
 
-  return { startSession, resolveSession, endSession };
+  /**
+   * Remove every Redis session of a user. Cleanup only: what actually ends them
+   * is the `session_epoch` move the caller has already committed (V3).
+   *
+   * @param {number} userId
+   */
+  async function endAllSessions(userId) {
+    await store.destroyAllForUser(userId);
+  }
+
+  return { startSession, resolveSession, endSession, endAllSessions };
 }

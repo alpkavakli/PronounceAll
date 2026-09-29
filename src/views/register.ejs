@@ -8,8 +8,9 @@
     configured, the Turnstile widget with its per-request CSP nonce. A plain
     POST form, so it works without JavaScript apart from the challenge itself.
 
-    This slice offers the username-and-password path without an email, which
-    requires the no-recovery acknowledgement. %>
+    Paths B and C of FR-AUTH-04 on one form: a username and password, with an
+    email (confirmed by link before sign-in) or without one (which requires the
+    no-recovery acknowledgement). Google sign-in (path A) is a later slice. %>
 <!doctype html>
 <html lang="en">
 <head>
@@ -37,16 +38,25 @@
              aria-describedby="register-username-help">
       <p class="account__help" id="register-username-help">3–20 letters, digits, “_” or “-”, starting with a letter. Shown publicly.</p>
 
+      <label class="account__label" for="register-email">Email <span class="account__optional">(optional)</span></label>
+      <input class="account__input" id="register-email" name="email" type="email"
+             value="<%= email %>" autocomplete="email" maxlength="320"
+             aria-describedby="register-email-help">
+      <p class="account__help" id="register-email-help">Lets you reset a forgotten password. We send a link to confirm it before you can sign in. Never shown publicly.</p>
+
       <label class="account__label" for="register-password">Password</label>
       <input class="account__input" id="register-password" name="password" type="password"
              autocomplete="new-password" required minlength="8" maxlength="100"
              aria-describedby="register-password-help">
       <p class="account__help" id="register-password-help">At least 8 characters. Passwords found in known data breaches are refused.</p>
 
+      <%# FR-CONSENT-04: required only when no email is given; the server enforces
+          that, so the box is not `required` in the markup. %>
       <p class="account__check">
-        <input id="register-no-recovery" name="acknowledgeNoRecovery" type="checkbox" value="yes" required>
+        <input id="register-no-recovery" name="acknowledgeNoRecovery" type="checkbox" value="yes">
         <label for="register-no-recovery">Without an email, we cannot recover your account if you forget your credentials. You accept this risk.</label>
       </p>
+      <p class="account__help">Tick this only if you leave the email empty.</p>
 
       <%- include('partials/turnstile') %>
       <button type="submit" class="button">Create account</button>
