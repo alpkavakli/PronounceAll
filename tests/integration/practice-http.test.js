@@ -110,21 +110,30 @@ beforeAll(async () => {
   wordIds = (await getPool().query('SELECT word_id FROM words ORDER BY word_id LIMIT 6'))[0].map((row) => Number(row.word_id));
 });
 
+/** Static cleanup statements per owner column (no interpolated SQL, NFR-SEC-07). */
+const CLEANUP = Object.freeze({
+  anonymous: [
+    'DELETE a FROM practice_attempts a JOIN practice_sessions s ON s.session_id = a.session_id WHERE s.anonymous_id = ?',
+    'DELETE FROM practice_sessions WHERE anonymous_id = ?',
+    'DELETE FROM sm2_states WHERE anonymous_id = ?',
+    'DELETE FROM user_word_states WHERE anonymous_id = ?',
+    'DELETE FROM user_activity_events WHERE anonymous_id = ?',
+    'DELETE FROM anonymous_profiles WHERE anonymous_id = ?',
+  ],
+  user: [
+    'DELETE a FROM practice_attempts a JOIN practice_sessions s ON s.session_id = a.session_id WHERE s.user_id = ?',
+    'DELETE FROM practice_sessions WHERE user_id = ?',
+    'DELETE FROM sm2_states WHERE user_id = ?',
+    'DELETE FROM user_word_states WHERE user_id = ?',
+    'DELETE FROM user_activity_events WHERE user_id = ?',
+    'DELETE FROM users WHERE user_id = ?',
+  ],
+});
+
 afterAll(async () => {
   const pool = getPool();
-  const owners = [
-    ...actors.map((id) => ['anonymous_id', id]),
-    ...userIds.map((id) => ['user_id', id]),
-  ];
-  for (const [column, value] of owners) {
-    const [sessions] = await pool.execute(`SELECT session_id FROM practice_sessions WHERE ${column} = ?`, [value]);
-    for (const { session_id: id } of sessions) await pool.execute('DELETE FROM practice_attempts WHERE session_id = ?', [id]);
-    for (const table of ['practice_sessions', 'sm2_states', 'user_word_states', 'user_activity_events']) {
-      await pool.execute(`DELETE FROM ${table} WHERE ${column} = ?`, [value]);
-    }
-  }
-  for (const id of actors) await pool.execute('DELETE FROM anonymous_profiles WHERE anonymous_id = ?', [id]);
-  for (const id of userIds) await pool.execute('DELETE FROM users WHERE user_id = ?', [id]);
+  for (const id of userIds) for (const sql of CLEANUP.user) await pool.execute(sql, [id]);
+  for (const id of actors) for (const sql of CLEANUP.anonymous) await pool.execute(sql, [id]);
   await closePool();
   await closeRedis();
 });

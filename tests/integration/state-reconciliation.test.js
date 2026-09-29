@@ -11,7 +11,7 @@
  * it with apply, find nothing on a second run, and never touch the log.
  */
 
-import { afterAll, beforeAll, describe, expect, test } from '@jest/globals';
+import { afterAll, beforeAll, describe, expect, jest, test } from '@jest/globals';
 
 import { generateAnonymousId } from '../../src/lib/ids.js';
 import { closePool, getPool } from '../../src/lib/mysql.js';
@@ -76,6 +76,11 @@ afterAll(async () => {
   await closePool();
   await closeRedis();
 });
+
+// Reconciliation walks every owner in the database, by design, and the
+// integration database is shared with every other suite and with local
+// development. Its passes take seconds, not milliseconds, once that data grows.
+jest.setTimeout(60_000);
 
 describe('FR-SAVE-04 reconciliation', () => {
   test('a lost projection is reported by the dry run, repaired by apply, and clean on a second run', async () => {
