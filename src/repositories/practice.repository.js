@@ -236,6 +236,26 @@ export async function lockSm2State(owner, wordId, executor) {
 }
 
 /**
+ * Every practice answer of an account and of every anonymous identity bound
+ * to it, per word in `(occurred_at, event_id)` order (C5) — the input of the
+ * SM-2 replay on a merge (SDD §4.6). `event_value` carries the quality.
+ *
+ * @param {number} userId
+ * @param {import('./transaction.js').Executor} executor
+ * @returns {Promise<Array<{ wordId: number, quality: number, occurredAt: Date }>>}
+ */
+export async function listAccountPracticeEvents(userId, executor) {
+  const [rows] = await executor.execute(
+    `SELECT e.target_id, e.event_value, e.occurred_at
+       FROM user_activity_events e LEFT JOIN current_identity_bindings b ON b.anonymous_id = e.anonymous_id
+      WHERE (e.user_id = ? OR b.user_id = ?) AND e.event_type = 'practice_attempt' AND e.target_kind = 'word'
+      ORDER BY e.target_id, e.occurred_at, e.event_id`,
+    [userId, userId],
+  );
+  return rows.map((row) => ({ wordId: Number(row.target_id), quality: Number(row.event_value), occurredAt: row.occurred_at }));
+}
+
+/**
  * Write the SM-2 state after a review; the first answer creates the row.
  */
 export async function upsertSm2State({ owner, wordId, state, nextDueAt, reviewedAt }, executor = defaultExecutor()) {

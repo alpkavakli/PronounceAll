@@ -15,18 +15,24 @@
 import { afterAll, beforeAll, describe, expect, test } from '@jest/globals';
 import request from 'supertest';
 
-import { createApp } from '../../src/app.js';
-import { config } from '../../src/config/index.js';
-import { generateAnonymousId } from '../../src/lib/ids.js';
-import { createInMemoryIdempotencyStore } from '../../src/lib/idempotency-store.js';
-import { closePool, getPool } from '../../src/lib/mysql.js';
-import { closeRedis, getRedis } from '../../src/lib/redis.js';
-import { createPracticeQueueStore } from '../../src/lib/practice-queue-store.js';
-import { createSessionStore } from '../../src/lib/session-store.js';
-import { issueCsrfToken, issueCsrfTokenFor } from '../../src/services/csrf.service.js';
-import { createPracticeService } from '../../src/services/practice.service.js';
-import { createSaveStateService } from '../../src/services/save-state.service.js';
-import { createSessionService } from '../../src/services/session.service.js';
+// In-memory rate-limit counters, set BEFORE the application is imported (the
+// configuration reads the environment at import): the merge test registers an
+// account, and the Redis counter for 3 registrations per hour per IP would
+// otherwise carry over from earlier runs. See word-request.test.js.
+process.env.RATE_LIMIT_STORE = 'memory';
+
+const { createApp } = await import('../../src/app.js');
+const { config } = await import('../../src/config/index.js');
+const { generateAnonymousId } = await import('../../src/lib/ids.js');
+const { createInMemoryIdempotencyStore } = await import('../../src/lib/idempotency-store.js');
+const { closePool, getPool } = await import('../../src/lib/mysql.js');
+const { closeRedis, getRedis } = await import('../../src/lib/redis.js');
+const { createPracticeQueueStore } = await import('../../src/lib/practice-queue-store.js');
+const { createSessionStore } = await import('../../src/lib/session-store.js');
+const { issueCsrfToken, issueCsrfTokenFor } = await import('../../src/services/csrf.service.js');
+const { createPracticeService } = await import('../../src/services/practice.service.js');
+const { createSaveStateService } = await import('../../src/services/save-state.service.js');
+const { createSessionService } = await import('../../src/services/session.service.js');
 
 const ORIGIN = new URL(config.baseUrl).origin;
 /** Always 0.99: never defers a learned word, and reinserts 7 ahead (or at the tail). */
@@ -126,6 +132,9 @@ const CLEANUP = Object.freeze({
     'DELETE FROM sm2_states WHERE user_id = ?',
     'DELETE FROM user_word_states WHERE user_id = ?',
     'DELETE FROM user_activity_events WHERE user_id = ?',
+    'DELETE FROM identity_bindings WHERE user_id = ?',
+    'DELETE FROM consent_records WHERE user_id = ?',
+    'DELETE FROM user_accounts WHERE user_id = ?',
     'DELETE FROM users WHERE user_id = ?',
   ],
 });
@@ -372,6 +381,75 @@ describe('FR-PRACTICE-06 — how a session ends', () => {
     expect(old).toMatchObject({ status: 'abandoned', total_attempts: 1 });
     // The answered word is scheduled a day out, so the new session holds the other two.
     expect(await sm2Of(actor)).toHaveLength(1);
+  });
+});
+
+describe('FR-AUTH-18 / SDD §4.6 — SM-2 follows the merge', () => {
+  const registerFrom = (anonymousId, username) =>
+    request(app)
+      .post('/register')
+      .set('Cookie', [`pa_uid=${anonymousId}`])
+      .set('Origin', ORIGIN)
+      .type('form')
+      .send(
+        new URLSearchParams({
+          username,
+          password: 'zq-a-long-unbreached-passphrase',
+          acknowledgeNoRecovery: 'yes',
+          'cf-turnstile-response': 'a-token',
+          _csrf: issueCsrfToken(config.csrf.secret, anonymousId),
+        }).toString(),
+      );
+  const loginFrom = (anonymousId, username) =>
+    request(app)
+      .post('/login')
+      .set('Cookie', [`pa_uid=${anonymousId}`])
+      .set('Origin', ORIGIN)
+      .type('form')
+      .send(
+        new URLSearchParams({
+          identifier: username,
+          password: 'zq-a-long-unbreached-passphrase',
+          'cf-turnstile-response': 'a-token',
+          _csrf: issueCsrfToken(config.csrf.secret, anonymousId),
+        }).toString(),
+      );
+  const accountSm2 = async (username) =>
+    (
+      await getPool().execute(
+        `SELECT m.* FROM sm2_states m JOIN users u ON u.user_id = m.user_id WHERE u.username_lower = ?`,
+        [username.toLowerCase()],
+      )
+    )[0];
+
+  test('the account gets the replay of every bound identity, in time order', async () => {
+    const phone = newActor();
+    const laptop = newActor();
+    await saveWords(phone, 1);
+    await saveWords(laptop, 1);
+
+    await answer(phone, turnOf((await page(phone)).text), 'right');
+    await new Promise((resolve) => setTimeout(resolve, 5));
+    await answer(laptop, turnOf((await page(laptop)).text), 'wrong');
+
+    const username = `zzs${Date.now()}`.slice(0, 20);
+    expect((await registerFrom(phone, username)).status).toBe(303);
+    const [user] = (await getPool().execute('SELECT user_id FROM users WHERE username_lower = ?', [username.toLowerCase()]))[0];
+    userIds.push(Number(user.user_id));
+
+    // Only the phone is bound: the replay of its one right answer.
+    let [sm2] = await accountSm2(username);
+    expect(sm2).toMatchObject({ word_id: wordIds[0], repetition_count: 1, interval_days: 1 });
+    expect(Number(sm2.ease_factor)).toBeCloseTo(2.6, 3);
+
+    // The laptop joins: right (earlier) then wrong (later), replayed in order.
+    expect((await loginFrom(laptop, username)).status).toBe(303);
+    [sm2] = await accountSm2(username);
+    expect(sm2).toMatchObject({ word_id: wordIds[0], repetition_count: 0, interval_days: 1 });
+    expect(Number(sm2.ease_factor)).toBeCloseTo(2.28, 3);
+    // The event log is untouched: two anonymous practice events, none rewritten.
+    expect(await practiceEventsOf(phone)).toHaveLength(1);
+    expect(await practiceEventsOf(laptop)).toHaveLength(1);
   });
 });
 

@@ -44,6 +44,7 @@ import { anonymousProfileExists, findBoundUserId } from '../repositories/progres
 import { withTransaction } from '../repositories/transaction.js';
 import { normaliseEmail } from './account-email.service.js';
 import { PASSWORD_MAX_LENGTH } from './password-policy.service.js';
+import { recomputeAccountSm2States } from './practice.service.js';
 import { recomputeOwnerStates } from './state-reconciliation.service.js';
 import { requireAcceptableUsername } from './username-policy.service.js';
 
@@ -195,7 +196,11 @@ export function createAccountService({
         // UNIQUE(anonymous_id): a concurrent login that linked first wins, and
         // this one writes nothing — never a second LINK, never a re-point (B1).
         const inserted = await insertLinkBinding({ anonymousId, userId, occurredAt: now }, tx);
-        if (inserted) await recomputeOwnerStates({ userId }, tx, now);
+        if (inserted) {
+          // Both derivations, by the same latest-in-order rule (§5.1).
+          await recomputeOwnerStates({ userId }, tx, now);
+          await recomputeAccountSm2States(userId, tx);
+        }
         return inserted;
       });
     }

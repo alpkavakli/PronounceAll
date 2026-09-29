@@ -30,6 +30,7 @@ import {
   finaliseSession,
   insertAttempt,
   insertSession,
+  listAccountPracticeEvents,
   listDueWords,
   listIdleSessions,
   listUpcomingWords,
@@ -61,6 +62,32 @@ export async function findPracticeWordLocation(wordId) {
   const location = await findWordLocation(wordId);
   if (!location) throw AppError.notFound('That word could not be found.');
   return location;
+}
+
+/**
+ * Rebuild an account's SM-2 state after a LINK (FR-AUTH-18, SDD v1.1 §4.6,
+ * §5.1): replay every practice answer of the account and of all its bound
+ * anonymous identities, per word in `(occurred_at, event_id)` order, through
+ * the same SM-2 function live answers use. No second merge rule.
+ *
+ * @param {number} userId
+ * @param {import('../repositories/transaction.js').Executor} tx the LINK transaction
+ * @returns {Promise<number>} how many words' states were written
+ */
+export async function recomputeAccountSm2States(userId, tx) {
+  const events = await listAccountPracticeEvents(userId, tx);
+  const byWord = new Map();
+  for (const event of events) {
+    const replay = byWord.get(event.wordId) ?? { state: INITIAL_SM2_STATE, reviewedAt: null };
+    byWord.set(event.wordId, { state: applySm2Review(replay.state, event.quality), reviewedAt: event.occurredAt });
+  }
+  for (const [wordId, { state, reviewedAt }] of byWord) {
+    await upsertSm2State(
+      { owner: { userId }, wordId, state, nextDueAt: nextDueAt(reviewedAt, state.intervalDays), reviewedAt },
+      tx,
+    );
+  }
+  return byWord.size;
 }
 
 /**
