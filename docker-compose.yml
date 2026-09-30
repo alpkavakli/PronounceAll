@@ -88,8 +88,17 @@ services:
       MYSQL_USER: ${MYSQL_USER:-pronounceall_app}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD:-devpass}
       REDIS_URL: redis://redis:6379
+      # Development mail goes to the Mailpit service; 127.0.0.1 inside this
+      # container would be the container itself.
+      SMTP_HOST: mailpit
+      SMTP_PORT: 1025
     ports:
       - '3000:3000'
+    # The generated audio store is not in the image (it is not source; see
+    # .gitignore), so development mounts the local one read-only. Production
+    # serves audio from its own volume through Nginx (V4).
+    volumes:
+      - ./data/audio:/app/data/audio:ro
     depends_on:
       mysql:
         condition: service_healthy
