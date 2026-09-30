@@ -1,0 +1,82 @@
+<%# PronounceAll — Copyright (C) 2026 Alp Kavaklı
+    SPDX-License-Identifier: AGPL-3.0-or-later
+    See LICENSE-NOTICE.md at the repository root.
+
+    Settings (FR-SET-01/02/03/04/05/06/10). One page for everyone: the account
+    section is for signed-in users and explains itself to everyone else; the
+    cookie preferences and the language selector are for all. Plain forms, so
+    it works without JavaScript. DYNAMIC (private, no-store). %>
+<!doctype html>
+<html lang="en">
+<head>
+  <%- include('partials/head', { title: title }) %>
+</head>
+<body>
+  <main class="page settings">
+    <h1>Settings</h1>
+
+    <% if (saved) { %>
+      <p class="notice" role="status">Your cookie preferences are saved.</p>
+    <% } %>
+
+    <section class="settings__section" aria-labelledby="settings-account">
+      <h2 id="settings-account" class="section-heading">Account</h2>
+      <% if (signedIn && account) { %>
+        <p>Signed in as <strong><%= account.username %></strong><% if (account.provider === 'google') { %> with Google<% } %>.</p>
+        <% if (account.email) { %>
+          <p>Email: <%= account.email %><%= account.emailVerifiedAt ? '' : ' (not yet confirmed)' %></p>
+        <% } %>
+        <form method="post" action="/logout" class="settings__inline">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+          <button type="submit" class="button button--secondary">Sign out</button>
+        </form>
+      <% } else { %>
+        <%# FR-SET-01/10: account management needs an account; say so rather than hide it silently. %>
+        <p>Account management — email, password, sign-out and deleting your account — is available once you have an account.</p>
+        <p><a class="button" href="/register">Create an account</a> <a href="/login">Sign in</a></p>
+      <% } %>
+    </section>
+
+    <section class="settings__section" aria-labelledby="settings-cookies">
+      <h2 id="settings-cookies" class="section-heading">Cookie preferences</h2>
+      <form method="post" action="/settings/cookies" class="settings__cookies">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <fieldset>
+          <legend>Strictly necessary</legend>
+          <p class="account__help">These keep the site working and cannot be turned off.</p>
+          <% essentialCookies.forEach(function (cookie) { %>
+            <p class="account__check">
+              <input type="checkbox" id="cookie-<%= cookie.name %>" checked disabled aria-describedby="cookie-<%= cookie.name %>-why">
+              <label for="cookie-<%= cookie.name %>"><code><%= cookie.name %></code></label>
+            </p>
+            <p class="account__help" id="cookie-<%= cookie.name %>-why"><%= cookie.purpose %></p>
+          <% }); %>
+        </fieldset>
+        <fieldset>
+          <legend>Optional</legend>
+          <p class="account__check">
+            <input type="checkbox" id="cookie-ads" name="ads" value="on"<%= adsEnabled ? ' checked' : '' %> aria-describedby="cookie-ads-why">
+            <label for="cookie-ads">Enable ads</label>
+          </p>
+          <p class="account__help" id="cookie-ads-why">Off unless you turn it on. No ads are shown yet; this records your choice for when they are.</p>
+        </fieldset>
+        <button type="submit" class="button">Save preferences</button>
+      </form>
+    </section>
+
+    <section class="settings__section" aria-labelledby="settings-language">
+      <h2 id="settings-language" class="section-heading">Language</h2>
+      <label class="account__label" for="settings-variant">Dictionary</label>
+      <select class="account__input" id="settings-variant" aria-describedby="settings-variant-help">
+        <% languageVariants.forEach(function (variant) { %>
+          <option value="<%= variant.code %>" selected><%= variant.name %></option>
+        <% }); %>
+      </select>
+      <p class="account__help" id="settings-variant-help">American English is the only dictionary for now. More languages and accents are planned.</p>
+    </section>
+  </main>
+
+  <%- include('partials/footer') %>
+  <script type="module" src="/js/bootstrap.js"></script>
+</body>
+</html>

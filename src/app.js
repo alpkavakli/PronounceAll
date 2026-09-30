@@ -55,6 +55,7 @@ import {
 import { accountEmailRouter } from './routes/account-email.route.js';
 import { accountRouter } from './routes/account.route.js';
 import { practiceRouter } from './routes/practice.route.js';
+import { settingsRouter } from './routes/settings.route.js';
 import { healthRouter } from './routes/health.route.js';
 import { homeRouter } from './routes/home.route.js';
 import { learnIpaRouter } from './routes/learn-ipa.route.js';
@@ -71,6 +72,7 @@ import {
 import { createAccountService, isRetiredAnonymousId } from './services/account.service.js';
 import { createGoogleSignInService } from './services/google-sign-in.service.js';
 import { createPracticeService } from './services/practice.service.js';
+import { createSettingsService } from './services/settings.service.js';
 import { createPasswordPolicy } from './services/password-policy.service.js';
 import { createEncounterService } from './services/encounter.service.js';
 import { createSessionService } from './services/session.service.js';
@@ -165,6 +167,7 @@ export function createApp({
   // FR-PRACTICE-02/05: the queue's random choices, from the CSPRNG
   // (Math.random is banned outright, NFR-SEC-12).
   const practiceService = createPracticeService({ queueStore: createPracticeQueueStore(), rng: practiceRng });
+  const settingsService = createSettingsService({ privacyPolicyVersion: config.privacyPolicyVersion });
   const googleSignInService = googleOidc
     ? createGoogleSignInService({ google: googleOidc, secrets: createFlowSecretStore(), verifyTurnstile })
     : null;
@@ -276,6 +279,8 @@ export function createApp({
   );
   // FR-PRACTICE-*. Before the word router, whose `/:variant` would match it.
   app.use(practiceRouter({ practiceService }));
+  // FR-SET-*. Before the word router, likewise.
+  app.use(settingsRouter({ settingsService }));
   // Email verification and password reset. Before the word router.
   app.use(
     accountEmailRouter({

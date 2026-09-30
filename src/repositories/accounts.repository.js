@@ -257,6 +257,24 @@ export async function replacePasswordAndEndSessions({ userId, passwordHash, now 
 }
 
 /**
+ * What the Settings page shows about an account (FR-SET-02).
+ *
+ * @param {number} userId
+ * @returns {Promise<{ username: string, provider: 'password'|'google', email: string|null, emailVerifiedAt: Date|null } | null>}
+ */
+export async function findAccountSummary(userId, executor = defaultExecutor()) {
+  const [rows] = await executor.execute(
+    `SELECT u.username, a.provider, a.email, a.email_verified_at
+       FROM users u JOIN user_accounts a ON a.user_id = u.user_id
+      WHERE u.user_id = ? ORDER BY a.account_id LIMIT 1`,
+    [userId],
+  );
+  if (rows.length === 0) return null;
+  const row = rows[0];
+  return { username: row.username, provider: row.provider, email: row.email, emailVerifiedAt: row.email_verified_at };
+}
+
+/**
  * The per-request session check's one primary-key read (V3).
  *
  * @param {number} userId

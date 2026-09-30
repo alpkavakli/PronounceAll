@@ -115,6 +115,13 @@
   box-sizing: border-box;
 }
 
+/* `hidden` always wins. A component rule that sets `display` (flex, grid, …)
+   otherwise overrides the browser's own `[hidden] { display: none }`, and an
+   element the script has hidden stays on screen — as the save/tag menu did. */
+[hidden] {
+  display: none !important;
+}
+
 body {
   margin: 0;
   padding: 0;
@@ -1088,4 +1095,66 @@ a:focus-visible,
 .practice__due {
   margin-left: var(--space-2);
   color: var(--color-muted);
+}
+
+/* ---------------------------------------------------------------------------
+   Open-source banner (FR-OSS-01) and Settings (FR-SET-*)
+   -------------------------------------------------------------------------- */
+
+.oss-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-4);
+  max-width: var(--page-max);
+  margin: var(--space-6) auto 0;
+  padding: var(--space-2) var(--space-4);
+  border-top: 1px solid var(--color-rule-soft);
+  color: var(--color-muted);
+  font-size: 0.9rem;
+}
+
+.oss-banner[hidden] {
+  display: none;
+}
+
+.oss-banner__text {
+  margin: 0;
+}
+
+.oss-banner__close {
+  min-height: 44px;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-ink);
+  font: inherit;
+  cursor: pointer;
+}
+
+.oss-banner__close:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.settings {
+  max-width: var(--narrow-max);
+}
+
+.settings__section {
+  margin: 0 0 var(--space-7);
+}
+
+.settings__cookies fieldset {
+  margin: 0 0 var(--space-4);
+  padding: 0;
+  border: 0;
+}
+
+.settings__cookies legend {
+  margin-bottom: var(--space-2);
+  font-weight: 600;
+  color: var(--color-ink);
 }

@@ -100,6 +100,13 @@ const schema = z.object({
   GOOGLE_CLIENT_ID: z.string().default(''),
   GOOGLE_CLIENT_SECRET: z.string().default(''),
   GOOGLE_REDIRECT_URI: z.string().default(''),
+
+  /**
+   * The privacy-policy version an ads opt-in is recorded against (FR-CONSENT-03,
+   * GDPR Art. 7). Set it to the published policy's version; locally it defaults
+   * to a value that says plainly no policy has been published.
+   */
+  PRIVACY_POLICY_VERSION: z.string().min(1).max(32).default('unpublished-draft'),
 });
 
 /**
@@ -132,6 +139,9 @@ const REQUIRED_IN_STRICT_ENVIRONMENTS = [
   // deployment never runs it with fake or missing credentials.
   'GOOGLE_CLIENT_ID',
   'GOOGLE_CLIENT_SECRET',
+  // FR-CONSENT-03: a consent is recorded against the published policy's
+  // version, never the development placeholder.
+  'PRIVACY_POLICY_VERSION',
 ];
 
 /**
@@ -272,6 +282,9 @@ export function loadConfig(env) {
       redirectUri: value.GOOGLE_REDIRECT_URI || `${value.APP_BASE_URL.replace(/\/+$/, '')}/auth/google/callback`,
       isConfigured: value.GOOGLE_CLIENT_ID !== '' && value.GOOGLE_CLIENT_SECRET !== '',
     }),
+
+    /** FR-CONSENT-03: the policy version consents are recorded against. */
+    privacyPolicyVersion: value.PRIVACY_POLICY_VERSION,
 
     /** Outgoing SMTP (FR-AUTH-09/11); development defaults to Mailpit. */
     mail: Object.freeze({

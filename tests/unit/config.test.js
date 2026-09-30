@@ -25,6 +25,7 @@ const PRODUCTION_ENV = {
   MAIL_FROM: 'PronounceAll <no-reply@pronounceall.com>',
   GOOGLE_CLIENT_ID: 'supplied-at-deploy-time.apps.googleusercontent.com',
   GOOGLE_CLIENT_SECRET: 'supplied-at-deploy-time',
+  PRIVACY_POLICY_VERSION: '1.0',
 };
 
 describe('loadConfig (SDD v1.1 §6.4, NFR-SEC-06)', () => {
@@ -83,6 +84,12 @@ describe('loadConfig (SDD v1.1 §6.4, NFR-SEC-06)', () => {
     const local = loadConfig({ NODE_ENV: 'development', APP_BASE_URL: 'http://localhost:3000' });
     expect(local.google).toMatchObject({ isConfigured: false, redirectUri: 'http://localhost:3000/auth/google/callback' });
     expect(loadConfig(PRODUCTION_ENV).google.isConfigured).toBe(true);
+  });
+
+  test('production refuses to boot without PRIVACY_POLICY_VERSION; locally it says "unpublished-draft"', () => {
+    const { PRIVACY_POLICY_VERSION, ...incomplete } = PRODUCTION_ENV;
+    expect(() => loadConfig(incomplete)).toThrow('PRIVACY_POLICY_VERSION');
+    expect(loadConfig({ NODE_ENV: 'development' }).privacyPolicyVersion).toBe('unpublished-draft');
   });
 
   test('development defaults to the local Mailpit catcher', () => {

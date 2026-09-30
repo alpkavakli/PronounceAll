@@ -61,6 +61,35 @@ test.describe('with JavaScript', () => {
     await expect(page.locator('#phoneme-popover')).toBeVisible();
   });
 
+  test('the tag menu goes away without a choice: outside click, Escape, or the control again', async ({ page }) => {
+    // Regression: `.save-menu { display: flex }` overrode `hidden`, so a menu
+    // the script had closed stayed on screen.
+    await page.goto(WORD);
+    await expect(page.locator('button.save-control').first()).toBeVisible();
+    await page.locator('.phoneme').first().click();
+    const control = page.locator('#phoneme-popover button.save-control');
+    await control.click();
+    await expect(control).toHaveText('Saved');
+    const menu = page.locator('.save-menu');
+
+    await control.click();
+    await expect(menu).toBeVisible();
+    await page.locator('h1').click();
+    await expect(menu).toBeHidden();
+
+    await page.locator('.phoneme').first().click();
+    await control.click();
+    await expect(menu).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(menu).toBeHidden();
+
+    await page.locator('.phoneme').first().click();
+    await control.click();
+    await expect(menu).toBeVisible();
+    await control.click();
+    await expect(menu).toBeHidden();
+  });
+
   test('the word page with the control reports zero axe-core violations', async ({ page }) => {
     await page.goto(WORD);
     await expect(page.locator('button.save-control').first()).toBeVisible();

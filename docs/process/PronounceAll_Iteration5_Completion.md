@@ -1,8 +1,8 @@
 # PronounceAll — Iteration 5 Completion
 
 **Date:** 2026-09-30
-**Status:** Iteration 5 (practice / SM-2) — all three slices built and gated;
-closure pending the maintainer's review. Next is Iteration 6 (Settings), not started.
+**Status:** Iteration 5 (practice / SM-2) **CLOSED** 2026-09-30 at `1d6fa18`, approved by the
+maintainer. Next is Iteration 6 (Settings).
 **Not specification authority.** Consult `DOC_INDEX.md` first.
 
 ---

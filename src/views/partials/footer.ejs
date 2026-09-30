@@ -1,6 +1,20 @@
 <%# PronounceAll — Copyright (C) 2026 Alp Kavaklı
     SPDX-License-Identifier: AGPL-3.0-or-later
     See LICENSE-NOTICE.md at the repository root. %>
+<%# FR-OSS-01: on every page, small and non-intrusive; not an ad surface and never
+    used to ask for consent. Identical for every viewer, so it is safe on the
+    cached word shell. FR-OSS-02: the close control is revealed by oss-banner.js,
+    which keeps the dismissal in localStorage for 30 minutes — no cookie. Without
+    JavaScript the banner simply stays. %>
+<aside class="oss-banner" data-oss-banner aria-label="About PronounceAll">
+  <p class="oss-banner__text">
+    PronounceAll is open-source and free.
+    <a href="https://github.com/alpkavakli/PronounceAll">See the code on GitHub</a>
+  </p>
+  <button type="button" class="oss-banner__close" data-oss-banner-close hidden>
+    Close<span class="visually-hidden"> the open-source notice</span>
+  </button>
+</aside>
 <footer class="site-footer">
   <p>
     PronounceAll is free software under the
@@ -15,10 +29,15 @@
         low-traffic surface for readers who genuinely want the global view. %>
     <a href="/learnIPA">Learn IPA</a>
     ·
+    <a href="/practice">Practice</a>
+    ·
     <%# Static and identical for every viewer, so it is safe on the cached
         shell: /login itself says whether you are signed in. %>
     <a href="/login">Account</a>
     ·
+    <a href="/settings">Settings</a>
+    ·
     <a href="https://github.com/alpkavakli/PronounceAll">Source code</a>
   </p>
 </footer>
+<script type="module" src="/js/oss-banner.js"></script>
