@@ -25,7 +25,7 @@ import { config } from '../config/index.js';
 import { logger } from './logger.js';
 
 /** One queue per worker, and so per database principal (§4.9). */
-export const QUEUES = Object.freeze({ ERASURE: 'erasure', MAINTENANCE: 'maintenance', APP: 'app' });
+export const QUEUES = Object.freeze({ ERASURE: 'erasure', MAINTENANCE: 'maintenance', APP: 'app', BACKUP: 'backup' });
 
 export const JOB_ATTEMPTS = 3;
 const BACKOFF = Object.freeze({ type: 'exponential', delay: 60_000 });

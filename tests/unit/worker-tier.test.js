@@ -15,6 +15,7 @@ import { describe, expect, test } from '@jest/globals';
 
 import { loadConfig } from '../../src/config/index.js';
 import { appJobs } from '../../src/jobs/app.jobs.js';
+import { backupJobs } from '../../src/jobs/backup.jobs.js';
 import { erasureJobs } from '../../src/jobs/erasure.jobs.js';
 import { maintenanceJobs } from '../../src/jobs/maintenance.jobs.js';
 import { createOpsAlert } from '../../src/lib/ops-alert.js';
@@ -59,6 +60,7 @@ describe('§6.5 — the schedules', () => {
     ...erasureJobs({ accountDeletionService: { purgeDueAccounts: noop }, dormancyService: { pruneDormantProfiles: noop } }),
     ...maintenanceJobs({ retentionService: { pruneExpiredTokens: noop, pruneSessionIndexes: noop } }),
     ...appJobs({ practiceService: { sweepIdleSessions: noop } }),
+    ...backupJobs({ backupService: { runBackup: noop, runRestoreTest: noop } }),
   ];
 
   test('every job has a unique name and a UTC cron schedule', () => {
@@ -76,6 +78,9 @@ describe('§6.5 — the schedules', () => {
       expect(schedule[nightly]).toMatch(/^\d+ \d+ \* \* \*$/);
     }
     expect(schedule['practice-sweep']).toBe('*/15 * * * *');
+    // NFR-OPS-01: nightly backups (RPO within 24 h); V6: a scheduled restore test, weekly.
+    expect(schedule['database-backup']).toMatch(/^\d+ \d+ \* \* \*$/);
+    expect(schedule['restore-test']).toMatch(/^\d+ \d+ \* \* \d$/);
   });
 
   test('adapters only call their service and report its count', async () => {

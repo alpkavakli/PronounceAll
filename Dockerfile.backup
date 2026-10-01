@@ -1,0 +1,30 @@
+# PronounceAll — Copyright (C) 2026 Alp Kavaklı
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# See LICENSE-NOTICE.md at the repository root.
+
+# The backup worker (NFR-OPS-01; SDD decision V6; maintainer decision
+# 2026-10-01). Built from the official MySQL image, matching the database's
+# version, so the dump is MySQL's own `mysqldump` and the restore test can start
+# a throwaway `mysqld`; Node runs the worker itself.
+FROM mysql:8.4
+
+RUN microdnf -y module enable nodejs:22 \
+ && microdnf -y install nodejs npm \
+ && microdnf clean all
+
+WORKDIR /app
+COPY package.json package-lock.json ./
+RUN npm ci --omit=dev && npm cache clean --force
+
+COPY src ./src
+COPY LICENSE LICENSE-NOTICE.md ./
+
+# Unprivileged: the image's own `mysql` user. mysqld refuses to run as root,
+# and nothing here needs root.
+USER mysql
+ENV NODE_ENV=production
+
+# Not the database server: the MySQL entrypoint would start one.
+ENTRYPOINT ["node"]
+CMD ["src/workers/backup.worker.js"]
+HEALTHCHECK NONE

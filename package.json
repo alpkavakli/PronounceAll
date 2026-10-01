@@ -40,6 +40,8 @@
     "worker:erasure": "node src/workers/erasure.worker.js",
     "worker:maintenance": "node src/workers/maintenance.worker.js",
     "worker:app": "node src/workers/app.worker.js",
+    "worker:backup": "node src/workers/backup.worker.js",
+    "backup:create-dev-bucket": "node scripts/create-backup-bucket.js",
     "account:purge-due": "node scripts/purge-deleted-accounts.js",
     "inventory:check": "node scripts/extract-phoneme-inventory.js --check",
     "audio:preflight": "node scripts/generate-phoneme-audio.js --dry-run",
@@ -55,6 +57,7 @@
     "size": "npm run capture:word-page && size-limit"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "3.1144.0",
     "@sentry/node": "11.2.0",
     "bcrypt": "^6.0.0",
     "bullmq": "6.3.11",

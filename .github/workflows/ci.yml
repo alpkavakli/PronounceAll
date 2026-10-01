@@ -73,6 +73,15 @@ jobs:
         options: >-
           --health-cmd="redis-cli ping"
           --health-interval=5s --health-timeout=5s --health-retries=20
+      # The backup target's local stand-in (NFR-OPS-01, V6), as in compose's
+      # `backup` profile. Placeholder credentials, not secrets.
+      backup-s3:
+        image: rustfs/rustfs@sha256:8cc9801755448b71a786705ce76692c77e14936cccd87cf2fc31842e58f4d1ff
+        env:
+          RUSTFS_ACCESS_KEY: dev-backup-access
+          RUSTFS_SECRET_KEY: dev-backup-secret-not-a-secret
+          RUSTFS_SSE_S3_MASTER_KEY: ZGV2LW9ubHktc3NlLWtleS1ub3QtYS1zZWNyZXQhISE=
+        ports: ['9010:9000']
 
     env:
       NODE_ENV: test

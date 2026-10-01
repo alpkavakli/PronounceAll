@@ -130,6 +130,20 @@ const schema = z.object({
   SENTRY_DSN: z.union([z.literal(''), z.string().url()]).default(''),
   /** Defaults to NODE_ENV. */
   SENTRY_ENVIRONMENT: z.string().max(64).default(''),
+
+  /**
+   * The off-site backup target (NFR-OPS-01, V6): an S3-compatible bucket with
+   * Object Lock — Backblaze B2 in production. Read by the backup worker only,
+   * which refuses to start without them; the key is the backup's own, holds no
+   * delete right, and is never held by the production role.
+   */
+  BACKUP_S3_ENDPOINT: z.union([z.literal(''), z.string().url()]).default(''),
+  BACKUP_S3_REGION: z.string().min(1).max(64).default('us-east-1'),
+  BACKUP_S3_BUCKET: z.string().max(63).default(''),
+  BACKUP_S3_ACCESS_KEY_ID: z.string().max(256).default(''),
+  BACKUP_S3_SECRET_ACCESS_KEY: z.string().max(256).default(''),
+  /** COMPLIANCE in production (V6: immutable); GOVERNANCE only for test buckets. */
+  BACKUP_OBJECT_LOCK_MODE: z.enum(['COMPLIANCE', 'GOVERNANCE']).default('COMPLIANCE'),
 });
 
 /**
@@ -318,6 +332,21 @@ export function loadConfig(env) {
 
     /** SDD §6.5: the maintainer's address for exhausted background jobs. */
     opsAlertEmail: value.OPS_ALERT_EMAIL,
+
+    /** NFR-OPS-01, V6: the backup worker's target. */
+    backup: Object.freeze({
+      endpoint: value.BACKUP_S3_ENDPOINT,
+      region: value.BACKUP_S3_REGION,
+      bucket: value.BACKUP_S3_BUCKET,
+      accessKeyId: value.BACKUP_S3_ACCESS_KEY_ID,
+      secretAccessKey: value.BACKUP_S3_SECRET_ACCESS_KEY,
+      lockMode: value.BACKUP_OBJECT_LOCK_MODE,
+      isConfigured:
+        value.BACKUP_S3_ENDPOINT !== '' &&
+        value.BACKUP_S3_BUCKET !== '' &&
+        value.BACKUP_S3_ACCESS_KEY_ID !== '' &&
+        value.BACKUP_S3_SECRET_ACCESS_KEY !== '',
+    }),
 
     /** NFR-OPS-03: error tracking; an empty DSN turns it off. */
     sentry: Object.freeze({
