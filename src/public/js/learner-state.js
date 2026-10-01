@@ -56,28 +56,20 @@ function renderCounts() {
   const progress = document.querySelector('[data-learn-progress]');
   if (progress) {
     progress.textContent = `${learned} / ${total} learned`;
-    progress.hidden = false;
+    // Server-rendered and invisible until now, so revealing it shifts nothing.
+    const controls = progress.closest('[data-learn-controls]');
+    if (controls) controls.dataset.ready = '';
   }
 }
 
 /** The all / learned / not-yet-learned filter on the IPA pages (JavaScript only). */
 function installFilter() {
   const list = document.querySelector('.phoneme-list');
-  const progress = document.querySelector('[data-learn-progress]');
-  if (!list || !progress) return;
+  // Server-rendered beside the progress line (learn-ipa.ejs), wired here.
+  const group = document.querySelector('[data-learn-filter]');
+  if (!list || !group) return;
 
-  const group = document.createElement('div');
-  group.className = 'learn-filter';
-  group.setAttribute('role', 'group');
-  group.setAttribute('aria-label', 'Show');
-
-  const options = [
-    { value: 'all', label: 'All' },
-    { value: 'learned', label: 'Learned' },
-    { value: 'not-learned', label: 'Not learned yet' },
-  ];
   let current = 'all';
-
   const apply = () => {
     for (const row of list.querySelectorAll('[data-row-phoneme]')) {
       const learnedRow = isLearned(row.getAttribute('data-row-phoneme'));
@@ -88,20 +80,12 @@ function installFilter() {
     }
   };
 
-  for (const { value, label } of options) {
-    const button = document.createElement('button');
-    button.type = 'button';
-    button.className = 'learn-filter__option';
-    button.dataset.filter = value;
-    button.textContent = label;
+  for (const button of group.querySelectorAll('button[data-filter]')) {
     button.addEventListener('click', () => {
-      current = value;
+      current = button.dataset.filter;
       apply();
     });
-    group.append(button);
   }
-
-  progress.after(group);
   apply();
   document.addEventListener('pa:save-state', apply);
 }

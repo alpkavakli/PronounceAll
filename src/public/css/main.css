@@ -74,36 +74,135 @@
 
 /* Self-hosted WOFF2, never a third-party CDN (§4.2 "Font delivery"). Both
    families are SIL Open Font License 1.1; the licence texts sit beside the
-   files in /fonts. `swap` keeps text readable while a face loads, which matters
-   most for Charis at 305 kB. Neither face is subsetted, so every canonical IPA
-   symbol is present by construction (FR-IPA-09). */
+   files in /fonts.
+
+   Plex is `optional`: on a cold first visit the page keeps the system sans if
+   Plex is not ready within the browser's short block period, so text never
+   re-wraps under the reader (NFR-PERF-01 CLS); from cache it shows at once.
+   The IPA face is `swap`, so IPA always ends in the face made for it.
+
+   IBM Plex Sans: IBM's own official split subsets (@ibm/plex-sans 1.1.0),
+   unmodified, with IBM's unicode-range for each; a page downloads only the
+   subsets its text uses. Latin1 is declared last in each weight, so it wins
+   where IBM's ranges overlap (e.g. U+0131) and plain Latin pages never fetch
+   Latin2. No local() lookup: probing installed fonts is a fingerprinting vector.
+
+   PronounceAll Phonetic: the IPA face, a renamed subset of the upstream IPA
+   font, built by tools/fonts/build_phonetic_font.py from the character set
+   PronounceAll renders (FR-IPA-09; maintainer decision 2026-10-01; see
+   /fonts/FONTLOG-PronounceAllPhonetic.txt). A character outside it falls back
+   per glyph to the next family in the IPA stack. */
 @font-face {
   font-family: "IBM Plex Sans";
-  src: url("/fonts/ibm-plex-sans-400.woff2") format("woff2");
+  src: url("/fonts/IBMPlexSans-Regular-Latin2.woff2") format("woff2");
   font-weight: 400;
   font-style: normal;
-  font-display: swap;
+  font-display: optional;
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+20A0-20AB, U+20AD-20CF, U+2C60-2C7F, U+A720-A7FF, U+FB01-FB02;
 }
 
 @font-face {
   font-family: "IBM Plex Sans";
-  src: url("/fonts/ibm-plex-sans-500.woff2") format("woff2");
+  src: url("/fonts/IBMPlexSans-Regular-Latin3.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: optional;
+  unicode-range: U+0102-0103, U+1EA0-1EF9, U+20AB;
+}
+
+@font-face {
+  font-family: "IBM Plex Sans";
+  src: url("/fonts/IBMPlexSans-Regular-Pi.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: optional;
+  unicode-range: U+0E3F, U+2032-2033, U+2070, U+2075-2079, U+2080-2081, U+2083, U+2085-2089, U+2113, U+2116, U+2126, U+212E, U+2150-2151, U+2153-215E, U+2190-2199, U+21A9-21AA, U+21B0-21B3, U+21B6-21B7, U+21BA-21BB, U+21C4, U+21C6, U+2202, U+2206, U+220F, U+2211, U+221A, U+221E, U+222B, U+2248, U+2260, U+2264-2265, U+25CA, U+2713, U+274C, U+2B0E-2B11, U+EBE1-EBE7, U+ECE0, U+EFCC;
+}
+
+@font-face {
+  font-family: "IBM Plex Sans";
+  src: url("/fonts/IBMPlexSans-Regular-Latin1.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: optional;
+  unicode-range: U+0000, U+000D, U+0020-007E, U+00A0-00A3, U+00A4-00FF, U+0131, U+0152-0153, U+02C6, U+02DA, U+02DC, U+2013-2014, U+2018-201A, U+201C-201E, U+2020-2022, U+2026, U+2030, U+2039-203A, U+2044, U+2074, U+20AC, U+2122, U+2212, U+FB01-FB02;
+}
+
+@font-face {
+  font-family: "IBM Plex Sans";
+  src: url("/fonts/IBMPlexSans-Medium-Latin2.woff2") format("woff2");
   font-weight: 500;
   font-style: normal;
-  font-display: swap;
+  font-display: optional;
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+20A0-20AB, U+20AD-20CF, U+2C60-2C7F, U+A720-A7FF, U+FB01-FB02;
 }
 
 @font-face {
   font-family: "IBM Plex Sans";
-  src: url("/fonts/ibm-plex-sans-600.woff2") format("woff2");
-  font-weight: 600;
+  src: url("/fonts/IBMPlexSans-Medium-Latin3.woff2") format("woff2");
+  font-weight: 500;
   font-style: normal;
-  font-display: swap;
+  font-display: optional;
+  unicode-range: U+0102-0103, U+1EA0-1EF9, U+20AB;
 }
 
 @font-face {
-  font-family: "Charis SIL";
-  src: url("/fonts/charis-sil-400.woff2") format("woff2");
+  font-family: "IBM Plex Sans";
+  src: url("/fonts/IBMPlexSans-Medium-Pi.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: optional;
+  unicode-range: U+0E3F, U+2032-2033, U+2070, U+2075-2079, U+2080-2081, U+2083, U+2085-2089, U+2113, U+2116, U+2126, U+212E, U+2150-2151, U+2153-215E, U+2190-2199, U+21A9-21AA, U+21B0-21B3, U+21B6-21B7, U+21BA-21BB, U+21C4, U+21C6, U+2202, U+2206, U+220F, U+2211, U+221A, U+221E, U+222B, U+2248, U+2260, U+2264-2265, U+25CA, U+2713, U+274C, U+2B0E-2B11, U+EBE1-EBE7, U+ECE0, U+EFCC;
+}
+
+@font-face {
+  font-family: "IBM Plex Sans";
+  src: url("/fonts/IBMPlexSans-Medium-Latin1.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: optional;
+  unicode-range: U+0000, U+000D, U+0020-007E, U+00A0-00A3, U+00A4-00FF, U+0131, U+0152-0153, U+02C6, U+02DA, U+02DC, U+2013-2014, U+2018-201A, U+201C-201E, U+2020-2022, U+2026, U+2030, U+2039-203A, U+2044, U+2074, U+20AC, U+2122, U+2212, U+FB01-FB02;
+}
+
+@font-face {
+  font-family: "IBM Plex Sans";
+  src: url("/fonts/IBMPlexSans-SemiBold-Latin2.woff2") format("woff2");
+  font-weight: 600;
+  font-style: normal;
+  font-display: optional;
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+20A0-20AB, U+20AD-20CF, U+2C60-2C7F, U+A720-A7FF, U+FB01-FB02;
+}
+
+@font-face {
+  font-family: "IBM Plex Sans";
+  src: url("/fonts/IBMPlexSans-SemiBold-Latin3.woff2") format("woff2");
+  font-weight: 600;
+  font-style: normal;
+  font-display: optional;
+  unicode-range: U+0102-0103, U+1EA0-1EF9, U+20AB;
+}
+
+@font-face {
+  font-family: "IBM Plex Sans";
+  src: url("/fonts/IBMPlexSans-SemiBold-Pi.woff2") format("woff2");
+  font-weight: 600;
+  font-style: normal;
+  font-display: optional;
+  unicode-range: U+0E3F, U+2032-2033, U+2070, U+2075-2079, U+2080-2081, U+2083, U+2085-2089, U+2113, U+2116, U+2126, U+212E, U+2150-2151, U+2153-215E, U+2190-2199, U+21A9-21AA, U+21B0-21B3, U+21B6-21B7, U+21BA-21BB, U+21C4, U+21C6, U+2202, U+2206, U+220F, U+2211, U+221A, U+221E, U+222B, U+2248, U+2260, U+2264-2265, U+25CA, U+2713, U+274C, U+2B0E-2B11, U+EBE1-EBE7, U+ECE0, U+EFCC;
+}
+
+@font-face {
+  font-family: "IBM Plex Sans";
+  src: url("/fonts/IBMPlexSans-SemiBold-Latin1.woff2") format("woff2");
+  font-weight: 600;
+  font-style: normal;
+  font-display: optional;
+  unicode-range: U+0000, U+000D, U+0020-007E, U+00A0-00A3, U+00A4-00FF, U+0131, U+0152-0153, U+02C6, U+02DA, U+02DC, U+2013-2014, U+2018-201A, U+201C-201E, U+2020-2022, U+2026, U+2030, U+2039-203A, U+2044, U+2074, U+20AC, U+2122, U+2212, U+FB01-FB02;
+}
+
+@font-face {
+  font-family: "PronounceAll Phonetic";
+  src: url("/fonts/pronounceall-phonetic-400.woff2") format("woff2");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
@@ -648,11 +747,12 @@ a:focus-visible,
    Linux distributions, so the stack degrades through progressively more common
    fonts rather than falling straight to the default.
 
-   FR-IPA-09 is now satisfied in full. The Frontend Design Baseline v1 §4.2 made
-   the decision this comment previously deferred: Charis SIL, self-hosted as
-   unsubsetted WOFF2 under the OFL, declared in the fonts section above. It
-   leads the stack; the system families behind it remain the fallback while the
-   face loads and for anyone who blocks web fonts.
+   FR-IPA-09: the self-hosted IPA face leads the stack. Since 2026-10-01 it is
+   PronounceAll Phonetic, a renamed subset holding every character the site
+   renders in IPA (proven by tests/integration/phonetic-font.test.js);
+   "Charis SIL" behind it is a reader's own installed copy, if any. The system
+   families remain the fallback while the face loads, for anyone who blocks web
+   fonts, and per glyph for any character outside the subset.
    -------------------------------------------------------------------------- */
 
 .ipa,
@@ -662,7 +762,7 @@ a:focus-visible,
 .phoneme-row__example-ipa,
 .phoneme-popover__symbol {
   font-family:
-    "Charis SIL", "Doulos SIL", "Gentium Plus", "Noto Sans",
+    "PronounceAll Phonetic", "Charis SIL", "Doulos SIL", "Gentium Plus", "Noto Sans",
     "Segoe UI", "Lucida Sans Unicode", "DejaVu Sans", "Arial Unicode MS",
     sans-serif;
 }
@@ -824,6 +924,20 @@ a:focus-visible,
 .ipa-banner__link {
   color: var(--color-accent-hover);
   font-weight: 500;
+}
+
+/* Controls that only work with script, rendered by the server so that filling
+   them in shifts nothing (NFR-PERF-01, CLS). Invisible, and so out of the
+   accessibility tree, until their script marks them ready; gone entirely
+   where script does not run (FR-WORD-08). */
+.script-only:not([data-ready]) {
+  visibility: hidden;
+}
+
+@media (scripting: none) {
+  .script-only {
+    display: none;
+  }
 }
 
 /* /learnIPA progress and filter (FR-IPA-07/10, baseline §11). */

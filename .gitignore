@@ -9,6 +9,7 @@ node_modules/
 # Build and tool output
 coverage/
 playwright-report/
+lighthouse-report/
 test-results/
 *.tsbuildinfo
 

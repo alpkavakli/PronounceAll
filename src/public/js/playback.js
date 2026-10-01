@@ -140,13 +140,13 @@ function enhanceNativeAudio() {
     }
   }
 
-  // IPA pages: one page-level toggle; rows follow it (baseline §10).
-  const list = document.querySelector('.phoneme-list');
-  if (list && elements.length > 0) {
-    const bar = document.createElement('p');
-    bar.className = 'speed-bar';
-    bar.append(createSpeedToggle());
-    list.before(bar);
+  // IPA pages: one page-level toggle; rows follow it (baseline §10). The bar
+  // is server-rendered so wiring it shifts nothing; the toggle is swapped for
+  // an identical, live one.
+  const bar = document.querySelector('[data-speed-bar]');
+  if (bar && elements.length > 0) {
+    bar.replaceChildren(createSpeedToggle());
+    bar.dataset.ready = '';
   }
 }
 

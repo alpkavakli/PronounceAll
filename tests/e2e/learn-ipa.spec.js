@@ -72,7 +72,18 @@ test.describe('FR-IPA-09 — IPA glyphs actually render', () => {
       .first()
       .evaluate((node) => getComputedStyle(node).fontFamily);
 
-    expect(family).toMatch(/Charis SIL|Doulos SIL|Gentium|Noto Sans/);
+    // The self-hosted IPA face leads; the SIL and system families follow it.
+    expect(family).toMatch(/^"?PronounceAll Phonetic"?, "?Charis SIL"?/);
+  });
+
+  test('the self-hosted IPA face is the one that loads', async ({ page, javaScriptEnabled }) => {
+    test.skip(!javaScriptEnabled, 'The FontFace API needs script');
+    await page.goto(PER_VARIANT);
+    const status = await page.evaluate(async () => {
+      await document.fonts.ready;
+      return [...document.fonts].filter((face) => face.family.replace(/"/g, '') === 'PronounceAll Phonetic').map((face) => face.status);
+    });
+    expect(status).toEqual(['loaded']);
   });
 });
 

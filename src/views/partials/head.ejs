@@ -12,4 +12,8 @@
 <% if (typeof canonicalUrl !== 'undefined' && canonicalUrl) { %>
 <link rel="canonical" href="<%= canonicalUrl %>">
 <% } %>
+<%# No icon is designed yet. An explicitly empty one stops the browser's automatic
+    /favicon.ico request, whose 404 is a console error (NFR-PERF-03, Best
+    Practices). Replace with the real icon when there is one. %>
+<link rel="icon" href="data:,">
 <link rel="stylesheet" href="/css/main.css">

@@ -51,6 +51,16 @@ jobs:
       - name: Phoneme inventory matches D4
         run: npm run inventory:check
 
+      # The IPA web font is a deterministic build of the committed character
+      # set (FR-IPA-09); the shipped file must be exactly what that build gives.
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: IPA web font matches its build
+        run: |
+          pip install -r tools/fonts/requirements.txt
+          npm run fonts:check
+
   test:
     name: Unit and integration tests
     runs-on: ubuntu-latest
@@ -184,6 +194,14 @@ jobs:
 
       - name: Playwright
         run: npm run test:e2e
+
+      # NFR-PERF-03 / NFR-PERF-01: every page of the list, Lighthouse's mobile
+      # profile, all four categories at 90+, LCP <= 2.5 s, CLS <= 0.1.
+      - name: Lighthouse
+        run: |
+          node src/server.js > server.log 2>&1 &
+          for i in $(seq 1 30); do curl -sf http://127.0.0.1:3000/health && break; sleep 1; done
+          npm run audit:lighthouse
 
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}

@@ -38,9 +38,19 @@
       word is built from these.
     </p>
 
-    <%# FR-IPA-07/10: the viewer's `M / N learned`, filled in by hydration.
-        Hidden until then, so a no-JavaScript page shows no count. %>
-    <p class="learn-progress" data-learn-progress data-total="<%= phonemes.length %>" hidden></p>
+    <%# FR-IPA-07/10: the viewer's `M / N learned` and the learned filter, both
+        filled in by hydration. Rendered here, invisible, rather than inserted
+        by script, so filling them in moves nothing (NFR-PERF-01, CLS); without
+        script the CSS drops them, so a no-JavaScript page shows no count and
+        no dead buttons (FR-WORD-08). %>
+    <div class="script-only" data-script-only data-learn-controls>
+      <p class="learn-progress" data-learn-progress data-total="<%= phonemes.length %>">0 / <%= phonemes.length %> learned</p>
+      <div class="learn-filter" role="group" aria-label="Show" data-learn-filter>
+        <button type="button" class="learn-filter__option" data-filter="all" aria-pressed="true">All</button>
+        <button type="button" class="learn-filter__option" data-filter="learned" aria-pressed="false">Learned</button>
+        <button type="button" class="learn-filter__option" data-filter="not-learned" aria-pressed="false">Not learned yet</button>
+      </div>
+    </div>
 
     <% if (scope === 'variant') { %>
       <%- include('partials/search-form', { variantCode: variant.code }) %>
@@ -51,6 +61,14 @@
     <% } else { %>
       <%# FR-IPA-07: ordered by ascending frequency rank, which is the order the
           query returned. Nothing re-sorts it here. %>
+      <%# Baseline §10: one page-level speed toggle the rows follow, where any row
+          can play. Rendered here for the same reason as the controls above;
+          playback.js wires it. %>
+      <% if (phonemes.some(function (phoneme) { return phoneme.hasAudio; })) { %>
+        <p class="speed-bar script-only" data-script-only data-speed-bar>
+          <span class="speed-toggle" role="group" aria-label="Playback speed"><button type="button" class="speed-toggle__option" data-rate="1" aria-pressed="true">1×</button><button type="button" class="speed-toggle__option" data-rate="0.75" aria-pressed="false">0.75×</button></span>
+        </p>
+      <% } %>
       <ol class="phoneme-list">
         <% phonemes.forEach(function (phoneme) { %>
           <li class="phoneme-row" data-row-phoneme="<%= phoneme.phonemeId %>">

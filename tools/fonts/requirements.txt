@@ -1,0 +1,4 @@
+# Development-only: builds the PronounceAll Phonetic web font (tools/fonts/build_phonetic_font.py).
+# Never needed at runtime.
+fonttools==4.66.1
+brotli==1.2.0

@@ -54,9 +54,14 @@ describe('word page shell', () => {
 });
 
 describe('learnIPA', () => {
-  test('carries a hidden progress placeholder and a learner hook on every row', async () => {
+  test('carries the script-only progress and filter, and a learner hook on every row', async () => {
     const response = await request(app).get('/en-us/learnIPA');
-    expect(response.text).toContain(`data-learn-progress data-total="${total}" hidden`);
+    // Server-rendered inside a script-only container, so hydration fills them
+    // without moving the list (NFR-PERF-01, CLS); the CSS hides them without
+    // script (FR-WORD-08).
+    expect(response.text).toMatch(/<div class="script-only" data-script-only data-learn-controls>\s*<p class="learn-progress" data-learn-progress/);
+    expect(response.text).toContain(`data-total="${total}">0 / ${total} learned</p>`);
+    expect(response.text).toContain('data-learn-filter');
     expect((response.text.match(/data-learner-phoneme="\d+"/g) ?? []).length).toBe(total);
   });
 });

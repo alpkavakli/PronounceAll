@@ -43,6 +43,10 @@
     "worker:backup": "node src/workers/backup.worker.js",
     "backup:create-dev-bucket": "node scripts/create-backup-bucket.js",
     "db:provision": "node scripts/provision-database-principals.js",
+    "fonts:charset": "node scripts/generate-phonetic-charset.js",
+    "fonts:build": "python tools/fonts/build_phonetic_font.py",
+    "fonts:check": "python tools/fonts/build_phonetic_font.py --check",
+    "audit:lighthouse": "node scripts/lighthouse-audit.js",
     "account:purge-due": "node scripts/purge-deleted-accounts.js",
     "inventory:check": "node scripts/extract-phoneme-inventory.js --check",
     "audio:preflight": "node scripts/generate-phoneme-audio.js --dry-run",
@@ -86,9 +90,12 @@
     "eslint": "^9.39.0",
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-security": "^3.0.1",
+    "fontkit": "2.0.4",
     "globals": "^16.5.0",
     "jest": "^30.2.0",
+    "lighthouse": "13.5.0",
     "size-limit": "^11.2.0",
+    "subset-font": "2.9.0",
     "supertest": "^7.1.4"
   }
 }

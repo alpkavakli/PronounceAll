@@ -1,0 +1,26 @@
+FONTLOG for PronounceAll Phonetic
+=================================
+
+PronounceAll Phonetic (pronounceall-phonetic-400.woff2) is a Modified Version,
+under the SIL Open Font License, Version 1.1 (OFL-CharisSIL.txt, beside this
+file), of a font by SIL Global.
+
+Copyright (c) 1997-2025 SIL Global (https://www.sil.org/), with Reserved Font
+Names "Charis" and "SIL". The modified font does not use either Reserved Font
+Name. It is not endorsed by SIL Global or by the original designers, and
+nothing about it should be taken to imply that it is.
+
+Modifications (2026-10-01, PronounceAll):
+- Subset to the characters PronounceAll renders in its IPA text: the character
+  set in tools/fonts/pronounceall-phonetic.charset.txt, generated from the
+  site's content. The OFL treats subsetting as modification (OFL-FAQ 2.6).
+- Renamed: family "PronounceAll Phonetic", PostScript name
+  "PronounceAllPhonetic-Regular". The trademark notice, vendor tag,
+  manufacturer, upstream description and URLs, and a private table were
+  removed; the copyright notice, the designers' credit and the licence were
+  kept.
+- Built reproducibly by tools/fonts/build_phonetic_font.py from the unmodified
+  upstream file in assets/fonts-source/ (version 7.000).
+
+The modified font is distributed under the same licence, the SIL Open Font
+License, Version 1.1.
