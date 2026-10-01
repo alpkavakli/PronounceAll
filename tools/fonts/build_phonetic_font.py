@@ -84,7 +84,8 @@ def build():
     subsetter.populate(unicodes=codepoints)
     subsetter.subset(font)
 
-    charset_digest = hashlib.sha256(CHARSET.read_bytes()).hexdigest()[:12]
+    # Line endings normalised, so a CRLF checkout builds the same bytes as CI.
+    charset_digest = hashlib.sha256(CHARSET.read_bytes().replace(b"\r\n", b"\n")).hexdigest()[:12]
     names = font["name"]
     for record in list(names.names):
         if record.nameID not in KEPT_NAME_IDS:
