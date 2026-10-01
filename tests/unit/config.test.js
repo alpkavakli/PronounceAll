@@ -27,6 +27,7 @@ const PRODUCTION_ENV = {
   GOOGLE_CLIENT_SECRET: 'supplied-at-deploy-time',
   PRIVACY_POLICY_VERSION: '1.0',
   CONTACT_EMAIL: 'privacy@pronounceall.example',
+  SENTRY_DSN: 'https://public-key@o0.ingest.de.sentry.io/1',
 };
 
 describe('loadConfig (SDD v1.1 §6.4, NFR-SEC-06)', () => {
@@ -98,6 +99,14 @@ describe('loadConfig (SDD v1.1 §6.4, NFR-SEC-06)', () => {
     expect(() => loadConfig(incomplete)).toThrow('CONTACT_EMAIL');
     expect(loadConfig({ NODE_ENV: 'development' }).contactEmail).toBe('privacy@pronounceall.localhost');
     expect(() => loadConfig({ NODE_ENV: 'development', CONTACT_EMAIL: 'not an address' })).toThrow();
+  });
+
+  test('production refuses to boot without SENTRY_DSN; locally reporting is off', () => {
+    const { SENTRY_DSN, ...incomplete } = PRODUCTION_ENV;
+    expect(() => loadConfig(incomplete)).toThrow('SENTRY_DSN');
+    expect(loadConfig({ NODE_ENV: 'development' }).sentry).toEqual({ dsn: '', environment: 'development' });
+    expect(loadConfig(PRODUCTION_ENV).sentry.environment).toBe('production');
+    expect(() => loadConfig({ NODE_ENV: 'development', SENTRY_DSN: 'not a url' })).toThrow();
   });
 
   test('development defaults to the local Mailpit catcher', () => {

@@ -83,9 +83,35 @@ function toAppError(thrown) {
 }
 
 /**
+ * NFR-OPS-03: report every 5xx-class response. One the error handler below has
+ * already reported with its exception is skipped; any other — a route that
+ * renders a fail-closed 503 in place, say — is reported by status and path.
+ *
+ * @param {{ reportResponse: Function }} [tracker]
+ * @returns {import('express').RequestHandler}
+ */
+export function serverErrorReporting({ reportResponse } = { reportResponse: () => {} }) {
+  return function reportServerErrors(req, res, next) {
+    res.on('finish', () => {
+      if (res.statusCode < 500 || res.locals.errorReported) return;
+      reportResponse({
+        status: res.statusCode,
+        method: req.method,
+        path: pathWithoutQuery(req.originalUrl),
+        correlationId: res.locals.correlationId,
+      });
+    });
+    next();
+  };
+}
+
+/**
+ * @param {object} [options]
+ * @param {(error: unknown, context: object) => void} [options.reportError] the
+ *   error tracker (NFR-OPS-03): called for 5xx only, with the original cause
  * @returns {import('express').ErrorRequestHandler}
  */
-export function errorHandler() {
+export function errorHandler({ reportError = () => {} } = {}) {
   return function handleError(thrown, req, res, next) {
     const error = toAppError(thrown);
     // Never undefined: an error the user cannot quote back is an error nobody
@@ -102,6 +128,9 @@ export function errorHandler() {
     };
     if (error.status >= 500) {
       logger.error(logLine, 'Request failed');
+      // The cause, not the wrapper, so the report carries the real stack.
+      reportError(error.cause ?? error, { correlationId, code: error.code, method: req.method, path: logLine.url });
+      res.locals.errorReported = true;
     } else {
       logger.warn(logLine, 'Request rejected');
     }

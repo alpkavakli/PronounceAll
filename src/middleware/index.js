@@ -13,6 +13,7 @@ export {
 export {
   ERROR_SURFACE,
   errorHandler,
+  serverErrorReporting,
   jsonErrorSurface,
   notFoundHandler,
 } from './error-handler.js';

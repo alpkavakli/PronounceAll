@@ -10,11 +10,15 @@
 
 import { createApp } from './app.js';
 import { config } from './config/index.js';
+import { createErrorTracker } from './lib/error-tracker.js';
 import { logger } from './lib/logger.js';
 import { closePool } from './lib/mysql.js';
 import { closeRedis } from './lib/redis.js';
 
-const server = createApp().listen(config.port, () => {
+// NFR-OPS-03: one tracker for the process; off when no DSN is configured.
+const errorTracker = createErrorTracker({ ...config.sentry, component: 'web' });
+
+const server = createApp({ errorTracker }).listen(config.port, () => {
   logger.info({ port: config.port, env: config.env }, 'PronounceAll listening');
 });
 
@@ -29,7 +33,13 @@ async function shutdown(signal) {
 process.on('SIGTERM', () => void shutdown('SIGTERM'));
 process.on('SIGINT', () => void shutdown('SIGINT'));
 
-process.on('unhandledRejection', (reason) => {
-  logger.fatal({ err: reason }, 'Unhandled promise rejection');
+/** A fatal error is reported before the process exits, so it is not lost. */
+async function die(kind, error) {
+  logger.fatal({ err: error }, kind);
+  errorTracker.reportError(error, { code: 'FATAL' });
+  await errorTracker.flush(2000).catch(() => false);
   process.exit(1);
-});
+}
+
+process.on('unhandledRejection', (reason) => void die('Unhandled promise rejection', reason));
+process.on('uncaughtException', (error) => void die('Uncaught exception', error));

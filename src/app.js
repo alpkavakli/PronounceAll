@@ -39,6 +39,7 @@ import { createSessionStore } from './lib/session-store.js';
 import {
   anonymousIdentityMiddleware,
   retiredIdentityMiddleware,
+  serverErrorReporting,
   byAnonymousIdAndIp,
   byIp,
   contentSecurityPolicyMiddleware,
@@ -60,6 +61,7 @@ import { accountDeletionRouter } from './routes/account-deletion.route.js';
 import { healthRouter } from './routes/health.route.js';
 import { legalRouter } from './routes/legal.route.js';
 import { loadLegalDocument } from './lib/legal-documents.js';
+import { disabledErrorTracker } from './lib/error-tracker.js';
 import { homeRouter } from './routes/home.route.js';
 import { learnIpaRouter } from './routes/learn-ipa.route.js';
 import { searchRouter } from './routes/search.route.js';
@@ -110,6 +112,9 @@ const LEGAL_DOCUMENTS = Object.freeze({
  *   replaces the Google provider boundary (FR-AUTH-04a); null means not offered
  * @param {() => number} [overrides.practiceRng] replaces the practice queue's
  *   CSPRNG-backed generator, so tests can seed it (FR-PRACTICE-02/05)
+ * @param {import('./lib/error-tracker.js').ErrorTracker} [overrides.errorTracker]
+ *   the process's error tracker (NFR-OPS-03); `server.js` passes the real one,
+ *   and anything else gets the disabled tracker
  * @returns {import('express').Express}
  */
 export function createApp({
@@ -117,6 +122,7 @@ export function createApp({
   sendMail = createSmtpMailer(config.mail),
   googleOidc = config.google.isConfigured ? createGoogleOidcClient(config.google) : null,
   practiceRng = () => randomInt(0, 2 ** 32) / 2 ** 32,
+  errorTracker = disabledErrorTracker,
 } = {}) {
   const app = express();
 
@@ -206,6 +212,8 @@ export function createApp({
 
   // 1. Observability first, so every later failure carries a correlation id.
   app.use(requestContextMiddleware());
+  // NFR-OPS-03: every 5xx-class response reaches the error tracker.
+  app.use(serverErrorReporting(errorTracker));
 
   // 2. Response classification, before anything that depends on the class.
   app.use(responseClassMiddleware());
@@ -395,7 +403,7 @@ export function createApp({
 
   // 7. One terminal 404 and one error middleware (C2).
   app.use(notFoundHandler());
-  app.use(errorHandler());
+  app.use(errorHandler({ reportError: errorTracker.reportError }));
 
   return app;
 }

@@ -55,6 +55,7 @@
     "size": "npm run capture:word-page && size-limit"
   },
   "dependencies": {
+    "@sentry/node": "11.2.0",
     "bcrypt": "^6.0.0",
     "bullmq": "6.3.11",
     "cookie-parser": "^1.4.7",

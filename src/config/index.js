@@ -121,6 +121,15 @@ const schema = z.object({
    * real deployment, so a failing purge or backup cannot go unnoticed.
    */
   OPS_ALERT_EMAIL: z.union([z.literal(''), z.string().email().max(320)]).default(''),
+
+  /**
+   * Error tracking (NFR-OPS-03): the Sentry project's DSN, EU data region.
+   * Empty locally, which turns reporting off; a real deployment must set it.
+   * A credential of sorts: never logged, never sent to the browser.
+   */
+  SENTRY_DSN: z.union([z.literal(''), z.string().url()]).default(''),
+  /** Defaults to NODE_ENV. */
+  SENTRY_ENVIRONMENT: z.string().max(64).default(''),
 });
 
 /**
@@ -158,6 +167,8 @@ const REQUIRED_IN_STRICT_ENVIRONMENTS = [
   'PRIVACY_POLICY_VERSION',
   // FR-SET-07: the deletion email's "this wasn't me" contact must reach someone.
   'CONTACT_EMAIL',
+  // NFR-OPS-03: unhandled errors and 5xx responses must reach the maintainer.
+  'SENTRY_DSN',
 ];
 
 /**
@@ -307,6 +318,12 @@ export function loadConfig(env) {
 
     /** SDD §6.5: the maintainer's address for exhausted background jobs. */
     opsAlertEmail: value.OPS_ALERT_EMAIL,
+
+    /** NFR-OPS-03: error tracking; an empty DSN turns it off. */
+    sentry: Object.freeze({
+      dsn: value.SENTRY_DSN,
+      environment: value.SENTRY_ENVIRONMENT || value.NODE_ENV,
+    }),
 
     /** Outgoing SMTP (FR-AUTH-09/11); development defaults to Mailpit. */
     mail: Object.freeze({

@@ -17,6 +17,7 @@
 import process from 'node:process';
 
 import { config } from '../config/index.js';
+import { createErrorTracker } from '../lib/error-tracker.js';
 import { createJobConnection, startJobWorker } from '../lib/job-queue.js';
 import { logger } from '../lib/logger.js';
 import { createSmtpMailer } from '../lib/mailer.js';
@@ -36,12 +37,27 @@ export async function runWorker({ worker, queueName, buildJobs }) {
   }
   enforceUtcSessions(getPool());
 
+  // NFR-OPS-03: an exhausted job and a fatal error reach the tracker too.
+  const errorTracker = createErrorTracker({ ...config.sentry, component: `worker-${worker}` });
+  const alert = createOpsAlert({ sendMail: createSmtpMailer(config.mail), to: config.opsAlertEmail, worker });
+  const die = async (kind, error) => {
+    logger.fatal({ worker, reason: error?.name ?? 'Error' }, kind);
+    errorTracker.reportError(error, { code: 'FATAL' });
+    await errorTracker.flush(2000).catch(() => false);
+    process.exit(1);
+  };
+  process.on('unhandledRejection', (reason) => void die('Unhandled promise rejection', reason));
+  process.on('uncaughtException', (error) => void die('Uncaught exception', error));
+
   const connection = createJobConnection();
   const running = await startJobWorker({
     queueName,
     jobs: buildJobs(),
     connection,
-    onExhausted: createOpsAlert({ sendMail: createSmtpMailer(config.mail), to: config.opsAlertEmail, worker }),
+    onExhausted: async (jobName, error) => {
+      errorTracker.reportError(error, { code: `JOB_EXHAUSTED:${jobName}` });
+      await alert(jobName, error);
+    },
   });
   logger.info({ worker, queue: queueName }, 'Worker started');
 
@@ -52,6 +68,7 @@ export async function runWorker({ worker, queueName, buildJobs }) {
     logger.info({ worker, signal }, 'Worker stopping');
     await running.close();
     await connection.quit();
+    await errorTracker.flush(2000).catch(() => false);
     await closePool();
     await closeRedis();
   };

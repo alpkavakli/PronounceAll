@@ -92,6 +92,7 @@ services:
       # container would be the container itself.
       SMTP_HOST: mailpit
       SMTP_PORT: 1025
+      SENTRY_DSN: ${SENTRY_DSN:-}
     ports:
       - '3000:3000'
     # The generated audio store is not in the image (it is not source; see
@@ -127,6 +128,7 @@ services:
       SMTP_HOST: mailpit
       SMTP_PORT: 1025
       OPS_ALERT_EMAIL: ${OPS_ALERT_EMAIL:-ops@pronounceall.localhost}
+      SENTRY_DSN: ${SENTRY_DSN:-}
     healthcheck:
       disable: true
     depends_on: &worker-dependencies
