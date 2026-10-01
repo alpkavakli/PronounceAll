@@ -105,6 +105,52 @@ services:
       redis:
         condition: service_healthy
 
+  # The worker tier (SDD v1.1 §6.5, Threat Model F4): one process per database
+  # principal (§4.9). Locally all three share the development user; in
+  # production each sets MYSQL_USER to its own principal — the erasure worker
+  # `pa_erase`, the maintenance worker `pa_maint`, the app worker `pa_app` —
+  # and OPS_ALERT_EMAIL, without which a worker refuses to start there.
+  # No HTTP server, so the image's /health check does not apply.
+  worker-erasure:
+    build: .
+    command: ['node', 'src/workers/erasure.worker.js']
+    environment: &worker-environment
+      NODE_ENV: ${NODE_ENV:-development}
+      APP_BASE_URL: ${APP_BASE_URL:-http://localhost:3000}
+      LOG_LEVEL: ${LOG_LEVEL:-debug}
+      MYSQL_HOST: mysql
+      MYSQL_PORT: 3306
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-pronounceall}
+      MYSQL_USER: ${MYSQL_USER:-pronounceall_app}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-devpass}
+      REDIS_URL: redis://redis:6379
+      SMTP_HOST: mailpit
+      SMTP_PORT: 1025
+      OPS_ALERT_EMAIL: ${OPS_ALERT_EMAIL:-ops@pronounceall.localhost}
+    healthcheck:
+      disable: true
+    depends_on: &worker-dependencies
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  worker-maintenance:
+    build: .
+    command: ['node', 'src/workers/maintenance.worker.js']
+    environment: *worker-environment
+    healthcheck:
+      disable: true
+    depends_on: *worker-dependencies
+
+  worker-app:
+    build: .
+    command: ['node', 'src/workers/app.worker.js']
+    environment: *worker-environment
+    healthcheck:
+      disable: true
+    depends_on: *worker-dependencies
+
 volumes:
   mysql-data:
   redis-data:

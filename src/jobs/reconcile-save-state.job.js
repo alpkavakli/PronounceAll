@@ -6,9 +6,8 @@
  * The scheduled derived-state reconciliation (FR-SAVE-04, B3; SDD v1.1 §6.5).
  *
  * A thin adapter (C4): the logic is `reconcileSaveState`, shared with the
- * dry-run script. The worker tier that schedules jobs (BullMQ, C6) is not built
- * yet; until it is, this runs from the Runbook schedule as
- * `npm run reconcile:state:apply`, and the worker will call this same function.
+ * dry-run script. The app worker runs it nightly (`app.jobs.js`); a manual run
+ * is `npm run reconcile:state:apply`.
  */
 
 import { logger } from '../lib/logger.js';

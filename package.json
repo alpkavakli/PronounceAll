@@ -37,6 +37,9 @@
     "reconcile:state": "node scripts/reconcile-save-state.js",
     "reconcile:state:apply": "node scripts/reconcile-save-state.js --apply",
     "practice:sweep": "node scripts/sweep-practice-sessions.js",
+    "worker:erasure": "node src/workers/erasure.worker.js",
+    "worker:maintenance": "node src/workers/maintenance.worker.js",
+    "worker:app": "node src/workers/app.worker.js",
     "account:purge-due": "node scripts/purge-deleted-accounts.js",
     "inventory:check": "node scripts/extract-phoneme-inventory.js --check",
     "audio:preflight": "node scripts/generate-phoneme-audio.js --dry-run",
@@ -53,6 +56,7 @@
   },
   "dependencies": {
     "bcrypt": "^6.0.0",
+    "bullmq": "6.3.11",
     "cookie-parser": "^1.4.7",
     "dotenv": "^17.2.3",
     "double-metaphone": "^2.0.1",

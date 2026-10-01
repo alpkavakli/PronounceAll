@@ -114,6 +114,13 @@ const schema = z.object({
    * reaches no one; a real deployment must name a monitored mailbox.
    */
   CONTACT_EMAIL: z.string().email().max(320).default('privacy@pronounceall.localhost'),
+
+  /**
+   * Where a background job that exhausted its retries is reported (SDD §6.5).
+   * Optional for the web process; a worker refuses to start without it in a
+   * real deployment, so a failing purge or backup cannot go unnoticed.
+   */
+  OPS_ALERT_EMAIL: z.union([z.literal(''), z.string().email().max(320)]).default(''),
 });
 
 /**
@@ -297,6 +304,9 @@ export function loadConfig(env) {
 
     /** FR-SET-07: the data-protection contact named in deletion emails. */
     contactEmail: value.CONTACT_EMAIL,
+
+    /** SDD §6.5: the maintainer's address for exhausted background jobs. */
+    opsAlertEmail: value.OPS_ALERT_EMAIL,
 
     /** Outgoing SMTP (FR-AUTH-09/11); development defaults to Mailpit. */
     mail: Object.freeze({

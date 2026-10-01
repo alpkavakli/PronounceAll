@@ -6,11 +6,11 @@
  * Erase every account whose deletion is due (FR-SET-08, NFR-PRIV-03): a direct
  * hard delete, or a soft delete whose 30-day window has passed.
  *
- * The hard-delete job's entry point until the worker tier exists (Threat Model
- * F4). It must run at least daily to meet the 24-hour bound, and in production
- * under the dedicated `pa_erase` database credential (SDD §4.9) — the runtime
- * `pa_app` principal holds no DELETE. Safe to run at any time, repeatedly and
- * concurrently: each account is claimed by compare-and-set before it is erased.
+ * A manual run of the erasure worker's hourly `account-purge` job (SDD §6.5):
+ * the same service, so it is safe at any time, repeatedly and concurrently —
+ * each account is claimed by compare-and-set before it is erased. Run it under
+ * the dedicated `pa_erase` database credential (SDD §4.9); the runtime
+ * `pa_app` principal holds no DELETE.
  * It sends no email; the one confirmation went out when deletion was requested.
  *
  * Usage:

@@ -5,9 +5,9 @@
 /**
  * Finalise practice sessions idle for 60 minutes or more (FR-PRACTICE-06).
  *
- * The recurring sweep's entry point until the worker tier exists (Threat Model
- * F4); a returning viewer already finalises their own stale session on arrival.
- * Safe to run at any time and repeatedly: only active, idle sessions change.
+ * A manual run of the app worker's 15-minute `practice-sweep` job (SDD §6.5);
+ * a returning viewer also finalises their own stale session on arrival. Safe
+ * to run at any time and repeatedly: only active, idle sessions change.
  *
  * Usage:
  *   node scripts/sweep-practice-sessions.js

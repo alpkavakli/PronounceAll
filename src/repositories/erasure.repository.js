@@ -6,9 +6,11 @@
  * Account erasure (FR-SET-08; SDD v1.1 §4.9, §5.5, C6).
  *
  * The ONLY module that deletes user data or history. It is called solely by
- * the hard-delete job (`purgeDueAccounts`), which in production runs under the
- * dedicated `pa_erase` credential (§4.9) — never by a request handler, and
- * never by the runtime `pa_app` principal, which holds no DELETE.
+ * the two C6 erasure jobs — the hard delete (`purgeDueAccounts`) and the
+ * dormancy prune (`pruneDormantProfiles`) — which in production run in the
+ * erasure worker under the dedicated `pa_erase` credential (§4.9): never by a
+ * request handler, and never by the runtime `pa_app` principal, which holds no
+ * DELETE. Every statement here stays inside the `pa_erase` grants.
  *
  * Order is explicit and children-first, inside the caller's one transaction,
  * so every ON DELETE RESTRICT foreign key holds and no cascade is relied on:
@@ -129,4 +131,52 @@ export async function insertDeletionTombstone({ deletionId, deletionType, now },
     deletionType,
     now,
   ]);
+}
+
+/**
+ * Dormancy candidates (NFR-PRIV-02): unbound anonymous identities not seen
+ * since `cutoff`. Selection only; the claim decides.
+ *
+ * @param {Date} cutoff
+ * @param {number} limit
+ * @returns {Promise<string[]>}
+ */
+export async function listDormantCandidates(cutoff, limit, executor = defaultExecutor()) {
+  const [rows] = await executor.query(
+    `SELECT p.anonymous_id FROM anonymous_profiles p
+      WHERE p.last_seen_at < ?
+        AND NOT EXISTS (SELECT 1 FROM identity_bindings b WHERE b.anonymous_id = p.anonymous_id)
+      ORDER BY p.last_seen_at
+      LIMIT ?`,
+    [cutoff, limit],
+  );
+  return rows.map((row) => row.anonymous_id);
+}
+
+/**
+ * The C6 dormancy claim: mark the profile only if it is still dormant and still
+ * unbound. The row lock it takes holds off a LINK until this transaction ends.
+ *
+ * @returns {Promise<boolean>} true for exactly one concurrent caller
+ */
+export async function claimDormantProfile(anonymousId, cutoff, now, executor) {
+  const [result] = await executor.execute(
+    `UPDATE anonymous_profiles p SET p.prune_claimed_at = ?
+      WHERE p.anonymous_id = ? AND p.last_seen_at < ? AND p.prune_claimed_at IS NULL
+        AND NOT EXISTS (SELECT 1 FROM identity_bindings b WHERE b.anonymous_id = p.anonymous_id)`,
+    [now, anonymousId, cutoff],
+  );
+  return result.affectedRows === 1;
+}
+
+/** Word requests survive, ownerless (NFR-PRIV-02, §4.9). */
+export async function orphanAnonymousWordRequests(anonymousId, executor) {
+  await executor.execute('UPDATE word_requests SET submitted_by_anonymous_id = NULL WHERE submitted_by_anonymous_id = ?', [
+    anonymousId,
+  ]);
+}
+
+/** The profile row itself, after its data. */
+export async function deleteAnonymousProfile(anonymousId, executor) {
+  await executor.execute('DELETE FROM anonymous_profiles WHERE anonymous_id = ?', [anonymousId]);
 }

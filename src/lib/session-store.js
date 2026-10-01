@@ -68,6 +68,32 @@ export function createSessionStore(redis = getRedis()) {
       await redis.multi().del(key).srem(indexKey(userId), key).exec();
     },
 
+    /**
+     * The nightly session prune (NFR-PRIV-02): records expire on their own TTL,
+     * but the reverse indexes keep the keys of expired records. Drop those, and
+     * any index left empty.
+     *
+     * @returns {Promise<number>} how many stale index entries were removed
+     */
+    async pruneIndexes() {
+      let removed = 0;
+      let cursor = '0';
+      do {
+        const [next, indexes] = await redis.scan(cursor, 'MATCH', 'user_sessions:*', 'COUNT', 200);
+        cursor = next;
+        for (const index of indexes) {
+          const members = await redis.smembers(index);
+          const alive = members.length ? await redis.exists(...members) : 0;
+          if (alive === members.length) continue;
+          const stale = [];
+          for (const member of members) if ((await redis.exists(member)) === 0) stale.push(member);
+          if (stale.length) removed += await redis.srem(index, ...stale);
+          if ((await redis.scard(index)) === 0) await redis.del(index);
+        }
+      } while (cursor !== '0');
+      return removed;
+    },
+
     /** Remove every session of a user (best effort; the epoch is the authority). */
     async destroyAllForUser(userId) {
       const keys = await redis.smembers(indexKey(userId));
