@@ -90,6 +90,9 @@ jobs:
       MYSQL_USER: pronounceall_app
       MYSQL_PASSWORD: ci-app
       REDIS_URL: redis://127.0.0.1:6379
+      # The principals test (SDD 4.9) provisions and drops the six principals.
+      TEST_MYSQL_ADMIN_USER: root
+      TEST_MYSQL_ADMIN_PASSWORD: ci-root
 
     steps:
       - uses: actions/checkout@v4

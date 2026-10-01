@@ -42,6 +42,7 @@
     "worker:app": "node src/workers/app.worker.js",
     "worker:backup": "node src/workers/backup.worker.js",
     "backup:create-dev-bucket": "node scripts/create-backup-bucket.js",
+    "db:provision": "node scripts/provision-database-principals.js",
     "account:purge-due": "node scripts/purge-deleted-accounts.js",
     "inventory:check": "node scripts/extract-phoneme-inventory.js --check",
     "audio:preflight": "node scripts/generate-phoneme-audio.js --dry-run",
