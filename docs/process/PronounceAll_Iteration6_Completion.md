@@ -1,8 +1,8 @@
 # PronounceAll — Iteration 6 Completion
 
 **Date:** 2026-10-01
-**Status:** Iteration 6 (Settings) complete at `f8ad7dc`, **awaiting maintainer review**.
-Iteration 7 does not start until it is approved.
+**Status:** Iteration 6 (Settings) **CLOSED** 2026-10-01 at `f8ad7dc`, approved by the
+maintainer. Next is Iteration 7 (Hardening).
 **Not specification authority.** Consult `DOC_INDEX.md` first.
 
 ---
