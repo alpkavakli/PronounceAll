@@ -1158,3 +1158,9 @@ a:focus-visible,
   font-weight: 600;
   color: var(--color-ink);
 }
+
+.settings__subheading {
+  margin: var(--space-6) 0 var(--space-2);
+  font-size: 1.05rem;
+  color: var(--color-ink);
+}

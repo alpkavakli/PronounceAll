@@ -14,7 +14,7 @@
 
 import { defaultExecutor } from './transaction.js';
 
-/** @typedef {'email_verification'|'password_reset'} TokenType */
+/** @typedef {'email_verification'|'password_reset'|'email_change'} TokenType */
 
 /**
  * Close every open token of a type for a user (FR-AUTH-10, FR-AUTH-11).

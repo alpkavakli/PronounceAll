@@ -7,6 +7,8 @@
  * FR-OSS-01/02, NFR-A11Y-02).
  */
 
+import { randomInt, randomUUID } from 'node:crypto';
+
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
 
@@ -23,6 +25,40 @@ test('the ads choice is saved and shown back; essential cookies cannot be untick
   await page.getByRole('button', { name: 'Save preferences' }).click();
   await expect(page.getByRole('status')).toHaveText('Your cookie preferences are saved.');
   await expect(page.getByLabel('Enable ads')).toBeChecked();
+});
+
+test('change the password from Settings, then sign in with the new one (FR-SET-02)', async ({ page }) => {
+  const octet = () => randomInt(1, 255);
+  await page.setExtraHTTPHeaders({ 'X-Forwarded-For': `10.${octet()}.${octet()}.${octet()}` });
+  const username = `zzq${randomUUID().replaceAll('-', '').slice(0, 14)}`;
+  const first = `zq-${randomUUID()}`;
+  const second = `zq-${randomUUID()}`;
+
+  await page.goto('/register');
+  await page.getByLabel('Username').fill(username);
+  await page.getByLabel('Password').fill(first);
+  await page.getByLabel(/Without an email, we cannot recover your account/).check();
+  await page.getByRole('button', { name: 'Create account' }).click();
+  await expect(page.getByRole('status')).toContainText(`Signed in as ${username}`);
+
+  await page.goto('/settings');
+  await page.getByLabel('Current password').first().fill('not my password');
+  await page.getByLabel('New password').fill(second);
+  await page.getByRole('button', { name: 'Change password' }).click();
+  await expect(page.getByRole('alert')).toHaveText('That is not your current password.');
+
+  await page.getByLabel('Current password').first().fill(first);
+  await page.getByLabel('New password').fill(second);
+  await page.getByRole('button', { name: 'Change password' }).click();
+  await expect(page.getByRole('status')).toContainText('Your password is changed.');
+
+  await page.getByRole('button', { name: 'Sign out' }).click();
+  await expect(page).toHaveURL(/^https?:\/\/[^/]+\/$/);
+  await page.goto('/login');
+  await page.getByLabel('Username or email').fill(username);
+  await page.getByLabel('Password').fill(second);
+  await page.getByRole('button', { name: 'Sign in' }).click();
+  await expect(page.getByRole('status')).toContainText(`Signed in as ${username}`);
 });
 
 test('the settings page reports zero axe-core violations', async ({ page, javaScriptEnabled }) => {

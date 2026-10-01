@@ -33,6 +33,7 @@
 import { AppError } from '../errors/index.js';
 import {
   DuplicateIdentityError,
+  emailIsTaken,
   findPasswordCredentialByEmail,
   findPasswordCredentialByUsername,
   insertPasswordAccount,
@@ -111,7 +112,9 @@ export function createAccountService({
 
     const wantsEmail = typeof emailInput === 'string' && emailInput.trim().length > 0;
     const email = wantsEmail ? normaliseEmail(emailInput) : null;
-    if (wantsEmail && !email) throw AppError.validation(EMAIL_REJECTED_MESSAGE);
+    // FR-AUTH-06: in use means verified, pending verification, or held by a
+    // pending email change; the answer is the same generic one in every case.
+    if (wantsEmail && (!email || (await emailIsTaken(email)))) throw AppError.validation(EMAIL_REJECTED_MESSAGE);
     if (!email && !acknowledgedNoRecovery) {
       throw AppError.validation('Please confirm that you accept an account without email recovery.');
     }

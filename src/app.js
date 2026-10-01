@@ -73,6 +73,7 @@ import { createAccountService, isRetiredAnonymousId } from './services/account.s
 import { createGoogleSignInService } from './services/google-sign-in.service.js';
 import { createPracticeService } from './services/practice.service.js';
 import { createSettingsService } from './services/settings.service.js';
+import { createAccountSettingsService } from './services/account-settings.service.js';
 import { createPasswordPolicy } from './services/password-policy.service.js';
 import { createEncounterService } from './services/encounter.service.js';
 import { createSessionService } from './services/session.service.js';
@@ -168,6 +169,13 @@ export function createApp({
   // (Math.random is banned outright, NFR-SEC-12).
   const practiceService = createPracticeService({ queueStore: createPracticeQueueStore(), rng: practiceRng });
   const settingsService = createSettingsService({ privacyPolicyVersion: config.privacyPolicyVersion });
+  const accountSettingsService = createAccountSettingsService({
+    passwords,
+    passwordPolicy,
+    sessionService,
+    sendMail,
+    emailChangeLink: (token) => `${config.baseUrl}/settings/email/confirm?token=${token}`,
+  });
   const googleSignInService = googleOidc
     ? createGoogleSignInService({ google: googleOidc, secrets: createFlowSecretStore(), verifyTurnstile })
     : null;
@@ -279,8 +287,27 @@ export function createApp({
   );
   // FR-PRACTICE-*. Before the word router, whose `/:variant` would match it.
   app.use(practiceRouter({ practiceService }));
-  // FR-SET-*. Before the word router, likewise.
-  app.use(settingsRouter({ settingsService }));
+  // FR-SET-*. Before the word router, likewise. Changing a password checks
+  // the current one, so it takes the sign-in limit; changing an email sends
+  // mail, so it takes the per-account resend limit (Appendix C).
+  app.use(
+    settingsRouter({
+      settingsService,
+      accountSettingsService,
+      passwordRateLimit: rateLimitMiddleware({
+        store: rateLimitStore,
+        bucket: 'settings-password',
+        ...RATE_LIMITS.LOGIN,
+        keyOf: byAnonymousIdAndIp,
+      }),
+      emailChangeRateLimit: rateLimitMiddleware({
+        store: rateLimitStore,
+        bucket: 'settings-email',
+        ...RATE_LIMITS.VERIFICATION_RESEND,
+        keyOf: (req) => `account:${req.session.userId}`,
+      }),
+    }),
+  );
   // Email verification and password reset. Before the word router.
   app.use(
     accountEmailRouter({

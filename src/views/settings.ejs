@@ -15,8 +15,11 @@
   <main class="page settings">
     <h1>Settings</h1>
 
-    <% if (saved) { %>
-      <p class="notice" role="status">Your cookie preferences are saved.</p>
+    <% if (notice) { %>
+      <p class="notice" role="status"><%= notice %></p>
+    <% } %>
+    <% if (linkProblem) { %>
+      <p class="account__error" role="alert"><%= linkProblem %></p>
     <% } %>
 
     <section class="settings__section" aria-labelledby="settings-account">
@@ -26,6 +29,49 @@
         <% if (account.email) { %>
           <p>Email: <%= account.email %><%= account.emailVerifiedAt ? '' : ' (not yet confirmed)' %></p>
         <% } %>
+
+        <% if (account.provider === 'google') { %>
+          <p class="account__help">Your password and email are managed by Google.</p>
+        <% } else { %>
+          <%# FR-SET-02: change password — the current one is required. %>
+          <h3 class="settings__subheading">Change password</h3>
+          <% if (passwordError) { %>
+            <p class="account__error" role="alert"><%= passwordError %></p>
+          <% } %>
+          <form class="account__form" method="post" action="/settings/password">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            <label class="account__label" for="settings-current-password">Current password</label>
+            <input class="account__input" id="settings-current-password" name="currentPassword" type="password"
+                   autocomplete="current-password" required maxlength="100">
+            <label class="account__label" for="settings-new-password">New password</label>
+            <input class="account__input" id="settings-new-password" name="newPassword" type="password"
+                   autocomplete="new-password" required minlength="8" maxlength="100"
+                   aria-describedby="settings-new-password-help">
+            <p class="account__help" id="settings-new-password-help">At least 8 characters. Passwords found in known data breaches are refused. Every other device will be signed out.</p>
+            <button type="submit" class="button">Change password</button>
+          </form>
+
+          <%# FR-SET-02: change email — confirmed by a link to the new address; the
+              current one stays active until then. %>
+          <h3 class="settings__subheading"><%= account.email ? 'Change email' : 'Add an email' %></h3>
+          <% if (account.pendingEmail) { %>
+            <p class="notice" role="status">Waiting for confirmation of <strong><%= account.pendingEmail %></strong>. Check that inbox for the link.</p>
+          <% } %>
+          <% if (emailError) { %>
+            <p class="account__error" role="alert"><%= emailError %></p>
+          <% } %>
+          <form class="account__form" method="post" action="/settings/email">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            <label class="account__label" for="settings-new-email">New email</label>
+            <input class="account__input" id="settings-new-email" name="email" type="email" value="<%= emailValue %>"
+                   autocomplete="email" required maxlength="320">
+            <label class="account__label" for="settings-email-password">Current password</label>
+            <input class="account__input" id="settings-email-password" name="currentPassword" type="password"
+                   autocomplete="current-password" required maxlength="100">
+            <button type="submit" class="button">Send confirmation link</button>
+          </form>
+        <% } %>
+
         <form method="post" action="/logout" class="settings__inline">
           <input type="hidden" name="_csrf" value="<%= csrfToken %>">
           <button type="submit" class="button button--secondary">Sign out</button>

@@ -86,8 +86,89 @@ export async function findGoogleAccount(googleSub, executor = defaultExecutor())
  * @returns {Promise<boolean>}
  */
 export async function emailIsTaken(email, executor = defaultExecutor()) {
-  const [rows] = await executor.execute('SELECT 1 FROM user_accounts WHERE email_lower = ?', [email.toLowerCase()]);
+  // A pending change reserves its address too (FR-AUTH-06: "verified or pending").
+  const lowered = email.toLowerCase();
+  const [rows] = await executor.execute(
+    'SELECT 1 FROM user_accounts WHERE email_lower = ? OR pending_email_lower = ? LIMIT 1',
+    [lowered, lowered],
+  );
   return rows.length > 0;
+}
+
+/**
+ * The password credential of a signed-in user, for re-checking the current
+ * password (FR-SET-02).
+ *
+ * @param {number} userId
+ * @returns {Promise<{ passwordHash: string, email: string|null, emailVerifiedAt: Date|null, sessionEpoch: number } | null>}
+ */
+export async function findPasswordCredentialByUserId(userId, executor = defaultExecutor()) {
+  const [rows] = await executor.execute(
+    `SELECT a.password_hash, a.email, a.email_verified_at, u.session_epoch
+       FROM user_accounts a JOIN users u ON u.user_id = a.user_id
+      WHERE a.user_id = ? AND a.provider = 'password'`,
+    [userId],
+  );
+  if (rows.length === 0) return null;
+  const row = rows[0];
+  return {
+    passwordHash: row.password_hash,
+    email: row.email,
+    emailVerifiedAt: row.email_verified_at,
+    sessionEpoch: Number(row.session_epoch),
+  };
+}
+
+/**
+ * Hold a new address as pending (FR-SET-02). The current email is untouched.
+ *
+ * @throws {DuplicateIdentityError} ('email') when another pending change holds it
+ */
+export async function setPendingEmail({ userId, email, now }, executor = defaultExecutor()) {
+  try {
+    await executor.execute(
+      `UPDATE user_accounts SET pending_email = ?, pending_email_lower = ?, updated_at = ?
+        WHERE user_id = ? AND provider = 'password'`,
+      [email, email.toLowerCase(), now, userId],
+    );
+  } catch (error) {
+    if (error?.code === 'ER_DUP_ENTRY' && String(error.message).includes('uq_user_accounts_pending_email_lower')) {
+      throw new DuplicateIdentityError('email');
+    }
+    throw error;
+  }
+}
+
+/**
+ * Make the pending address the account's email, verified now, and clear the
+ * pending columns. UNIQUE (email_lower) is the final word on uniqueness.
+ *
+ * @returns {Promise<boolean>} false when there was nothing pending
+ * @throws {DuplicateIdentityError} ('email') when another account took it meanwhile
+ */
+export async function confirmPendingEmail({ userId, now }, executor) {
+  try {
+    const [result] = await executor.execute(
+      `UPDATE user_accounts
+          SET email = pending_email, email_lower = pending_email_lower, email_verified_at = ?,
+              pending_email = NULL, pending_email_lower = NULL, updated_at = ?
+        WHERE user_id = ? AND provider = 'password' AND pending_email IS NOT NULL`,
+      [now, now, userId],
+    );
+    return result.affectedRows === 1;
+  } catch (error) {
+    rethrowDuplicate(error);
+    return false;
+  }
+}
+
+/** Drop a pending change that can no longer complete. */
+export async function clearPendingEmail({ userId, now }, executor = defaultExecutor()) {
+  await executor.execute(
+    `UPDATE user_accounts SET pending_email = NULL, pending_email_lower = NULL, updated_at = ?
+      WHERE user_id = ? AND provider = 'password'`,
+    [now, userId],
+  );
 }
 
 /**
@@ -264,14 +345,20 @@ export async function replacePasswordAndEndSessions({ userId, passwordHash, now 
  */
 export async function findAccountSummary(userId, executor = defaultExecutor()) {
   const [rows] = await executor.execute(
-    `SELECT u.username, a.provider, a.email, a.email_verified_at
+    `SELECT u.username, a.provider, a.email, a.email_verified_at, a.pending_email
        FROM users u JOIN user_accounts a ON a.user_id = u.user_id
       WHERE u.user_id = ? ORDER BY a.account_id LIMIT 1`,
     [userId],
   );
   if (rows.length === 0) return null;
   const row = rows[0];
-  return { username: row.username, provider: row.provider, email: row.email, emailVerifiedAt: row.email_verified_at };
+  return {
+    username: row.username,
+    provider: row.provider,
+    email: row.email,
+    emailVerifiedAt: row.email_verified_at,
+    pendingEmail: row.pending_email,
+  };
 }
 
 /**
