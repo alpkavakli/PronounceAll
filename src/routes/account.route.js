@@ -34,6 +34,7 @@ import {
   retireAnonymousIdentity,
   setSessionCookie,
 } from '../middleware/index.js';
+import { renderDeletionChoice } from './account-deletion.route.js';
 
 /** Errors a form shows in place; anything else goes to the error page. */
 const FORM_ERRORS = new Set([ERROR_CODES.VALIDATION, ERROR_CODES.CONFLICT, ERROR_CODES.AUTH, ERROR_CODES.UNAVAILABLE]);
@@ -49,6 +50,8 @@ const POST_SIGN_IN_DESTINATION = '/login';
  * @param {import('express').RequestHandler} dependencies.registerRateLimit
  * @param {ReturnType<import('../services/google-sign-in.service.js').createGoogleSignInService> | null} [dependencies.googleSignInService]
  *   null when Google is not configured (development only): the path is not offered
+ * @param {ReturnType<import('../services/account-deletion.service.js').createAccountDeletionService> | null} [dependencies.accountDeletionService]
+ *   issues the step-2 proof after a Google re-authentication (FR-SET-07)
  * @returns {import('express').Router}
  */
 export function accountRouter({
@@ -57,6 +60,7 @@ export function accountRouter({
   loginRateLimit,
   registerRateLimit,
   googleSignInService = null,
+  accountDeletionService = null,
 }) {
   const router = Router();
   const googleOffered = googleSignInService !== null;
@@ -99,6 +103,7 @@ export function accountRouter({
       pendingEmail,
       passwordWasReset: req.query['password-reset'] === '1',
       signedInAs: req.session?.username ?? null,
+      accountRestored: req.session !== null && req.query.restored === '1',
       googleOffered,
     });
 
@@ -112,7 +117,8 @@ export function accountRouter({
     const { sessionId, retireAnonymousId } = await accountService.completeSignIn(authenticated, req.anonymousId);
     setSessionCookie(res, sessionId);
     if (retireAnonymousId) retireAnonymousIdentity(req);
-    res.redirect(303, POST_SIGN_IN_DESTINATION);
+    // FR-SET-09: a sign-in that restored a soft-deleted account says so.
+    res.redirect(303, authenticated.restored ? `${POST_SIGN_IN_DESTINATION}?restored=1` : POST_SIGN_IN_DESTINATION);
   }
 
   router.get('/register', (req, res) => {
@@ -231,8 +237,8 @@ export function accountRouter({
 
   /**
    * The OAuth callback. A signed-in outcome goes through the same auth
-   * transition as a password sign-in; anything else creates, links and merges
-   * nothing.
+   * transition as a password sign-in; a re-authentication for account deletion
+   * opens its second step; anything else creates, links and merges nothing.
    */
   router.get('/auth/google/callback', async (req, res, next) => {
     if (!googleOffered) {
@@ -247,8 +253,13 @@ export function accountRouter({
         code: req.query.code,
         error: req.query.error,
         anonymousId: req.anonymousId,
+        session: req.session,
       });
-      if (outcome.kind === 'signed-in') {
+      if (outcome.kind === 'reauthenticated') {
+        // FR-SET-07: a fresh Google sign-in for the signed-in account opens step 2.
+        const nonce = await accountDeletionService.issueReauthNonce({ userId: outcome.userId, sessionId: req.session.sessionId });
+        renderDeletionChoice(req, res, { nonce });
+      } else if (outcome.kind === 'signed-in') {
         await finishSignIn(req, res, outcome);
       } else if (outcome.kind === 'needs-username') {
         renderGoogleUsername(req, res, { pendingNonce: outcome.pendingNonce, email: outcome.email });

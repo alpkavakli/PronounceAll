@@ -26,6 +26,12 @@
  * arrives through `POST /register` like every other path (CSRF, Turnstile, the
  * rate limit), supplying only the nonce — never the `sub` or the email.
  *
+ * Re-authentication (FR-SET-07): the same round trip, started from account
+ * deletion with `max_age=0`, its state also bound to the account and the
+ * session. It proves only that the signed-in person just signed in to Google
+ * as this account (`auth_time` within five minutes); it never signs anyone in.
+ * A soft-deleted account that signs in inside its window is restored (FR-SET-09).
+ *
  * No code, token, secret, state or nonce is ever logged.
  */
 
@@ -42,6 +48,7 @@ import {
   insertUser,
 } from '../repositories/accounts.repository.js';
 import { withTransaction } from '../repositories/transaction.js';
+import { restoreIfSoftDeleted } from './account-deletion.service.js';
 import { requireAcceptableUsername } from './username-policy.service.js';
 
 export const OAUTH_STATE_TTL_SECONDS = 10 * 60;
@@ -58,6 +65,9 @@ const GOOGLE_ISSUERS = new Set(['https://accounts.google.com', 'accounts.google.
 /** Tolerated clock difference for `iat`, in seconds. */
 const CLOCK_SKEW_SECONDS = 300;
 
+/** FR-SET-07: how recent Google's own sign-in must be to count as re-authentication. */
+export const REAUTH_MAX_AGE_SECONDS = 300;
+
 /**
  * Validate the claims of an ID token received directly from Google's token
  * endpoint (OIDC Core §3.1.3.7).
@@ -67,7 +77,7 @@ const CLOCK_SKEW_SECONDS = 300;
  * @param {string} expected.clientId the audience
  * @param {string} expected.nonce the nonce this flow issued
  * @param {number} expected.nowSeconds
- * @returns {{ ok: true, claims: { sub: string, email: string, picture: string|null } } | { ok: false, reason: string }}
+ * @returns {{ ok: true, claims: { sub: string, email: string, picture: string|null, authTime: number|null } } | { ok: false, reason: string }}
  */
 export function validateGoogleIdToken(idToken, { clientId, nonce, nowSeconds }) {
   if (typeof idToken !== 'string') return { ok: false, reason: 'malformed' };
@@ -103,11 +113,15 @@ export function validateGoogleIdToken(idToken, { clientId, nonce, nowSeconds }) 
   const picture = typeof claims.picture === 'string' && /^https:\/\//.test(claims.picture) && claims.picture.length <= 512
     ? claims.picture
     : null;
-  return { ok: true, claims: { sub: claims.sub, email: claims.email, picture } };
+  const authTime = typeof claims.auth_time === 'number' ? claims.auth_time : null;
+  return { ok: true, claims: { sub: claims.sub, email: claims.email, picture, authTime } };
 }
 
 /** PKCE S256 (RFC 7636). */
 const codeChallengeFor = (verifier) => createHash('sha256').update(verifier).digest('base64url');
+
+/** A re-auth flow names its session by hash: the raw `pa_sid` is a bearer secret. */
+const sessionBinding = (sessionId) => createHash('sha256').update(String(sessionId)).digest('base64url');
 
 /**
  * @param {object} dependencies
@@ -130,6 +144,27 @@ export function createGoogleSignInService({ google, secrets, verifyTurnstile, cl
     return google.authorizationUrl({ state, nonce, codeChallenge: codeChallengeFor(codeVerifier) });
   }
 
+  /**
+   * FR-SET-07 step 1 for a Google account: a fresh Google round trip. The
+   * flow is bound to this browser, this account and this session, and Google
+   * is asked to authenticate the person again (`max_age=0`).
+   *
+   * @param {{ anonymousId: string, userId: number, sessionId: string }} request
+   * @returns {Promise<string>} the Google authorization URL
+   */
+  async function beginReauth({ anonymousId, userId, sessionId }) {
+    const state = generateSecureToken(32);
+    const nonce = generateSecureToken(32);
+    const codeVerifier = generateSecureToken(32);
+    await secrets.put(
+      STATE_NAMESPACE,
+      state,
+      { anonymousId, nonce, codeVerifier, purpose: 'reauth', userId, session: sessionBinding(sessionId) },
+      OAUTH_STATE_TTL_SECONDS,
+    );
+    return google.authorizationUrl({ state, nonce, codeChallenge: codeChallengeFor(codeVerifier), fresh: true });
+  }
+
   /** A failed outcome; the reason is for the log, never the page. */
   const failed = (reason) => {
     logger.warn({ reason }, 'Google sign-in refused');
@@ -142,14 +177,16 @@ export function createGoogleSignInService({ google, secrets, verifyTurnstile, cl
    * @param {unknown} callback.code
    * @param {unknown} callback.error set by Google when the person refused or the request failed
    * @param {string|null} callback.anonymousId the `pa_uid` of the browser arriving
+   * @param {{ userId: number, sessionId: string } | null} [callback.session] the session arriving, for a re-auth
    * @returns {Promise<
-   *   { kind: 'signed-in', userId: number, sessionEpoch: number }
+   *   { kind: 'signed-in', userId: number, sessionEpoch: number, restored: boolean }
+   *   | { kind: 'reauthenticated', userId: number }
    *   | { kind: 'needs-username', pendingNonce: string, email: string }
    *   | { kind: 'cancelled' }
    *   | { kind: 'failed', reason: string }
    * >}
    */
-  async function complete({ state, code, error, anonymousId }) {
+  async function complete({ state, code, error, anonymousId, session = null }) {
     // The state is checked, and spent, before anything else — even an error
     // answer from Google has to belong to a flow this browser started.
     if (typeof state !== 'string' || !SECRET_SHAPE.test(state)) return failed('state-missing');
@@ -176,12 +213,30 @@ export function createGoogleSignInService({ google, secrets, verifyTurnstile, cl
       nowSeconds: Math.floor(clock().getTime() / 1000),
     });
     if (!validation.ok) return failed(`id-token:${validation.reason}`);
-    const { sub, email, picture } = validation.claims;
-
+    const { sub, email, picture, authTime } = validation.claims;
     const existing = await findGoogleAccount(sub);
+
+    if (flow.purpose === 'reauth') {
+      // The same account, the same session, and a Google sign-in made just now.
+      const nowSeconds = Math.floor(clock().getTime() / 1000);
+      if (!existing || existing.userId !== flow.userId) return failed('reauth-account');
+      if (!session || session.userId !== flow.userId || sessionBinding(session.sessionId) !== flow.session) {
+        return failed('reauth-session');
+      }
+      if (authTime === null || authTime < nowSeconds - REAUTH_MAX_AGE_SECONDS) return failed('reauth-stale');
+      return { kind: 'reauthenticated', userId: existing.userId };
+    }
+
     if (existing) {
-      if (existing.deletionState !== 'none') return failed('account-unavailable');
-      return { kind: 'signed-in', userId: existing.userId, sessionEpoch: existing.sessionEpoch };
+      // FR-SET-09: inside the 30-day window, signing in restores the account.
+      let restored = false;
+      if (existing.deletionState === 'soft_deleted') {
+        restored = await restoreIfSoftDeleted(existing.userId, clock);
+        if (!restored) return failed('account-unavailable');
+      } else if (existing.deletionState !== 'none') {
+        return failed('account-unavailable');
+      }
+      return { kind: 'signed-in', userId: existing.userId, sessionEpoch: existing.sessionEpoch, restored };
     }
 
     // §5.6: never a second account for an email in use, and never linked by email.
@@ -254,5 +309,5 @@ export function createGoogleSignInService({ google, secrets, verifyTurnstile, cl
     }
   }
 
-  return { begin, complete, register };
+  return { begin, beginReauth, complete, register };
 }

@@ -44,8 +44,8 @@ const exchanges = [];
 
 const fakeGoogle = {
   clientId: CLIENT_ID,
-  authorizationUrl: ({ state, nonce, codeChallenge }) =>
-    `https://accounts.google.test/auth?${new URLSearchParams({ state, nonce, code_challenge: codeChallenge })}`,
+  authorizationUrl: ({ state, nonce, codeChallenge, fresh = false }) =>
+    `https://accounts.google.test/auth?${new URLSearchParams({ state, nonce, code_challenge: codeChallenge, ...(fresh ? { max_age: '0' } : {}) })}`,
   async exchangeCode({ code, codeVerifier }) {
     exchanges.push({ code, codeVerifier });
     const entry = codes.get(code);
@@ -655,5 +655,124 @@ describe('pages', () => {
     expect((await request(app).get('/auth/google')).status).toBe(404);
     expect((await request(app).get('/auth/google/callback?state=x&code=y')).status).toBe(404);
     expect((await request(app).get('/login')).text).not.toContain('/auth/google');
+  });
+});
+
+describe('FR-SET-07/09 — deleting and restoring a Google account', () => {
+  const nowSeconds = () => Math.floor(Date.now() / 1000);
+  const reauthNonceIn = (html) => html.match(/name="reauth" value="([A-Za-z0-9_-]{43})"/)?.[1] ?? null;
+  const userRow = async (sub) => {
+    const [account] = await googleAccount(sub);
+    return (await getPool().execute('SELECT * FROM users WHERE user_id = ?', [account.user_id]))[0][0];
+  };
+
+  /** A registered Google account, signed in on a browser. */
+  async function signedInGoogleAccount(app) {
+    const account = await registeredGoogleAccount(app);
+    const anonymousId = newAnonymousId();
+    const { response } = await roundTrip(app, anonymousId, account);
+    return { ...account, anonymousId: cookiesOf(response).pa_uid ?? anonymousId, sessionId: cookiesOf(response).pa_sid };
+  }
+
+  /** "Confirm with Google", then Google answers for `sub` with these claim overrides. */
+  async function reauth(app, { anonymousId, sessionId, sub, email }, overrides = {}, { arriveAs = sessionId } = {}) {
+    const begun = await request(app)
+      .get('/settings/delete/google')
+      .set('Cookie', [`pa_uid=${anonymousId}`, `pa_sid=${sessionId}`]);
+    expect(begun.status).toBe(303);
+    const sent = new URL(begun.headers.location).searchParams;
+    expect(sent.get('max_age')).toBe('0');
+    const code = `code-${generateAnonymousId()}`;
+    codes.set(code, { claims: claimsFor({ sub, email, nonce: sent.get('nonce'), auth_time: nowSeconds() - 5, ...overrides }) });
+    return request(app)
+      .get(`/auth/google/callback?${new URLSearchParams({ state: sent.get('state'), code })}`)
+      .set('Cookie', [`pa_uid=${anonymousId}`, ...(arriveAs ? [`pa_sid=${arriveAs}`] : [])]);
+  }
+
+  test('step 1 offers Google, not a password', async () => {
+    const app = newApp();
+    const viewer = await signedInGoogleAccount(app);
+    const page = await request(app)
+      .get('/settings/delete')
+      .set('Cookie', [`pa_uid=${viewer.anonymousId}`, `pa_sid=${viewer.sessionId}`]);
+    expect(page.text).toContain('href="/settings/delete/google"');
+    expect(page.text).not.toContain('action="/settings/delete/reauth"');
+  });
+
+  test('a fresh Google sign-in opens step 2; soft delete; signing in with Google again restores', async () => {
+    const app = newApp();
+    const viewer = await signedInGoogleAccount(app);
+
+    const step2 = await reauth(app, viewer);
+    expect(step2.status).toBe(200);
+    const nonce = reauthNonceIn(step2.text);
+    expect(nonce).not.toBeNull();
+    expect(cookiesOf(step2).pa_sid).toBeUndefined();
+
+    const deleted = await request(app)
+      .post('/settings/delete')
+      .set('Cookie', [`pa_uid=${viewer.anonymousId}`, `pa_sid=${viewer.sessionId}`])
+      .set('Origin', ORIGIN)
+      .type('form')
+      .send(
+        new URLSearchParams({
+          reauth: nonce,
+          option: 'soft',
+          _csrf: issueCsrfTokenFor(config.csrf.secret, { sessionId: viewer.sessionId }),
+        }).toString(),
+      );
+    expect(deleted.status).toBe(200);
+    expect((await userRow(viewer.sub)).deletion_state).toBe('soft_deleted');
+
+    const { response } = await roundTrip(app, newAnonymousId(), viewer);
+    expect(response.status).toBe(303);
+    expect(response.headers.location).toBe('/login?restored=1');
+    expect((await userRow(viewer.sub)).deletion_state).toBe('none');
+  });
+
+  test('a Google sign-in that is not fresh does not count', async () => {
+    const app = newApp();
+    const viewer = await signedInGoogleAccount(app);
+    for (const overrides of [{ auth_time: nowSeconds() - 3600 }, { auth_time: undefined }]) {
+      const response = await reauth(app, viewer, overrides);
+      expect(response.status).toBe(400);
+      expect(reauthNonceIn(response.text)).toBeNull();
+    }
+    expect((await userRow(viewer.sub)).deletion_state).toBe('none');
+  });
+
+  test('another Google account, or another session, does not count', async () => {
+    const app = newApp();
+    const viewer = await signedInGoogleAccount(app);
+    const other = await registeredGoogleAccount(app);
+
+    const wrongAccount = await reauth(app, viewer, { sub: other.sub, email: other.email });
+    expect(wrongAccount.status).toBe(400);
+    expect(reauthNonceIn(wrongAccount.text)).toBeNull();
+
+    // The same account signed in elsewhere: a second session, not the one that began.
+    const elsewhere = cookiesOf((await roundTrip(app, newAnonymousId(), viewer)).response).pa_sid;
+    for (const arriveAs of [elsewhere, null]) {
+      const response = await reauth(app, viewer, {}, { arriveAs });
+      expect(response.status).toBe(400);
+      expect(reauthNonceIn(response.text)).toBeNull();
+    }
+    expect((await userRow(viewer.sub)).deletion_state).toBe('none');
+  });
+
+  test('a hard-deleted Google account cannot sign in', async () => {
+    const app = newApp();
+    const { sub, email } = await registeredGoogleAccount(app);
+    const [account] = await googleAccount(sub);
+    await getPool().execute(
+      "UPDATE users SET deletion_state = 'hard_delete_scheduled', hard_delete_scheduled_at = NOW(3) + INTERVAL 1 DAY WHERE user_id = ?",
+      [account.user_id],
+    );
+    const { response } = await roundTrip(app, newAnonymousId(), { sub, email });
+    expect(response.status).toBe(400);
+    expect(cookiesOf(response).pa_sid).toBeUndefined();
+    await getPool().execute("UPDATE users SET deletion_state = 'none', hard_delete_scheduled_at = NULL WHERE user_id = ?", [
+      account.user_id,
+    ]);
   });
 });

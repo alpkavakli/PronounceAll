@@ -107,6 +107,13 @@ const schema = z.object({
    * to a value that says plainly no policy has been published.
    */
   PRIVACY_POLICY_VERSION: z.string().min(1).max(32).default('unpublished-draft'),
+
+  /**
+   * Where a person writes about their data — the "this wasn't me" contact in
+   * the account-deletion confirmation (FR-SET-07). Locally a placeholder that
+   * reaches no one; a real deployment must name a monitored mailbox.
+   */
+  CONTACT_EMAIL: z.string().email().max(320).default('privacy@pronounceall.localhost'),
 });
 
 /**
@@ -142,6 +149,8 @@ const REQUIRED_IN_STRICT_ENVIRONMENTS = [
   // FR-CONSENT-03: a consent is recorded against the published policy's
   // version, never the development placeholder.
   'PRIVACY_POLICY_VERSION',
+  // FR-SET-07: the deletion email's "this wasn't me" contact must reach someone.
+  'CONTACT_EMAIL',
 ];
 
 /**
@@ -285,6 +294,9 @@ export function loadConfig(env) {
 
     /** FR-CONSENT-03: the policy version consents are recorded against. */
     privacyPolicyVersion: value.PRIVACY_POLICY_VERSION,
+
+    /** FR-SET-07: the data-protection contact named in deletion emails. */
+    contactEmail: value.CONTACT_EMAIL,
 
     /** Outgoing SMTP (FR-AUTH-09/11); development defaults to Mailpit. */
     mail: Object.freeze({

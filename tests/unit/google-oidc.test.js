@@ -35,9 +35,19 @@ describe('ID token validation', () => {
   test('a valid token yields sub, email and picture', () => {
     expect(check(good())).toEqual({
       ok: true,
-      claims: { sub: '109876543210', email: 'person@example.test', picture: 'https://lh3.googleusercontent.com/a/photo' },
+      claims: {
+        sub: '109876543210',
+        email: 'person@example.test',
+        picture: 'https://lh3.googleusercontent.com/a/photo',
+        authTime: null,
+      },
     });
     expect(check(good({ iss: 'accounts.google.com' })).ok).toBe(true);
+  });
+
+  test('auth_time is passed on when numeric, for the deletion re-auth (FR-SET-07)', () => {
+    expect(check(good({ auth_time: NOW - 30 })).claims.authTime).toBe(NOW - 30);
+    expect(check(good({ auth_time: String(NOW) })).claims.authTime).toBeNull();
   });
 
   test.each([
@@ -97,6 +107,15 @@ describe('the provider adapter', () => {
     expect(url.searchParams.has('access_type')).toBe(false);
     // The secret never goes to the browser.
     expect(url.href).not.toContain('the-client-secret');
+  });
+
+  test('a fresh request asks Google to authenticate again (max_age=0, prompt=login)', () => {
+    const plain = new URL(client().authorizationUrl({ state: 'S', nonce: 'N', codeChallenge: 'C' }));
+    expect(plain.searchParams.get('prompt')).toBe('select_account');
+    expect(plain.searchParams.has('max_age')).toBe(false);
+    const fresh = new URL(client().authorizationUrl({ state: 'S', nonce: 'N', codeChallenge: 'C', fresh: true }));
+    expect(fresh.searchParams.get('prompt')).toBe('login');
+    expect(fresh.searchParams.get('max_age')).toBe('0');
   });
 
   test('the code exchange sends the verifier and the secret to the token endpoint, and keeps only the ID token', async () => {

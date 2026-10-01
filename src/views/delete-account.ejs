@@ -1,0 +1,84 @@
+<%# PronounceAll — Copyright (C) 2026 Alp Kavaklı
+    SPDX-License-Identifier: AGPL-3.0-or-later
+    See LICENSE-NOTICE.md at the repository root.
+
+    Deleting an account (FR-SET-07). Three states of one page:
+      explain — both options, then re-authentication (password, or Google);
+      choose  — the option, carrying the single-use re-authentication proof;
+      done    — signed out, and what happens next.
+    Plain forms, so it works without JavaScript. DYNAMIC (private, no-store). %>
+<!doctype html>
+<html lang="en">
+<head>
+  <%- include('partials/head', { title: title }) %>
+</head>
+<body>
+  <main class="page account">
+    <% if (step === 'done') { %>
+      <h1>Your account is deleted</h1>
+      <% if (option === 'soft') { %>
+        <p class="lede" role="status">You are signed out. Your account and progress are kept for 30 days and then erased for good.</p>
+        <p>Changed your mind? Sign in within 30 days and the account is restored as it was.</p>
+      <% } else { %>
+        <p class="lede" role="status">You are signed out. Everything your account holds will be erased within 24 hours. This cannot be undone.</p>
+      <% } %>
+      <p>If the account has a confirmed email address, a confirmation was sent to it.</p>
+      <p><a class="button" href="/">Back to the dictionary</a></p>
+    <% } else { %>
+      <h1>Delete your account</h1>
+      <% if (error) { %>
+        <p class="account__error" role="alert"><%= error %></p>
+      <% } %>
+
+      <% if (step === 'explain') { %>
+        <p>There are two ways to delete your account. You choose on the next step.</p>
+        <ul class="account__options">
+          <li><strong>Delete, with 30 days to change your mind.</strong> You are signed out and the account is closed. Signing in within 30 days restores everything. After 30 days, it is erased for good.</li>
+          <li><strong>Delete now, for good.</strong> Your account, saved words, progress and history are erased within 24 hours. This cannot be undone. Words you asked us to add stay in the dictionary queue, without your name.</li>
+        </ul>
+
+        <h2 class="section-heading">First, confirm it is you</h2>
+        <% if (provider === 'google') { %>
+          <% if (googleOffered) { %>
+            <p>You will be asked to sign in to Google again.</p>
+            <p><a class="button" href="/settings/delete/google">Confirm with Google</a></p>
+          <% } else { %>
+            <p>Google sign-in is not available right now, so the account cannot be confirmed. Please try again later.</p>
+          <% } %>
+        <% } else { %>
+          <form class="account__form" method="post" action="/settings/delete/reauth">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            <label class="account__label" for="delete-password">Your password</label>
+            <input class="account__input" id="delete-password" name="password" type="password"
+                   autocomplete="current-password" required maxlength="100">
+            <button type="submit" class="button">Continue</button>
+          </form>
+        <% } %>
+        <p><a href="/settings">Cancel and go back to Settings</a></p>
+      <% } else { %>
+        <form class="account__form" method="post" action="/settings/delete">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+          <input type="hidden" name="reauth" value="<%= nonce %>">
+          <fieldset>
+            <legend>How should we delete your account?</legend>
+            <p class="account__check">
+              <input type="radio" id="delete-soft" name="option" value="soft" required>
+              <label for="delete-soft">Delete, with 30 days to change my mind</label>
+            </p>
+            <p class="account__check">
+              <input type="radio" id="delete-hard" name="option" value="hard">
+              <label for="delete-hard">Delete now, for good — this cannot be undone</label>
+            </p>
+          </fieldset>
+          <p class="account__help">Either way, you are signed out on every device. This confirmation expires in 10 minutes.</p>
+          <button type="submit" class="button button--danger">Delete my account</button>
+        </form>
+        <p><a href="/settings">Cancel and go back to Settings</a></p>
+      <% } %>
+    <% } %>
+  </main>
+
+  <%- include('partials/footer') %>
+  <script type="module" src="/js/bootstrap.js"></script>
+</body>
+</html>

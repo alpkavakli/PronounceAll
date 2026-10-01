@@ -26,6 +26,7 @@ const PRODUCTION_ENV = {
   GOOGLE_CLIENT_ID: 'supplied-at-deploy-time.apps.googleusercontent.com',
   GOOGLE_CLIENT_SECRET: 'supplied-at-deploy-time',
   PRIVACY_POLICY_VERSION: '1.0',
+  CONTACT_EMAIL: 'privacy@pronounceall.example',
 };
 
 describe('loadConfig (SDD v1.1 §6.4, NFR-SEC-06)', () => {
@@ -90,6 +91,13 @@ describe('loadConfig (SDD v1.1 §6.4, NFR-SEC-06)', () => {
     const { PRIVACY_POLICY_VERSION, ...incomplete } = PRODUCTION_ENV;
     expect(() => loadConfig(incomplete)).toThrow('PRIVACY_POLICY_VERSION');
     expect(loadConfig({ NODE_ENV: 'development' }).privacyPolicyVersion).toBe('unpublished-draft');
+  });
+
+  test('production refuses to boot without CONTACT_EMAIL; locally it is a placeholder that reaches no one', () => {
+    const { CONTACT_EMAIL, ...incomplete } = PRODUCTION_ENV;
+    expect(() => loadConfig(incomplete)).toThrow('CONTACT_EMAIL');
+    expect(loadConfig({ NODE_ENV: 'development' }).contactEmail).toBe('privacy@pronounceall.localhost');
+    expect(() => loadConfig({ NODE_ENV: 'development', CONTACT_EMAIL: 'not an address' })).toThrow();
   });
 
   test('development defaults to the local Mailpit catcher', () => {

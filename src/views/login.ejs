@@ -21,6 +21,9 @@
     <% if (signedInAs) { %>
       <h1>Your account</h1>
       <p class="lede" role="status">Signed in as <strong><%= signedInAs %></strong>.</p>
+      <% if (locals.accountRestored) { %>
+        <p class="notice" role="status">Welcome back. Your account was restored, and it will not be deleted.</p>
+      <% } %>
       <p>Your saved words and sounds now belong to this account on every device you sign in on.</p>
       <p><a href="/">Back to the dictionary</a></p>
 

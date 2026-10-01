@@ -44,6 +44,7 @@ import { insertLinkBinding } from '../repositories/identity-bindings.repository.
 import { anonymousProfileExists, findBoundUserId } from '../repositories/progress.repository.js';
 import { withTransaction } from '../repositories/transaction.js';
 import { normaliseEmail } from './account-email.service.js';
+import { restoreIfSoftDeleted } from './account-deletion.service.js';
 import { PASSWORD_MAX_LENGTH } from './password-policy.service.js';
 import { recomputeAccountSm2States } from './practice.service.js';
 import { recomputeOwnerStates } from './state-reconciliation.service.js';
@@ -155,7 +156,7 @@ export function createAccountService({
    * @param {unknown} request.password
    * @param {string|undefined} request.turnstileToken
    * @param {string} [request.remoteIp]
-   * @returns {Promise<{ userId: number, sessionEpoch: number, verificationPending: false } | { verificationPending: true, email: string }>}
+   * @returns {Promise<{ userId: number, sessionEpoch: number, verificationPending: false, restored: boolean } | { verificationPending: true, email: string }>}
    */
   async function login({ identifier, password, turnstileToken, remoteIp }) {
     await requireTurnstile(turnstileToken, remoteIp);
@@ -170,13 +171,22 @@ export function createAccountService({
     }
     // Always one bcrypt comparison (FR-AUTH-13).
     const matched = await verifyPassword(secret.slice(0, PASSWORD_MAX_LENGTH), credential?.passwordHash);
-    if (!credential || !matched || credential.deletionState !== 'none') throw AppError.auth();
+    if (!credential || !matched) throw AppError.auth();
+    // FR-SET-09: inside the 30-day window a correct credential restores the
+    // account; past it, or for a hard delete, the generic failure.
+    let restored = false;
+    if (credential.deletionState === 'soft_deleted') {
+      restored = await restoreIfSoftDeleted(credential.userId, clock);
+      if (!restored) throw AppError.auth();
+    } else if (credential.deletionState !== 'none') {
+      throw AppError.auth();
+    }
 
     // FR-AUTH-09: blocked until verified — said only now, after a correct pair.
     if (credential.email && !credential.emailVerifiedAt) {
       return { verificationPending: true, email: credential.email };
     }
-    return { userId: credential.userId, sessionEpoch: credential.sessionEpoch, verificationPending: false };
+    return { userId: credential.userId, sessionEpoch: credential.sessionEpoch, verificationPending: false, restored };
   }
 
   /**

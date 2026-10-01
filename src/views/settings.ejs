@@ -72,6 +72,11 @@
           </form>
         <% } %>
 
+        <%# FR-SET-02/07: opens the two-step deletion flow. %>
+        <h3 class="settings__subheading">Delete account</h3>
+        <p class="account__help">Close your account, with 30 days to change your mind, or erase it for good.</p>
+        <p><a href="/settings/delete">Delete my account…</a></p>
+
         <form method="post" action="/logout" class="settings__inline">
           <input type="hidden" name="_csrf" value="<%= csrfToken %>">
           <button type="submit" class="button button--secondary">Sign out</button>

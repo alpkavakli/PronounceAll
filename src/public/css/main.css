@@ -1027,6 +1027,17 @@ a:focus-visible,
   color: var(--color-ink);
 }
 
+/* An irreversible action: the ink stays readable, the frame says "careful". */
+.button--danger {
+  border: 2px solid var(--color-danger);
+  background: var(--color-surface);
+  color: var(--color-ink);
+}
+
+.account__options li {
+  margin-bottom: var(--space-3);
+}
+
 .account__optional {
   font-weight: 400;
   color: var(--color-muted);

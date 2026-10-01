@@ -362,6 +362,55 @@ export async function findAccountSummary(userId, executor = defaultExecutor()) {
 }
 
 /**
+ * A deletion request (FR-SET-07; SDD §5.5): the deletion state and its
+ * deadline, with `session_epoch + 1` in the same statement — MySQL is the
+ * session authority, so every session ends with the commit (V3).
+ *
+ * @param {object} request
+ * @param {number} request.userId
+ * @param {'soft'|'hard'} request.option
+ * @param {Date} request.now
+ * @param {Date} request.purgeAt soft: now + 30 days; hard: now
+ * @returns {Promise<boolean>} false when the account was not in a normal state
+ */
+export async function requestAccountDeletion({ userId, option, now, purgeAt }, executor) {
+  const [result] = await executor.execute(
+    `UPDATE users
+        SET deletion_state = ?, soft_deleted_at = ?, hard_delete_scheduled_at = ?,
+            session_epoch = session_epoch + 1, updated_at = ?
+      WHERE user_id = ? AND deletion_state = 'none'`,
+    [option === 'soft' ? 'soft_deleted' : 'hard_delete_scheduled', option === 'soft' ? now : null, purgeAt, now, userId],
+  );
+  return result.affectedRows === 1;
+}
+
+/**
+ * FR-SET-09: restore a soft-deleted account whose window is still open.
+ *
+ * @returns {Promise<boolean>} whether this call restored it
+ */
+export async function restoreSoftDeletedAccount(userId, now, executor) {
+  const [result] = await executor.execute(
+    `UPDATE users SET deletion_state = 'none', soft_deleted_at = NULL, hard_delete_scheduled_at = NULL, updated_at = ?
+      WHERE user_id = ? AND deletion_state = 'soft_deleted' AND hard_delete_scheduled_at > ?`,
+    [now, userId, now],
+  );
+  return result.affectedRows === 1;
+}
+
+/**
+ * @param {number} userId
+ * @returns {Promise<{ deletionState: string, hardDeleteScheduledAt: Date|null } | null>}
+ */
+export async function findDeletionState(userId, executor = defaultExecutor()) {
+  const [rows] = await executor.execute(
+    'SELECT deletion_state, hard_delete_scheduled_at FROM users WHERE user_id = ?',
+    [userId],
+  );
+  return rows.length === 0 ? null : { deletionState: rows[0].deletion_state, hardDeleteScheduledAt: rows[0].hard_delete_scheduled_at };
+}
+
+/**
  * The per-request session check's one primary-key read (V3).
  *
  * @param {number} userId

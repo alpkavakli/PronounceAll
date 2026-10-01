@@ -29,7 +29,7 @@ export const GOOGLE_SCOPES = Object.freeze(['openid', 'email', 'profile']);
 /**
  * @typedef {object} GoogleOidcClient
  * @property {string} clientId the audience an ID token must carry
- * @property {(request: { state: string, nonce: string, codeChallenge: string }) => string} authorizationUrl
+ * @property {(request: { state: string, nonce: string, codeChallenge: string, fresh?: boolean }) => string} authorizationUrl
  * @property {(request: { code: string, codeVerifier: string }) => Promise<{ idToken: string }>} exchangeCode
  */
 
@@ -46,7 +46,12 @@ export function createGoogleOidcClient({ clientId, clientSecret, redirectUri, fe
   return {
     clientId,
 
-    authorizationUrl({ state, nonce, codeChallenge }) {
+    /**
+     * `fresh`: ask Google to re-authenticate the person now (OIDC `max_age=0`),
+     * so the ID token's `auth_time` proves a fresh sign-in — the re-auth step
+     * before an account deletion (FR-SET-07).
+     */
+    authorizationUrl({ state, nonce, codeChallenge, fresh = false }) {
       const url = new URL(AUTHORIZATION_ENDPOINT);
       url.search = new URLSearchParams({
         client_id: clientId,
@@ -57,7 +62,8 @@ export function createGoogleOidcClient({ clientId, clientSecret, redirectUri, fe
         nonce,
         code_challenge: codeChallenge,
         code_challenge_method: 'S256',
-        prompt: 'select_account',
+        prompt: fresh ? 'login' : 'select_account',
+        ...(fresh ? { max_age: '0' } : {}),
       }).toString();
       return url.href;
     },

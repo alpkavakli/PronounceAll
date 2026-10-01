@@ -56,6 +56,7 @@ import { accountEmailRouter } from './routes/account-email.route.js';
 import { accountRouter } from './routes/account.route.js';
 import { practiceRouter } from './routes/practice.route.js';
 import { settingsRouter } from './routes/settings.route.js';
+import { accountDeletionRouter } from './routes/account-deletion.route.js';
 import { healthRouter } from './routes/health.route.js';
 import { homeRouter } from './routes/home.route.js';
 import { learnIpaRouter } from './routes/learn-ipa.route.js';
@@ -74,6 +75,7 @@ import { createGoogleSignInService } from './services/google-sign-in.service.js'
 import { createPracticeService } from './services/practice.service.js';
 import { createSettingsService } from './services/settings.service.js';
 import { createAccountSettingsService } from './services/account-settings.service.js';
+import { createAccountDeletionService } from './services/account-deletion.service.js';
 import { createPasswordPolicy } from './services/password-policy.service.js';
 import { createEncounterService } from './services/encounter.service.js';
 import { createSessionService } from './services/session.service.js';
@@ -165,9 +167,6 @@ export function createApp({
     sessionService,
     accountEmailService,
   });
-  // FR-PRACTICE-02/05: the queue's random choices, from the CSPRNG
-  // (Math.random is banned outright, NFR-SEC-12).
-  const practiceService = createPracticeService({ queueStore: createPracticeQueueStore(), rng: practiceRng });
   const settingsService = createSettingsService({ privacyPolicyVersion: config.privacyPolicyVersion });
   const accountSettingsService = createAccountSettingsService({
     passwords,
@@ -176,9 +175,22 @@ export function createApp({
     sendMail,
     emailChangeLink: (token) => `${config.baseUrl}/settings/email/confirm?token=${token}`,
   });
+  const flowSecrets = createFlowSecretStore();
+  const practiceQueueStore = createPracticeQueueStore();
   const googleSignInService = googleOidc
-    ? createGoogleSignInService({ google: googleOidc, secrets: createFlowSecretStore(), verifyTurnstile })
+    ? createGoogleSignInService({ google: googleOidc, secrets: flowSecrets, verifyTurnstile })
     : null;
+  const accountDeletionService = createAccountDeletionService({
+    passwords,
+    sessionService,
+    secrets: flowSecrets,
+    practiceQueueStore,
+    sendMail,
+    contactEmail: config.contactEmail,
+  });
+  // FR-PRACTICE-02/05: the queue's random choices, from the CSPRNG
+  // (Math.random is banned outright, NFR-SEC-12).
+  const practiceService = createPracticeService({ queueStore: practiceQueueStore, rng: practiceRng });
 
   // 1. Observability first, so every later failure carries a correlation id.
   app.use(requestContextMiddleware());
@@ -270,6 +282,7 @@ export function createApp({
       accountService,
       sessionService,
       googleSignInService,
+      accountDeletionService,
       // Appendix C: 5 per 15 minutes per UUID + IP; 3 per hour per IP.
       loginRateLimit: rateLimitMiddleware({
         store: rateLimitStore,
@@ -305,6 +318,21 @@ export function createApp({
         bucket: 'settings-email',
         ...RATE_LIMITS.VERIFICATION_RESEND,
         keyOf: (req) => `account:${req.session.userId}`,
+      }),
+    }),
+  );
+  // FR-SET-07. Re-entering the password takes the sign-in limit, like a
+  // password change. Before the word router.
+  app.use(
+    accountDeletionRouter({
+      accountDeletionService,
+      settingsService,
+      googleSignInService,
+      reauthRateLimit: rateLimitMiddleware({
+        store: rateLimitStore,
+        bucket: 'delete-reauth',
+        ...RATE_LIMITS.LOGIN,
+        keyOf: byAnonymousIdAndIp,
       }),
     }),
   );
