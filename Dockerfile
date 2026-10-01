@@ -16,6 +16,8 @@ COPY --from=deps --chown=node:node /app/node_modules ./node_modules
 COPY --chown=node:node package.json ./
 COPY --chown=node:node src ./src
 COPY --chown=node:node LICENSE LICENSE-NOTICE.md ./
+# FR-CONSENT-05: /privacy and /kvkk render the reviewed documents themselves.
+COPY --chown=node:node docs/current/PronounceAll_Privacy_Policy_EN_DRAFT.md docs/current/PronounceAll_KVKK_Aydinlatma_Metni_TR_DRAFT.md ./docs/current/
 
 USER node
 EXPOSE 3000

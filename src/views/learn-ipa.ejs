@@ -27,7 +27,7 @@
 <!doctype html>
 <html lang="<%= scope === 'variant' ? variant.code : 'en' %>">
 <head>
-  <%- include('partials/head', { title: title }) %>
+  <%- include('partials/head', { title: title, metaDescription: 'Every sound of English in the International Phonetic Alphabet, most frequent first, with audio and an example word for each.' }) %>
 </head>
 <body>
   <main class="page learn-ipa" data-viewer-variant="<%= scope === 'variant' ? variant.code : (phonemes[0] ? phonemes[0].variantCode : 'en-us') %>">

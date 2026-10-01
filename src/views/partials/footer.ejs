@@ -6,6 +6,18 @@
     cached word shell. FR-OSS-02: the close control is revealed by oss-banner.js,
     which keeps the dismissal in localStorage for 30 minutes — no cookie. Without
     JavaScript the banner simply stays. %>
+<%# FR-CONSENT-01: an acknowledgement of the one strictly-necessary cookie, not a
+    consent request, so it offers no "reject". Identical for every viewer, so it
+    is safe on the cached word shell. In the page flow rather than fixed over it,
+    so it never covers a focused control (NFR-A11Y-12). cookie-notice.js reveals
+    "OK, got it" and remembers it in localStorage as `pa_uid_ack`. %>
+<aside class="cookie-notice" data-cookie-notice aria-label="Cookie notice">
+  <p class="cookie-notice__text">
+    PronounceAll uses one strictly necessary cookie, <code>pa_uid</code>, to save your word-learning progress.
+    <a href="/privacy">Read the Privacy Policy</a>
+  </p>
+  <button type="button" class="cookie-notice__ok" data-cookie-notice-ok hidden>OK, got it</button>
+</aside>
 <aside class="oss-banner" data-oss-banner aria-label="About PronounceAll">
   <p class="oss-banner__text">
     PronounceAll is open-source and free.
@@ -39,5 +51,12 @@
     ·
     <a href="https://github.com/alpkavakli/PronounceAll">Source code</a>
   </p>
+  <p>
+    <%# FR-CONSENT-05: both notices from the footer of every page. %>
+    <a href="/privacy">Privacy Policy</a>
+    ·
+    <a href="/kvkk" hreflang="tr" lang="tr">KVKK Aydınlatma Metni</a>
+  </p>
 </footer>
+<script type="module" src="/js/cookie-notice.js"></script>
 <script type="module" src="/js/oss-banner.js"></script>

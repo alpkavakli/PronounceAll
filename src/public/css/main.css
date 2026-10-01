@@ -1175,3 +1175,64 @@ a:focus-visible,
   font-size: 1.05rem;
   color: var(--color-ink);
 }
+
+/* ---------------------------------------------------------------------------
+   Legal pages (FR-CONSENT-05) and the cookie notice (FR-CONSENT-01)
+   -------------------------------------------------------------------------- */
+
+.legal {
+  max-width: var(--narrow-max);
+}
+
+.legal__text h2 {
+  margin-top: var(--space-7);
+}
+
+/* Tables wrap rather than scroll, so the page never scrolls sideways at 320 px
+   and no scroll region needs its own keyboard stop. */
+.legal__text table {
+  width: 100%;
+  margin: 0 0 var(--space-5);
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.legal__text th,
+.legal__text td {
+  padding: var(--space-2);
+  border-bottom: 1px solid var(--color-rule-soft);
+  text-align: left;
+  vertical-align: top;
+  overflow-wrap: anywhere;
+}
+
+.cookie-notice {
+  max-width: var(--page-max);
+  margin: var(--space-6) auto 0;
+  padding: var(--space-3) var(--space-4);
+  border-top: 1px solid var(--color-rule);
+}
+
+.cookie-notice[hidden] {
+  display: none;
+}
+
+.cookie-notice__text {
+  margin: 0 0 var(--space-2);
+}
+
+.cookie-notice__ok {
+  min-height: 44px;
+  padding: 0 var(--space-4);
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-ink);
+  font: inherit;
+  cursor: pointer;
+}
+
+.cookie-notice__ok:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}

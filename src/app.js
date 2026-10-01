@@ -58,6 +58,8 @@ import { practiceRouter } from './routes/practice.route.js';
 import { settingsRouter } from './routes/settings.route.js';
 import { accountDeletionRouter } from './routes/account-deletion.route.js';
 import { healthRouter } from './routes/health.route.js';
+import { legalRouter } from './routes/legal.route.js';
+import { loadLegalDocument } from './lib/legal-documents.js';
 import { homeRouter } from './routes/home.route.js';
 import { learnIpaRouter } from './routes/learn-ipa.route.js';
 import { searchRouter } from './routes/search.route.js';
@@ -85,6 +87,16 @@ import { wordRouter } from './routes/word.route.js';
 import { checkHealth } from './services/health.service.js';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
+
+/**
+ * The reviewed legal texts (FR-CONSENT-05). Served as drafts until the owner
+ * approves them (maintainer decision 2026-10-01); the approved versions replace
+ * these files, or these paths.
+ */
+const LEGAL_DOCUMENTS = Object.freeze({
+  privacy: path.join(here, '..', 'docs', 'current', 'PronounceAll_Privacy_Policy_EN_DRAFT.md'),
+  kvkk: path.join(here, '..', 'docs', 'current', 'PronounceAll_KVKK_Aydinlatma_Metni_TR_DRAFT.md'),
+});
 
 /**
  * Build the Express application.
@@ -248,6 +260,13 @@ export function createApp({
   //    fixed paths above.
   app.use(healthRouter({ probeHealth: () => checkHealth({ pingDatabase, pingRedis }) }));
   app.use(homeRouter());
+  // FR-CONSENT-05 and FR-WORD-09. Before the word router, whose `/:variant`
+  // pattern would otherwise match `/privacy`.
+  app.use(
+    legalRouter({
+      documents: { privacy: loadLegalDocument(LEGAL_DOCUMENTS.privacy), kvkk: loadLegalDocument(LEGAL_DOCUMENTS.kvkk) },
+    }),
+  );
   // FIND-10, implemented ahead of the SRS. Top-level rather than
   // `/:variant/search`, which would be indistinguishable from a word lookup.
   app.use(searchRouter());

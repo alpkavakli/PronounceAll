@@ -60,6 +60,7 @@
     "express": "^5.1.0",
     "helmet": "^8.1.0",
     "ioredis": "^5.9.0",
+    "marked": "18.0.14",
     "mysql2": "^3.15.4",
     "nodemailer": "^10.0.12",
     "obscenity": "^0.4.6",

@@ -14,6 +14,7 @@ import {
   findActiveVariants,
   findVariantByCode,
 } from '../repositories/language-variants.repository.js';
+import { listHeadwords } from '../repositories/words.repository.js';
 
 /**
  * @returns {Promise<import('../repositories/language-variants.repository.js').LanguageVariant[]>}
@@ -32,4 +33,22 @@ export async function listActiveVariants() {
 export async function resolveActiveVariant(code) {
   const variant = await findVariantByCode(code);
   return variant?.isActive ? variant : null;
+}
+
+/**
+ * Every public content page, for the sitemap (FR-WORD-09): the landing page,
+ * the legal pages, the IPA indexes, and each active variant's word pages at
+ * their canonical URL. Account and practice pages are not content.
+ *
+ * @returns {Promise<string[]>} site-relative paths
+ */
+export async function listSitemapPaths() {
+  const paths = ['/', '/learnIPA', '/privacy', '/kvkk'];
+  for (const variant of await findActiveVariants()) {
+    paths.push(`/${variant.code}/learnIPA`);
+    for (const { normalizedHeadword } of await listHeadwords(variant.variantId)) {
+      paths.push(`/${variant.code}/${encodeURIComponent(normalizedHeadword)}`);
+    }
+  }
+  return paths;
 }

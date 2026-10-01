@@ -1,0 +1,26 @@
+<%# PronounceAll — Copyright (C) 2026 Alp Kavaklı
+    SPDX-License-Identifier: AGPL-3.0-or-later
+    See LICENSE-NOTICE.md at the repository root.
+
+    The Privacy Policy (/privacy, English) and the KVKK Aydınlatma Metni (/kvkk,
+    Turkish) (FR-CONSENT-05). `html` is rendered at boot from the reviewed
+    Markdown documents in the repository, never from request input. Until the
+    owner approves the text it carries a draft notice. DYNAMIC (SDD §6.3). %>
+<!doctype html>
+<html lang="<%= lang %>">
+<head>
+  <%- include('partials/head', { title: title, metaDescription: metaDescription, canonicalUrl: canonicalUrl }) %>
+</head>
+<body>
+  <main class="page legal">
+    <h1><%= heading %></h1>
+    <p class="notice legal__draft" role="note"><%= draftNotice %></p>
+    <div class="legal__text">
+      <%- html %>
+    </div>
+  </main>
+
+  <%- include('partials/footer') %>
+  <script type="module" src="/js/bootstrap.js"></script>
+</body>
+</html>

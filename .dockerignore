@@ -3,6 +3,8 @@
 node_modules
 coverage
 docs
+!docs/current/PronounceAll_Privacy_Policy_EN_DRAFT.md
+!docs/current/PronounceAll_KVKK_Aydinlatma_Metni_TR_DRAFT.md
 notes
 tests
 playwright-report
