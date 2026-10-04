@@ -47,6 +47,7 @@
     "fonts:build": "python tools/fonts/build_phonetic_font.py",
     "fonts:check": "python tools/fonts/build_phonetic_font.py --check",
     "audit:lighthouse": "node scripts/lighthouse-audit.js",
+    "loadtest:users": "node scripts/load-test-users.js",
     "account:purge-due": "node scripts/purge-deleted-accounts.js",
     "inventory:check": "node scripts/extract-phoneme-inventory.js --check",
     "audio:preflight": "node scripts/generate-phoneme-audio.js --dry-run",

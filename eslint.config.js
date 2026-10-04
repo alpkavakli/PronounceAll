@@ -153,6 +153,14 @@ export default [
   },
 
   {
+    // The k6 load test (NFR-PERF-08) runs in k6's own JavaScript runtime.
+    files: ['tests/load/**/*.js'],
+    languageOptions: { globals: { __ENV: 'readonly', __VU: 'readonly', __ITER: 'readonly' } },
+    settings: { 'import/core-modules': ['k6', 'k6/crypto', 'k6/http'] },
+    rules: { 'security/detect-non-literal-regexp': 'off' },
+  },
+
+  {
     files: ['src/public/**/*.js'],
     languageOptions: {
       ecmaVersion: 2023,

@@ -17,6 +17,8 @@
  * standalone read and a step inside a transaction.
  */
 
+import { randomInt } from 'node:crypto';
+
 import { getPool } from '../lib/mysql.js';
 
 /**
@@ -33,15 +35,41 @@ export function defaultExecutor() {
   return getPool();
 }
 
+/** InnoDB's answers that mean "this transaction lost a lock race; run it again". */
+const RETRYABLE_ERRNOS = new Set([
+  1213, // ER_LOCK_DEADLOCK: InnoDB chose this transaction as the victim and rolled it back
+  1205, // ER_LOCK_WAIT_TIMEOUT
+]);
+export const TRANSACTION_ATTEMPTS = 3;
+
 /**
  * Run `work` inside a single MySQL transaction, committing on success and
  * rolling back on any throw. The connection is always returned to the pool.
+ *
+ * A transaction that loses a lock race (a deadlock or a lock-wait timeout) is
+ * rolled back and run again, up to three times in all, after a short random
+ * pause: concurrent writers that touch neighbouring index gaps — two learners'
+ * first answers on the same word, say — deadlock under InnoDB's gap locking,
+ * and MySQL's own guidance is to retry. That is only safe because of the rule
+ * every caller keeps: `work` touches nothing but the transaction it is given.
+ * Mail, Redis and other side effects happen after `withTransaction` returns.
  *
  * @template T
  * @param {(tx: Executor) => Promise<T>} work
  * @returns {Promise<T>}
  */
 export async function withTransaction(work) {
+  for (let attempt = 1; ; attempt += 1) {
+    try {
+      return await runOnce(work);
+    } catch (error) {
+      if (!RETRYABLE_ERRNOS.has(error?.errno) || attempt >= TRANSACTION_ATTEMPTS) throw error;
+      await new Promise((resolve) => setTimeout(resolve, randomInt(5, 25) * attempt));
+    }
+  }
+}
+
+async function runOnce(work) {
   const connection = await getPool().getConnection();
   try {
     await connection.beginTransaction();
